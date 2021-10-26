@@ -1,6 +1,12 @@
+# Clinics
+
+O principal objetivo deste projeto é o desenvolvimento de uma aplicação empresarial clínica, para a gestão de dados/sinais biomédicos de pessoas com doença cardiovascular.
+
 # clinics-client
 
-## Build Setup
+Neste repositório mostramos a vertente front-end ou por outras palavras, cliente da aplicação clinics.
+
+## How to set it up?
 
 ```bash
 # install dependencies
