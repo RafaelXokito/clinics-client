@@ -25,9 +25,8 @@ export default {
     this.$axios
       .$get('/api/prescriptions')
       .then(prescriptions => {
-        this.prescriptions = prescriptions;
-        for(var k in prescriptions[0])
-          this.fields.push(k);
+        this.prescriptions = prescriptions.entities
+        this.fields = prescriptions.columns
 
         this.fields.push("update");
         this.fields.push("delete");

@@ -25,9 +25,8 @@ export default {
     this.$axios
       .$get('/api/biometricdatatypes')
       .then(biometricdatatype => {
-        this.biometricdatatype = biometricdatatype;
-        for(var k in biometricdatatype[0])
-          this.fields.push(k);
+        this.biometricdatatype = biometricdatatype.entities
+        this.fields = biometricdatatype.columns
 
         this.fields.push("update");
         this.fields.push("delete");

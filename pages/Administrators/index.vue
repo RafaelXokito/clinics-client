@@ -25,12 +25,8 @@ export default {
     this.$axios
       .$get('/api/administrators')
       .then(administrators => {
-        this.administrators = administrators;
-        for(var k in administrators[0])
-          this.fields.push(k);
-
-        this.fields.push("update");
-        this.fields.push("delete");
+        this.administrators = administrators.entities;
+        this.fields = administrators.columns
 
         this.fields.push("update");
         this.fields.push("delete");

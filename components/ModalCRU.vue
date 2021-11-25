@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="lg" :title="name" ref="bvEntity" @hide="resetModal">ola!</b-modal>
+    <b-modal id="bv-entity" size="lg" :title="name" ref="bvEntity" @hide="resetModal">{{ entity }}</b-modal>
   </div>
 </template>
 
