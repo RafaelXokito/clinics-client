@@ -12,7 +12,8 @@ export default {
     }
   },
   props:{
-    entity:Object
+    entity:Object,
+    method:String
   },
   methods: {
     resetModal(){
