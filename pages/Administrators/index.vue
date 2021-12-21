@@ -4,7 +4,7 @@
   <b-container>
     <entities-table :items="administrators" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteAdmin"></entities-table>
   </b-container>
-  <modalCRU :entity="administrator" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" />
+  <modalCRU :entity="administrator" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
 </div>
 </template>
 
@@ -25,6 +25,7 @@ export default {
       administrators: [],
       administrator: {},
       method: '',
+      modalShow: false,
     }
   },
   created(){
@@ -32,6 +33,7 @@ export default {
   },
   methods: {
     modalCRU(item, method){
+      this.modalShow = true
       this.administrator = item;
       this.method = method;
     },
@@ -41,6 +43,8 @@ export default {
           .$post('/api/administrators', form)
           .then(() => {
             this.list();
+            this.$toast.success('Administrator '+form.username+' created').goAway(3000);
+            this.modalShow = false
           })
           .catch((err)=>{
             console.log(err);
@@ -50,6 +54,8 @@ export default {
           .$put('/api/administrators/'+form.username, form)
           .then(() => {
             this.list();
+            this.$toast.success('Administrator '+form.username+' updated').goAway(3000);
+            this.modalShow = false
           })
           .catch((err)=>{
             console.log(err);
@@ -79,6 +85,7 @@ export default {
         .$delete('/api/administrators/'+username)
           .then(() => {
             this.list()
+            this.$toast.success('Administrator '+username+' deleted').goAway(3000);
           })
           .catch((err) => {
             console.log(err)

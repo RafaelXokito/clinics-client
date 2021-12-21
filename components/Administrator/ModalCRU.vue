@@ -77,7 +77,7 @@ export default {
         email: '',
         name: '',
         gender: null,
-        password: ''
+        password: '',
       },
       genders: [{ text: 'Select One', value: null }, 'Male', 'Female'],
       show: true
@@ -85,7 +85,8 @@ export default {
   },
   props:{
     entity:Object,
-    method:String
+    method:String,
+    modalShow: Boolean,
   },
   methods: {
     onReset(){
@@ -94,9 +95,16 @@ export default {
     onSubmit(){
       console.log(this.form)
       this.$emit("onSubmit",this.form, this.method)
-    }
+    },
   },
   watch: {
+    modalShow(newVal){
+      if (newVal === true) {
+        this.$refs.bvEntity.show()
+      }else{
+        this.$refs.bvEntity.hide()
+      }
+    },
     entity(newEntity, oldVar){
       if (newEntity != null) {
         if (this.method == 'edit') {
