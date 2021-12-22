@@ -40,6 +40,10 @@ export default {
     '@nuxtjs/toast',
   ],
 
+  bootstrapVue: {
+    icons: true
+  },
+
   toast: {
       position: 'top-center',
       register: [ // Register custom toasts
