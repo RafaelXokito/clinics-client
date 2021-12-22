@@ -150,6 +150,7 @@ export default {
           this.$axios
             .$get('/api/prescriptions/' + this.entity.id)
             .then(prescription => {
+              this.form.id = this.entity.id;
               this.form.issues = prescription.issues;
               this.form.healthProfessionalUsername = prescription.healthProfessionalUsername;
               this.form.healthProfessionalName = prescription.healthProfessionalName;

@@ -79,7 +79,7 @@
           label-for="input-healthProfessionals"
           v-if="fieldProperties('healthProfessionals').visible"
         >
-          <b-table v-if="form.biometricDataHistory && form.healthProfessionals.length > 0" striped hover responsive :items="form.healthProfessionals" :fields="fieldsHealthProfessionals" />
+          <b-table v-if="form.healthProfessionals && form.healthProfessionals.length > 0" striped hover responsive :items="form.healthProfessionals" :fields="fieldsHealthProfessionals" />
           <b-card-text v-else>No Data</b-card-text>
         </b-form-group>
         <b-form-group

@@ -56,6 +56,8 @@ export default {
             console.log(err);
           });
       } else {
+        form.startDate = this.getFormatedDate(form.startDate)
+        form.endDate = this.getFormatedDate(form.endDate)
         this.$axios
           .$put('/api/prescriptions/'+form.id, form)
           .then(() => {
