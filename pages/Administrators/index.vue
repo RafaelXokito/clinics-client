@@ -80,12 +80,12 @@ export default {
           console.log(err)
         })
     },
-    deleteAdmin(username){
+    deleteAdmin(item){
       this.$axios
-        .$delete('/api/administrators/'+username)
+        .$delete('/api/administrators/'+item.username)
           .then(() => {
             this.list()
-            this.$toast.success('Administrator '+username+' deleted').goAway(3000);
+            this.$toast.success('Administrator '+item.name+' deleted').goAway(3000);
           })
           .catch((err) => {
             console.log(err)
