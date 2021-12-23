@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Patient '" ref="bvEntity" @hide="onReset" :hide-footer="true">
+    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Healthcare Professional'" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
         <b-form-group
           id="input-group-id"
@@ -71,36 +71,36 @@
           />
         </b-form-group>
         <b-form-group
-          id="input-group-healthNo"
-          label="Health Number:"
-          label-for="input-healthNo"
+          id="input-group-specialty"
+          label="Specialty:"
+          label-for="input-specialty"
           label-class="font-weight-bold"
-          v-if="fieldProperties('healthNo').visible"
+          v-if="fieldProperties('specialty').visible"
         >
           <b-form-input
-            id="input-healthNo"
-            v-model="form.healthNo"
-            :disabled="!fieldProperties('healthNo').editable"
+            id="input-specialty"
+            v-model="form.specialty"
+            :disabled="!fieldProperties('specialty').editable"
           ></b-form-input>
         </b-form-group>
         <b-form-group
-          id="input-group-biometricDataHistory"
-          label="Biometric Data History:"
-          label-for="input-biometricDataHistory"
+          id="input-group-prescriptions"
+          label="Prescriptions:"
+          label-for="input-prescriptions"
           label-class="font-weight-bold"
-          v-if="fieldProperties('biometricDataHistory').visible"
+          v-if="fieldProperties('prescriptions').visible"
         >
-          <b-table v-if="form.biometricDatas && form.biometricDatas.length > 0" striped hover responsive :items="form.biometricDatas" :fields="fieldsBiometricData" />
+          <b-table v-if="form.prescriptions && form.prescriptions.length > 0" striped hover responsive :items="form.prescriptions" :fields="fieldsPrescriptions" />
           <b-card-text v-else>No Data</b-card-text>
         </b-form-group>
         <b-form-group
-          id="input-group-healthProfessionals"
-          label="Healthcare Professionals Responsible:"
-          label-for="input-healthProfessionals"
+          id="input-group-patients"
+          label="Patients:"
+          label-for="input-patients"
           label-class="font-weight-bold"
-          v-if="fieldProperties('healthProfessionals').visible"
+          v-if="fieldProperties('patients').visible"
         >
-          <b-table v-if="form.healthcareProfessionals && form.healthcareProfessionals.length > 0" striped hover responsive :items="form.healthcareProfessionals" :fields="fieldsHealthProfessionals" />
+          <b-table v-if="form.patients && form.patients.length > 0" striped hover responsive :items="form.patients" :fields="fieldsPatients" />
           <b-card-text v-else>No Data</b-card-text>
         </b-form-group>
         <b-form-group
@@ -140,14 +140,18 @@ export default {
         password: null,
         name: null,
         gender: null,
-        biometricDatas: [],
-        healthcareProfessionals: [],
+        specialty: null,
+        prescriptions: [],
+        patients: [],
         createdBy: null,
-        healthNo: null
       },
+      issues: [],
       show: true,
-      fieldsBiometricData: ["value", "valueUnit", "biometricDataTypeName", "createdAt"],
-      fieldsHealthProfessionals: ["email", "name", "specialty", "gender"],
+      fieldsPrescriptions: [],
+      fieldsPatients: [],
+      currentPagePrescriptions: 1,
+      currentPagePatients: 1,
+      perPage: 4,
       genderValues: [
         { value: 'Male', text: 'Male' },
         { value: 'Female', text: 'Female' },
@@ -156,10 +160,10 @@ export default {
     }
   },
   methods: {
-    onReset() {
+    onReset(){
       this.$emit("onReset")
     },
-    onSubmit() {
+    onSubmit(){
       this.$emit("onSubmit", this.form, this.method)
     },
     fieldProperties(fieldName) {
@@ -170,10 +174,10 @@ export default {
           if (fieldName === 'password') return { visible: false, editable: false }
           if (fieldName === 'name') return { visible: true, editable: true }
           if (fieldName === 'gender') return { visible: true, editable: true }
-          if (fieldName === 'biometricDataHistory') return { visible: true, editable: false }
-          if (fieldName === 'healthProfessionals') return { visible: true, editable: false }
+          if (fieldName === 'specialty') return { visible: true, editable: true }
+          if (fieldName === 'prescriptions') return { visible: true, editable: false }
+          if (fieldName === 'patients') return { visible: true, editable: false }
           if (fieldName === 'createdBy') return { visible: true, editable: false }
-          if (fieldName === 'healthNo') return { visible: true, editable: true }
           break;
         case 'create':
           if (fieldName === 'id') return { visible: false, editable: false }
@@ -181,14 +185,31 @@ export default {
           if (fieldName === 'password') return { visible: true, editable: true }
           if (fieldName === 'name') return { visible: true, editable: true }
           if (fieldName === 'gender') return { visible: true, editable: true }
-          if (fieldName === 'biometricDataHistory') return { visible: false, editable: false }
-          if (fieldName === 'healthProfessionals') return { visible: false, editable: false }
+          if (fieldName === 'specialty') return { visible: true, editable: true }
+          if (fieldName === 'prescriptions') return { visible: false, editable: false }
+          if (fieldName === 'patients') return { visible: false, editable: false }
           if (fieldName === 'createdBy') return { visible: false, editable: false }
-          if (fieldName === 'healthNo') return { visible: true, editable: true }
           break;
         default: return { visible: true, editable: true }
       }
     },
+    onRowSelected(items) {
+      this.form.issues = items;
+    },
+    containsIssue(id) {
+      if (this.form.issues == null) return false
+
+      for (let i = 0; i < this.form.issues.length; i++) {
+        if (this.form.issues[i].id === id) return true
+      }
+
+      return false
+    }
+  },
+  computed: {
+    dataRows() {
+      return this.issues.length
+    }
   },
   watch: {
     modalShow(newVal){
@@ -198,20 +219,19 @@ export default {
         this.$refs.bvEntity.hide()
       }
     },
-    entity(newEntity) {
+    entity(newEntity){
       if (newEntity != null) {
         if (this.method === 'edit') {
           this.$axios
-            .$get('/api/patients/' + this.entity.id)
-            .then(patient => {
-              this.form.id = patient.id;
-              this.form.email = patient.email;
-              this.form.name = patient.name;
-              this.form.gender = patient.gender;
-              this.form.biometricDatas = patient.biometricDatas;
-              this.form.healthcareProfessionals = patient.healthcareProfessionals;
-              this.form.created_by = patient.created_by;
-              this.form.healthNo = patient.healthNo;
+            .$get('/api/healthcareprofessionals/' + this.entity.id)
+            .then(healthcareProfessional => {
+              this.form.id = healthcareProfessional.id;
+              this.form.email = healthcareProfessional.email;
+              this.form.name = healthcareProfessional.name;
+              this.form.gender = healthcareProfessional.gender;
+              this.form.specialty = healthcareProfessional.specialty;
+              this.form.patients = healthcareProfessional.patients;
+              this.form.created_by = healthcareProfessional.created_by;
             })
             .catch((err) => {
               this.$toast.error(err).goAway(3000);

@@ -3,13 +3,14 @@
     <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
         <b-form-group
-          id="input-group-healthProfessionalUsername"
+          id="input-group-healthProfessionalId"
           label="Healthcare Professional Id:"
-          label-for="input-healthProfessionalUsername"
+          label-for="input-healthProfessionalId"
+          label-class="font-weight-bold"
           v-if="fieldProperties('healthProfessionalUsername').visible"
         >
           <b-form-input
-            id="input-healthProfessionalUsername"
+            id="input-healthProfessionalId"
             v-model="form.healthcareProfessionalId"
             :disabled="!fieldProperties('healthProfessionalUsername').editable"
           ></b-form-input>
@@ -18,8 +19,8 @@
           id="input-group-healthProfessionalName"
           label="Healthcare Professional Name:"
           label-for="input-healthProfessionalName"
+          label-class="font-weight-bold"
           v-if="fieldProperties('healthProfessionalName').visible"
-          disabled
         >
           <b-form-input
             id="input-healthProfessionalName"
@@ -31,6 +32,7 @@
           id="input-group-startDate"
           label="Start Date:"
           label-for="input-startDate"
+          label-class="font-weight-bold"
           v-if="fieldProperties('startDate').visible"
         >
           <b-form-datepicker
@@ -44,6 +46,7 @@
           id="input-group-endDate"
           label="End Date:"
           label-for="input-endDate"
+          label-class="font-weight-bold"
           v-if="fieldProperties('endDate').visible"
         >
           <b-form-datepicker
@@ -58,6 +61,7 @@
           id="input-group-notes"
           label="Notes:"
           label-for="input-notes"
+          label-class="font-weight-bold"
           v-if="fieldProperties('notes').visible"
         >
           <b-form-input
@@ -72,6 +76,7 @@
           id="input-group-issues"
           label="Issues:"
           label-for="issues-table"
+          label-class="font-weight-bold"
           v-if="fieldProperties('issues').visible"
         >
           <div class="pt-3">
@@ -88,10 +93,12 @@
               </template>
             </b-table>
             <b-pagination
+              v-if="issues.length > 4"
               v-model="currentPage"
               :total-rows="dataRows"
               :per-page="perPage"
               aria-controls="issues-table"
+              align="center"
             ></b-pagination>
           </div>
         </b-form-group>
@@ -125,7 +132,6 @@ export default {
       show: true,
       fields: ["selected", "name", "biometricDataTypeName"],
       currentPage: 1,
-      dataRows: 0,
       perPage: 4
     }
   },
@@ -189,7 +195,7 @@ export default {
           this.$axios
             .$get('/api/prescriptions/' + this.entity.id)
             .then(prescription => {
-              this.form.id = this.entity.id;
+              this.form.id = prescription.id;
               this.form.issues = prescription.issues;
               this.form.healthcareProfessionalId = prescription.healthcareProfessionalId;
               this.form.healthcareProfessionalName = prescription.healthcareProfessionalName;
@@ -198,7 +204,7 @@ export default {
               this.form.notes = prescription.notes;
             })
             .catch((err) => {
-              console.log(err)
+              this.$toast.error(err).goAway(3000);
             })
         } else {
           this.form = {}
@@ -208,7 +214,10 @@ export default {
           .$get('/api/biometricdataissues')
           .then(biometricdataissues => {
             this.issues = biometricdataissues.entities;
-          });
+          })
+          .catch((err) => {
+            this.$toast.error(err).goAway(3000);
+          })
 
         this.$refs.bvEntity.show()
       }

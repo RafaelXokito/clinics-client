@@ -1,17 +1,17 @@
 <template>
 <div>
-  <navbar />
+  <navbar/>
   <b-container>
-    <entities-table :items="patients" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteEntity" />
+    <entities-table :items="healthcareProfessionals" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteEntity" />
   </b-container>
-  <modalCRU :entity="patient" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
+  <modalCRU :entity="healthcareProfessional" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>
 </template>
 
 <script>
 import EntitiesTable from '~/components/EntitiesTable.vue'
 import navbar from "../../components/NavBar.vue"
-import modalCRU from "~/components/Patient/ModalCRU";
+import modalCRU from "~/components/HealthcareProfessional/ModalCRU";
 
 export default {
   components: {
@@ -22,8 +22,8 @@ export default {
   data() {
     return {
       fields: [],
-      patients: [],
-      patient: {},
+      healthcareProfessionals: [],
+      healthcareProfessional: {},
       method: '',
       modalShow: false,
     }
@@ -34,7 +34,7 @@ export default {
   methods: {
     modalCRU(item, method){
       this.modalShow = true;
-      this.patient = item;
+      this.healthcareProfessional = item;
       this.method = method;
     },
     getFormatedDate(dateString) {
@@ -43,12 +43,12 @@ export default {
     },
     onSubmit(form, method){
       if (method === 'create') {
-        form.created_by = 2 //substituir quando login nice
+        form.created_by = 1
         this.$axios
-          .$post('/api/patients', form)
+          .$post('/api/healthcareprofessionals', form)
           .then(() => {
             this.list();
-            this.$toast.success('Patient created').goAway(3000);
+            this.$toast.success('Healthcare Professional created').goAway(3000);
             this.modalShow = false;
           })
           .catch((err)=>{
@@ -56,27 +56,27 @@ export default {
           });
       } else {
         this.$axios
-          .$put('/api/patients/'+form.id, form)
+          .$put('/api/healthcareprofessionals/'+form.id, form)
           .then(() => {
             this.list();
-            this.$toast.success('Patient '+form.id+' updated').goAway(3000);
+            this.$toast.success('Healthcare Professional '+form.id+' updated').goAway(3000);
             this.modalShow = false;
           })
           .catch((err)=>{
             this.$toast.error(err).goAway(3000);
           });
       }
-      this.patient = null;
+      this.healthcareProfessional = null;
     },
-    resetEntity() {
-      this.patient = null;
+    resetEntity(){
+      this.healthcareProfessional = null;
     },
     list() {
       this.$axios
-        .$get('/api/patients')
-        .then(patients => {
-          this.patients=patients.entities
-          this.fields=patients.columns
+        .$get('/api/healthcareprofessionals')
+        .then(healthcareprofessionals => {
+          this.healthcareProfessionals=healthcareprofessionals.entities
+          this.fields=healthcareprofessionals.columns
 
           this.fields.push("update")
           this.fields.push("delete")
@@ -87,10 +87,10 @@ export default {
     },
     deleteEntity(entity){
       this.$axios
-        .$delete('/api/patients/'+entity.id)
+        .$delete('/api/healthcareprofessionals/'+entity.id)
         .then(() => {
           this.list()
-          this.$toast.success('Patient '+entity.id+' deleted').goAway(3000);
+          this.$toast.success('Healthcare Professional '+entity.id+' deleted').goAway(3000);
         })
         .catch((err) => {
           this.$toast.error(err).goAway(3000);

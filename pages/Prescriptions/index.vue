@@ -54,7 +54,7 @@ export default {
             this.modalShow = false;
           })
           .catch((err)=>{
-            console.log(err);
+            this.$toast.error(err).goAway(3000);
           });
       } else {
         form.start_date = this.getFormatedDate(form.start_date)
@@ -67,7 +67,7 @@ export default {
             this.modalShow = false;
           })
           .catch((err)=>{
-            console.log(err);
+            this.$toast.error(err).goAway(3000);
           });
       }
       this.prescription = null;
@@ -86,7 +86,7 @@ export default {
           this.fields.push("delete")
         })
         .catch((err) => {
-          console.log(err)
+          this.$toast.error(err).goAway(3000);
         })
     },
     deleteEntity(entity){
@@ -97,7 +97,7 @@ export default {
           this.$toast.success('Prescription '+entity.id+' deleted').goAway(3000);
         })
         .catch((err) => {
-          console.log(err)
+          this.$toast.error(err).goAway(3000);
         })
     }
   }
