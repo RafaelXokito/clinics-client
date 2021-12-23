@@ -43,8 +43,9 @@ export default {
     },
     onSubmit(form, method){
       if (method === 'create') {
-        form.startDate = this.getFormatedDate(form.startDate)
-        form.endDate = this.getFormatedDate(form.endDate)
+        form.healthcareProfessionalId = 2
+        form.start_date = this.getFormatedDate(form.start_date)
+        form.end_date = this.getFormatedDate(form.end_date)
         this.$axios
           .$post('/api/prescriptions', form)
           .then(() => {
@@ -56,8 +57,8 @@ export default {
             console.log(err);
           });
       } else {
-        form.startDate = this.getFormatedDate(form.startDate)
-        form.endDate = this.getFormatedDate(form.endDate)
+        form.start_date = this.getFormatedDate(form.start_date)
+        form.end_date = this.getFormatedDate(form.end_date)
         this.$axios
           .$put('/api/prescriptions/'+form.id, form)
           .then(() => {
@@ -88,12 +89,12 @@ export default {
           console.log(err)
         })
     },
-    deleteEntity(id){
+    deleteEntity(entity){
       this.$axios
-        .$delete('/api/prescriptions/'+id)
+        .$delete('/api/prescriptions/'+entity.id)
         .then(() => {
           this.list()
-          this.$toast.success('Prescription '+id+' deleted').goAway(3000);
+          this.$toast.success('Prescription '+entity.id+' deleted').goAway(3000);
         })
         .catch((err) => {
           console.log(err)
