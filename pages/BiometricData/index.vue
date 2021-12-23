@@ -77,12 +77,12 @@ export default {
           console.log(err)
         })
     },
-    deleteAdmin(username){
+    deleteAdmin(item){
       this.$axios
-        .$delete('/api/biometricdata/'+username)
+        .$delete('/api/biometricdata/'+item.id)
           .then(() => {
             this.list()
-            this.$toast.success('Biometric Data '+username+' deleted').goAway(3000);
+            this.$toast.success('Biometric Data '+item.id+' deleted').goAway(3000);
           })
           .catch((err) => {
             console.log(err)

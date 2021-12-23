@@ -64,7 +64,7 @@ export default {
       this.method = method;
     },
     deleteEntity(item){
-      this.$emit('deleteEntity',item.username)
+      this.$emit('deleteEntity',item)
     },
     resetEntity(){
       this.entity = null;

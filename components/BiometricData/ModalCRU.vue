@@ -94,6 +94,8 @@
                   placeholder="X"
                   required
                   type="number"
+                  step="0.01"
+                  @change="parseFloat(form.value).toFixed(2)"
                 ></b-form-input>
               </b-input-group>
             </b-form-group>
@@ -169,7 +171,7 @@ export default {
       if (record[0]) {
         this.form.biometricTypeId = record[0].id
         this.form.biometricTypeName = record[0].name
-        this.form.biometricTypeUnit = record[0].unit_name
+        this.form.biometricTypeUnit = record[0].unit + ' ' + record[0].unit_name
       }
     },
     selectPatient(){
@@ -238,7 +240,9 @@ export default {
           this.form.patientUsername = this.entity.patientUsername
           this.form.biometricTypeId = this.entity.biometricTypeId;
           this.form.biometricTypeName = this.entity.biometricDataTypeName;
-          this.form.biometricTypeUnit = this.selectableTEntity.filter((e) => e.id == this.entity.biometricTypeId)[0].unit_name
+          let biometricType = this.selectableTEntity.filter((e) => e.id == this.entity.biometricTypeId)[0];
+          this.form.biometricTypeUnit = biometricType.unit + ' ' + biometricType.unit_name
+          this.form.notes = this.entity.notes
           //this.form.biometricTypeUnit = this.entity.
           this.form.value = this.entity.value;
         }else {
@@ -248,6 +252,7 @@ export default {
           this.form.biometricTypeUnit = ""
           this.form.value = ""
           this.form.patientUsername = ""
+          this.form.notes = ""
         }
         this.$refs.bvEntity.show()
       }

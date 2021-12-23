@@ -2,27 +2,71 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="biometricdatatype" :fields="fields"></entities-table>
+    <entities-table :items="biometricdatatype" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteBioDataType"></entities-table>
   </b-container>
+  <modalCRU :entity="oneBiometricdatatype" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
 </div>
 </template>
 
 <script>
 import EntitiesTable from '~/components/EntitiesTable.vue'
+import modalCRU from '~/components/BiometricDataType/ModalCRU.vue'
 import navbar from "../../components/NavBar.vue"
 export default {
   components: {
     navbar,
-    EntitiesTable
+    EntitiesTable,
+    modalCRU
   },
   data() {
     return {
       fields: [],
-      biometricdatatype: []
+      biometricdatatype: [],
+      oneBiometricdatatype: {},
+      method: '',
+      modalShow: false
     }
   },
   created(){
-    this.$axios
+    this.list();
+  },
+  methods: {
+    modalCRU(item, method){
+      this.modalShow = true
+      this.oneBiometricdatatype = item;
+      this.method = method;
+    },
+    onSubmit(form, method){
+      if (method == 'create') {
+        this.$axios
+          .$post('/api/biometricdatatypes', form)
+          .then((e) => {
+            this.list();
+            this.$toast.success('Biometric Data Type '+e.id+' created').goAway(3000);
+            this.modalShow = false
+          })
+          .catch((err)=>{
+            console.log(err);
+          });
+      } else {
+        this.$axios
+          .$put('/api/biometricdatatypes/'+form.id, form)
+          .then(() => {
+            this.list();
+            this.$toast.success('Biometric Data Type '+form.id+' updated').goAway(3000);
+            this.modalShow = false
+          })
+          .catch((err)=>{
+            console.log(err);
+          });
+      }
+      this.oneBiometricdatatype = null;
+    },
+    resetEntity(){
+      this.oneBiometricdatatype = null;
+    },
+    list() {
+      this.$axios
       .$get('/api/biometricdatatypes')
       .then(biometricdatatype => {
         this.biometricdatatype = biometricdatatype.entities
@@ -34,7 +78,20 @@ export default {
       .catch((err)=>{
         console.log(err);
       });
-  }
+    },
+    deleteBioDataType(item){
+      this.$axios
+        .$delete('/api/biometricdatatypes/'+item.id)
+          .then(() => {
+            this.list()
+            this.$toast.success('Biometric Data Type '+item.name+' deleted').goAway(3000);
+          })
+          .catch((err) => {
+            console.log(err)
+          })
+    }
+  },
+
 }
 </script>
 
