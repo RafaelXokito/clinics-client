@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-5">
+  <div class="mt-3">
     <b-form-group>
       <b-button
         variant="success"
@@ -12,21 +12,21 @@
       <template #cell(created_at)="data">
         {{
           data.item.created_at != null
-            ? new Date(data.item.created_at).toLocaleDateString("pt-PT")
+            ? new Date(data.item.created_at).toLocaleString('pt-PT')
             : "Not Shown"
         }}
       </template>
       <template #cell(updated_at)="data">
         {{
           data.item.updated_at != null
-            ? new Date(data.item.updated_at).toLocaleDateString("pt-PT")
+            ? new Date(data.item.updated_at).toLocaleString('pt-PT')
             : "Not Updated"
         }}
       </template>
       <template #cell(deleted_at)="data">
         {{
           data.item.deleted_at != null
-            ? new Date(data.item.deleted_at).toLocaleDateString("pt-PT")
+            ? new Date(data.item.deleted_at).toLocaleString('pt-PT')
             : "Not Deleted"
         }}
       </template>

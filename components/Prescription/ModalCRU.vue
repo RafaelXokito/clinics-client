@@ -29,6 +29,32 @@
           ></b-form-input>
         </b-form-group>
         <b-form-group
+          id="input-group-patientId"
+          label="Patient Id:"
+          label-for="input-patientId"
+          label-class="font-weight-bold"
+          v-if="fieldProperties('patientId').visible"
+        >
+          <b-form-input
+            id="input-patientId"
+            v-model="form.patientId"
+            :disabled="!fieldProperties('patientId').editable"
+          ></b-form-input>
+        </b-form-group>
+        <b-form-group
+          id="input-group-patientName"
+          label="Patient Name:"
+          label-for="input-patientName"
+          label-class="font-weight-bold"
+          v-if="fieldProperties('patientName').visible"
+        >
+          <b-form-input
+            id="input-patientName"
+            v-model="form.patientName"
+            :disabled="!fieldProperties('patientName').editable"
+          ></b-form-input>
+        </b-form-group>
+        <b-form-group
           id="input-group-startDate"
           label="Start Date:"
           label-for="input-startDate"
@@ -124,6 +150,8 @@ export default {
         issues: null,
         healthcareProfessionalId: null,
         healthcareProfessionalName: null,
+        patientId: null,
+        patientName: null,
         start_date: null,
         end_date: null,
         notes: '',
@@ -145,9 +173,11 @@ export default {
     fieldProperties(fieldName) {
       switch (this.method) {
         case 'edit':
-          if (fieldName === 'issues') return { visible: true, editable: true }
+          if (fieldName === 'issues') return { visible: this.form.patientId === 0, editable: true }
           if (fieldName === 'healthProfessionalUsername') return { visible: true, editable: false }
           if (fieldName === 'healthProfessionalName') return { visible: true, editable: false }
+          if (fieldName === 'patientId') return { visible: this.form.patientId !== 0, editable: false }
+          if (fieldName === 'patientName') return { visible: this.form.patientId !== 0, editable: false }
           if (fieldName === 'startDate') return { visible: true, editable: true }
           if (fieldName === 'endDate') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
@@ -156,6 +186,8 @@ export default {
           if (fieldName === 'issues') return { visible: true, editable: true }
           if (fieldName === 'healthProfessionalUsername') return { visible: false, editable: false }
           if (fieldName === 'healthProfessionalName') return { visible: false, editable: false }
+          if (fieldName === 'patientId') return { visible: false, editable: false }
+          if (fieldName === 'patientName') return { visible: false, editable: false }
           if (fieldName === 'startDate') return { visible: true, editable: true }
           if (fieldName === 'endDate') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
@@ -199,25 +231,37 @@ export default {
               this.form.issues = prescription.issues;
               this.form.healthcareProfessionalId = prescription.healthcareProfessionalId;
               this.form.healthcareProfessionalName = prescription.healthcareProfessionalName;
+              this.form.patientId = prescription.patientId;
+              this.form.patientName = prescription.patientName;
               this.form.start_date = prescription.start_date;
               this.form.end_date = prescription.end_date;
               this.form.notes = prescription.notes;
+
+              if (prescription.patientId === 0) {
+                this.$axios
+                  .$get('/api/biometricdataissues')
+                  .then(biometricdataissues => {
+                    this.issues = biometricdataissues.entities;
+                  })
+                  .catch((err) => {
+                    this.$toast.error(err).goAway(3000);
+                  })
+              }
             })
             .catch((err) => {
               this.$toast.error(err).goAway(3000);
             })
         } else {
           this.form = {}
+          this.$axios
+            .$get('/api/biometricdataissues')
+            .then(biometricdataissues => {
+              this.issues = biometricdataissues.entities;
+            })
+            .catch((err) => {
+              this.$toast.error(err).goAway(3000);
+            })
         }
-
-        this.$axios
-          .$get('/api/biometricdataissues')
-          .then(biometricdataissues => {
-            this.issues = biometricdataissues.entities;
-          })
-          .catch((err) => {
-            this.$toast.error(err).goAway(3000);
-          })
 
         this.$refs.bvEntity.show()
       }

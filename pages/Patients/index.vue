@@ -43,7 +43,7 @@ export default {
     },
     onSubmit(form, method){
       if (method === 'create') {
-        form.created_by = 2 //substituir quando login nice
+        form.created_by = 4 //substituir quando login nice
         this.$axios
           .$post('/api/patients', form)
           .then(() => {
