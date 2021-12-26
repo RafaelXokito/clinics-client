@@ -14,8 +14,9 @@
         <b-nav-item :class="this.$route.name == 'BiometricDataIssues' ? 'active' : ''" to="BiometricDataIssues">Biometric Data Issues</b-nav-item>
         <b-nav-item :class="this.$route.name == 'BiometricDataTypes' ? 'active' : ''" to="BiometricDataTypes">Biometric Data Types</b-nav-item>
         <b-nav-item :class="this.$route.name == 'Prescriptions' ? 'active' : ''" to="Prescriptions">Prescriptions</b-nav-item>
+        <b-nav-item :class="this.$route.name == 'Observations' ? 'active' : ''" to="Observations">Observations</b-nav-item>
         <b-nav-item :class="this.$route.name == 'Patients' ? 'active' : ''" to="Patients">Patients</b-nav-item>
-        <b-nav-item :class="this.$route.name == 'Doctors' ? 'active' : ''" to="Doctors">Doctors</b-nav-item>
+        <b-nav-item :class="this.$route.name == 'HealthcareProfessionals' ? 'active' : ''" to="HealthcareProfessionals">Healthcare Professionals</b-nav-item>
         <b-nav-item :class="this.$route.name == 'Administrators' ? 'active' : ''" to="Administrators">Administrators</b-nav-item>
       </b-navbar-nav>
 
