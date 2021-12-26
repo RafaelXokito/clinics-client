@@ -252,7 +252,15 @@ export default {
               this.$toast.error(err).goAway(3000);
             })
         } else {
-          this.form = {}
+          this.form.id = ""
+          this.form.issues = ""
+          this.form.healthcareProfessionalId = ""
+          this.form.healthcareProfessionalName = ""
+          this.form.patientId = ""
+          this.form.patientName = ""
+          this.form.start_date = ""
+          this.form.end_date = ""
+          this.form.notes = ""
           this.$axios
             .$get('/api/biometricdataissues')
             .then(biometricdataissues => {

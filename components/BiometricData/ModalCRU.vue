@@ -27,7 +27,7 @@
               <div v-if="togglePSelect" class="pt-3">
                 <b-table id="my-patients-table" :items="selectablePEntity" :fields="selectablePFields" small hover responsive selectable select-mode="single" @row-selected="selectableEntityPClicked" :current-page="currentPatientPage" :per-page="perPage">
                   <template #cell(selected)="data">
-                    <template v-if="data.item.username == form.patientUsername">
+                    <template v-if="data.item.id == form.patientId">
                       <span aria-hidden="true">&check;</span>
                       <span class="sr-only">Selected</span>
                     </template>
@@ -124,7 +124,7 @@ export default {
     return {
       form: {
         patient: '',
-        patientUsername: '',
+        patientId: '',
         biometricTypeId: '',
         biometricTypeName: '',
         biometricTypeUnit: '',
@@ -163,7 +163,7 @@ export default {
     selectableEntityPClicked(record){
       if (record[0]) {
         this.form.patient = record[0].name
-        this.form.patientUsername = record[0].username
+        this.form.patientId = record[0].id
       }
     },
     selectableEntityTClicked(record){
@@ -178,7 +178,7 @@ export default {
     },
     unselectPatient(){
       this.form.patient = ""
-      this.form.patientUsername = ""
+      this.form.patientId = ""
     },
     selectBiometricType(){
       this.toggleTSelect = !this.toggleTSelect;
@@ -236,7 +236,7 @@ export default {
         this.toggleTSelect = false
         if (this.method == 'edit') {
           this.form.patient = this.entity.patientName
-          this.form.patientUsername = this.entity.patientUsername
+          this.form.patientId = this.entity.patientId
           this.form.biometricTypeId = this.entity.biometricTypeId;
           this.form.biometricTypeName = this.entity.biometricDataTypeName;
           let biometricType = this.selectableTEntity.filter((e) => e.id == this.entity.biometricTypeId)[0];
@@ -250,7 +250,7 @@ export default {
           this.form.biometricTypeName = ""
           this.form.biometricTypeUnit = ""
           this.form.value = ""
-          this.form.patientUsername = ""
+          this.form.patientId = ""
           this.form.notes = ""
         }
         this.$refs.bvEntity.show()

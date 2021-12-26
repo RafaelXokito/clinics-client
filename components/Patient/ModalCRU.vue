@@ -129,7 +129,7 @@ export default {
         gender: null,
         biometricDatas: [],
         observations: [],
-        createdBy: null,
+        created_by: null,
         healthNo: null
       },
       show: true,
@@ -208,9 +208,15 @@ export default {
               this.$toast.error(err).goAway(3000);
             })
         } else {
-          this.form = {}
+          this.form.id = ""
+          this.form.email = ""
+          this.form.name = ""
+          this.form.gender = ""
+          this.form.biometricDatas = ""
+          this.form.observations = ""
+          this.form.created_by = ""
+          this.form.healthNo = ""
         }
-
         this.$refs.bvEntity.show()
       }
     }

@@ -113,7 +113,10 @@ export default {
           this.form.name = this.entity.name;
           this.form.gender = this.entity.gender;
         }else {
-          this.form = {}
+          this.form.username = ""
+          this.form.email = ""
+          this.form.name = ""
+          this.form.gender = ""
         }
 
         // if (newEntity["name"] != undefined) {

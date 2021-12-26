@@ -149,7 +149,7 @@ export default {
         specialty: null,
         prescriptions: [],
         observations: [],
-        createdBy: null,
+        created_by: null,
       },
       show: true,
       fieldsPrescriptions: ["id", "healthcareProfessionalName", "start_date", "end_date", "isGlobal"],
@@ -232,7 +232,14 @@ export default {
               this.$toast.error(err).goAway(3000);
             })
         } else {
-          this.form = {}
+          this.form.id = ""
+          this.form.email = ""
+          this.form.name = ""
+          this.form.gender = ""
+          this.form.specialty = ""
+          this.form.prescriptions = ""
+          this.form.observations = ""
+          this.form.created_by = ""
         }
 
         this.$refs.bvEntity.show()

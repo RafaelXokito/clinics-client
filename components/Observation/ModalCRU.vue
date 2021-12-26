@@ -265,8 +265,17 @@ export default {
               this.$toast.error(err).goAway(3000);
             })
         } else {
-          this.form = {}
-          this.form.prescription = {}
+          this.form.id = observation.id;
+          this.form.healthcareProfessionalId = ""
+          this.form.healthcareProfessionalName = ""
+          this.form.patientId = ""
+          this.form.patientName = ""
+          this.form.notes = ""
+          this.form.created_at = ""
+          this.form.prescription.id = ""
+          this.form.prescription.start_date = ""
+          this.form.prescription.end_date = ""
+          this.form.prescription.notes = ""
         }
 
         this.$refs.bvEntity.show()
