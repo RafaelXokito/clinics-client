@@ -37,8 +37,35 @@ export default {
     'bootstrap-vue/nuxt',
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    '@nuxtjs/auth',
     '@nuxtjs/toast',
   ],
+
+  auth: {
+    redirect: {
+      login: '/auth/login',
+      logout: '/',
+      home: '/'
+    },
+    watchLoggedIn: true,
+    strategies: {
+      local: {
+        endpoints: {
+          login: {
+            url: '/api/auth/login',
+            method: 'post',
+              propertyName: 'token'
+          },
+          logout: false,
+          user: {
+            url: '/api/auth/user',
+            method: 'get',
+            propertyName: ''
+          }
+        },
+      }
+    }
+  },
 
   bootstrapVue: {
     icons: true

@@ -24,10 +24,10 @@
         <b-nav-item-dropdown right>
           <!-- Using 'button-content' slot -->
           <template #button-content>
-            <em>User</em>
+            <em>{{currentUser.name}}</em>
           </template>
-          <b-dropdown-item href="#">Profile</b-dropdown-item>
-          <b-dropdown-item to="/">Sign Out</b-dropdown-item>
+          <b-dropdown-item :class="this.$route.name == 'Profile' ? 'active' : ''" to="Profile">Profile</b-dropdown-item>
+          <b-dropdown-item href="#" @click="logout">Sign Out</b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>
     </b-collapse>
@@ -37,7 +37,20 @@
 
 <script>
 export default {
+  computed: {
+    currentUser(){
+      return this.$auth.user
+    }
+  },
+  methods: {
+    async logout(){
+      //this.$router.push({ name: 'index' })
+      await this.$auth.logout()
+      //this.$router.push('/')
+      //await this.$auth.logout()
 
+    }
+  }
 }
 </script>
 

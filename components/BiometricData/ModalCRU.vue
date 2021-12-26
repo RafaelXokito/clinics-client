@@ -159,7 +159,6 @@ export default {
     method:String,
     modalShow: Boolean,
   },
-
   methods: {
     selectableEntityPClicked(record){
       if (record[0]) {
