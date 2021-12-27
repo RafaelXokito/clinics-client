@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
+    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Global Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
         <b-form-group
           id="input-group-healthProfessionalId"
@@ -65,6 +65,7 @@
             id="input-startDate"
             v-model="form.start_date" class="mb-2"
             :disabled="!fieldProperties('startDate').editable"
+            required
           >
           </b-form-datepicker>
         </b-form-group>
@@ -79,6 +80,7 @@
             id="input-endDate"
             v-model="form.end_date" class="mb-2"
             :disabled="!fieldProperties('endDate').editable"
+            required
           >
           </b-form-datepicker>
         </b-form-group>
@@ -90,12 +92,14 @@
           label-class="font-weight-bold"
           v-if="fieldProperties('notes').visible"
         >
-          <b-form-input
+          <b-form-textarea
             id="input-notes"
             v-model="form.notes"
             placeholder="Enter notes"
             :disabled="!fieldProperties('notes').editable"
-          ></b-form-input>
+            rows="3"
+            max-rows="6"
+          ></b-form-textarea>
         </b-form-group>
 
         <b-form-group

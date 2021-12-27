@@ -13,6 +13,7 @@ import EntitiesTable from '~/components/EntitiesTable.vue'
 import modalCRU from '~/components/BiometricData/ModalCRU.vue'
 import navbar from "../../components/NavBar.vue"
 export default {
+  middleware: ('auth', 'biometricdata'),
   components: {
     navbar,
     EntitiesTable,
@@ -40,7 +41,7 @@ export default {
           .$post('/api/biometricdata', form)
           .then(() => {
             this.list();
-            this.$toast.success('Biometric Data '+form.username+' created').goAway(3000);
+            this.$toast.success('Biometric Data created').goAway(3000);
             this.modalShow = false
           })
           .catch((err)=>{
@@ -51,7 +52,7 @@ export default {
           .$put('/api/biometricdata/'+this.oneBiometricData.id, form)
           .then(() => {
             this.list();
-            this.$toast.success('Biometric Data '+form.username+' updated').goAway(3000);
+            this.$toast.success('Biometric Data updated').goAway(3000);
             this.modalShow = false
           })
           .catch((err)=>{
@@ -82,7 +83,7 @@ export default {
         .$delete('/api/biometricdata/'+item.id)
           .then(() => {
             this.list()
-            this.$toast.success('Biometric Data '+item.id+' deleted').goAway(3000);
+            this.$toast.success('Biometric Data deleted').goAway(3000);
           })
           .catch((err) => {
             console.log(err)

@@ -14,6 +14,7 @@ import navbar from "../../components/NavBar.vue"
 import modalCRU from "~/components/Prescription/ModalCRU";
 
 export default {
+  middleware: ('auth', 'prescriptions'),
   components: {
     navbar,
     EntitiesTable,
@@ -63,7 +64,7 @@ export default {
           .$put('/api/prescriptions/'+form.id, form)
           .then(() => {
             this.list();
-            this.$toast.success('Prescription '+form.id+' updated').goAway(3000);
+            this.$toast.success('Prescription updated').goAway(3000);
             this.modalShow = false;
           })
           .catch((err)=>{
@@ -94,7 +95,7 @@ export default {
         .$delete('/api/prescriptions/'+entity.id)
         .then(() => {
           this.list()
-          this.$toast.success('Prescription '+entity.id+' deleted').goAway(3000);
+          this.$toast.success('Prescription deleted').goAway(3000);
         })
         .catch((err) => {
           this.$toast.error(err).goAway(3000);

@@ -14,6 +14,7 @@ import modalCRU from '~/components/Administrator/ModalCRU.vue'
 import navbar from "../../components/NavBar.vue"
 
 export default {
+  middleware: ('auth','administrator'),
   components: {
     navbar,
     EntitiesTable,
@@ -43,7 +44,7 @@ export default {
           .$post('/api/administrators', form)
           .then(() => {
             this.list();
-            this.$toast.success('Administrator '+form.username+' created').goAway(3000);
+            this.$toast.success('Administrator '+form.name+' created').goAway(3000);
             this.modalShow = false
           })
           .catch((err)=>{
@@ -51,10 +52,10 @@ export default {
           });
       } else {
         this.$axios
-          .$put('/api/administrators/'+form.username, form)
+          .$put('/api/administrators/'+form.id, form)
           .then(() => {
             this.list();
-            this.$toast.success('Administrator '+form.username+' updated').goAway(3000);
+            this.$toast.success('Administrator '+form.name+' updated').goAway(3000);
             this.modalShow = false
           })
           .catch((err)=>{
@@ -82,7 +83,7 @@ export default {
     },
     deleteAdmin(item){
       this.$axios
-        .$delete('/api/administrators/'+item.username)
+        .$delete('/api/administrators/'+item.id)
           .then(() => {
             this.list()
             this.$toast.success('Administrator '+item.name+' deleted').goAway(3000);

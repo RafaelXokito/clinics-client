@@ -14,6 +14,7 @@ import navbar from "../../components/NavBar.vue"
 import modalCRU from "~/components/Observation/ModalCRU";
 
 export default {
+  middleware: ('auth', 'healthcareprofessional'),
   components: {
     navbar,
     EntitiesTable,
@@ -38,12 +39,13 @@ export default {
       this.method = method;
     },
     getFormatedDate(dateString) {
+      if(dateString === null || dateString.trim().length === 0)
+        return ""
       let date = new Date(dateString)
       return (date.toISOString().split('.')[0]).slice(0, -3).replace('T', ' ')
     },
     onSubmit(form, method){
       if (method === 'create') {
-        form.healthcareProfessionalId = 4
         form.prescription.start_date = this.getFormatedDate(form.prescription.start_date)
         form.prescription.end_date = this.getFormatedDate(form.prescription.end_date)
         this.$axios
@@ -63,7 +65,7 @@ export default {
           .$put('/api/observations/'+form.id, form)
           .then(() => {
             this.list();
-            this.$toast.success('Observation '+form.id+' updated').goAway(3000);
+            this.$toast.success('Observation updated').goAway(3000);
             this.modalShow = false;
           })
           .catch((err)=>{
@@ -94,7 +96,7 @@ export default {
         .$delete('/api/observations/'+entity.id)
         .then(() => {
           this.list()
-          this.$toast.success('Observation '+entity.id+' deleted').goAway(3000);
+          this.$toast.success('Observation deleted').goAway(3000);
         })
         .catch((err) => {
           this.$toast.error(err).goAway(3000);

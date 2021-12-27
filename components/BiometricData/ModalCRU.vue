@@ -42,6 +42,7 @@
                   :total-rows="patientRows"
                   :per-page="perPage"
                   aria-controls="my-patients-table"
+                  align="center"
                 ></b-pagination>
               </div>
             </b-form-group>
@@ -83,6 +84,7 @@
                   :total-rows="bioDataRows"
                   :per-page="perPage"
                   aria-controls="my-patients-table"
+                  align="center"
                 ></b-pagination>
               </div>
             </b-form-group>
