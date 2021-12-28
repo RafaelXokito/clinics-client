@@ -2,9 +2,9 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="biometricdata" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteAdmin"></entities-table>
+    <entities-table :items="biometricDatas" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteAdmin" />
   </b-container>
-  <modalCRU :entity="oneBiometricData" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
+  <modalCRU :entity="biometricData" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow" />
 </div>
 </template>
 
@@ -12,6 +12,7 @@
 import EntitiesTable from '~/components/EntitiesTable.vue'
 import modalCRU from '~/components/BiometricData/ModalCRU.vue'
 import navbar from "../../components/NavBar.vue"
+
 export default {
   components: {
     navbar,
@@ -21,60 +22,82 @@ export default {
   data() {
     return {
       fields: [],
-      biometricdata: [],
-      oneBiometricData: {},
+      biometricDatas: [],
+      biometricData: {},
       method: '',
       modalShow: false,
     }
   },
-  methods: {
+  methods: {
     modalCRU(item, method){
-      this.modalShow = true
-      this.oneBiometricData = item;
+      this.modalShow = true;
+      this.biometricData = item;
       this.method = method;
     },
+    getDateAndTimeSum(date, timeString) {
+      if (date == null || timeString == null || timeString === '') return ''
+      let timePieces = timeString.split(':');
+
+      if (timePieces.length !== 3) return ''
+
+      date.setHours(timePieces[0], timePieces[1], timePieces[2])
+
+      return date
+    },
     onSubmit(form, method){
-      console.log(form, method)
-      if (method == 'create') {
+      form.created_at = this.getDateAndTimeSum(new Date(form.created_at), form.created_at_time)
+
+      if (method === 'create') {
         this.$axios
           .$post('/api/biometricdata', form)
           .then(() => {
             this.list();
-            this.$toast.success('Biometric Data '+form.username+' created').goAway(3000);
+            this.$toast.success('Biometric Data created').goAway(3000);
             this.modalShow = false
+            this.biometricData = null;
           })
           .catch((err)=>{
-            console.log(err);
+            if (err.response) {
+              this.$toast.error(err.response.data).goAway(3000);
+            }
+            else {
+              this.$toast.error(err).goAway(3000);
+            }
           });
       } else {
         this.$axios
-          .$put('/api/biometricdata/'+this.oneBiometricData.id, form)
+          .$put('/api/biometricdata/'+this.biometricData.id, form)
           .then(() => {
             this.list();
-            this.$toast.success('Biometric Data '+form.username+' updated').goAway(3000);
+            this.$toast.success('Biometric Data '+form.id+' updated').goAway(3000);
             this.modalShow = false
+            this.biometricData = null;
           })
           .catch((err)=>{
-            console.log(err);
+            if (err.response) {
+              this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+            }
+            else {
+              this.$toast.error(err).goAway(3000);
+            }
           });
       }
-      this.oneBiometricData = null;
     },
-    resetEntity(){
-      this.oneBiometricData = null;
+    resetEntity() {
+      this.biometricData = null;
     },
     list() {
       this.$axios
         .$get('/api/biometricdata')
-        .then(biometricdata => {
-          this.biometricdata=biometricdata.entities
-          this.fields=biometricdata.columns
+        .then(biometricDatas => {
+          this.biometricDatas = biometricDatas.entities
+          this.fields = biometricDatas.columns
 
           this.fields.push("update")
           this.fields.push("delete")
         })
         .catch((err) => {
-          console.log(err)
+          this.$toast.error(err).goAway(3000);
         })
     },
     deleteAdmin(item){
@@ -85,7 +108,7 @@ export default {
             this.$toast.success('Biometric Data '+item.id+' deleted').goAway(3000);
           })
           .catch((err) => {
-            console.log(err)
+            this.$toast.error(err).goAway(3000);
           })
     }
   },

@@ -1,21 +1,23 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="xl" :title="method+' Biometric Data'" ref="bvEntity" @hide="onReset" :hide-footer="true">
+    <b-modal id="bv-entity" size="xl" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Biometric Data'" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <div class="row">
         <div class="col">
-          <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
+          <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
             <b-form-group
               id="input-group-patient"
               label="Patient:"
               label-for="input-patient"
+              label-class="font-weight-bold"
             >
               <b-input-group>
                 <b-form-input
                   id="input-patient"
-                  v-model="form.patient"
+                  v-model="form.patientName"
                   type="text"
-                  placeholder="Enter Patient"
+                  placeholder="Select the Patient"
                   required
+                  disabled
                 ></b-form-input>
                 <b-input-group-append>
                   <b-button variant="outline-info"><b-icon icon="search" @click="selectPatient"></b-icon></b-button>
@@ -24,10 +26,10 @@
                   <b-button variant="outline-danger"><b-icon icon="backspace" @click="unselectPatient"></b-icon></b-button>
                 </b-input-group-append>
               </b-input-group>
-              <div v-if="togglePSelect" class="pt-3">
+              <div v-show="togglePSelect" class="pt-3">
                 <b-table id="my-patients-table" :items="selectablePEntity" :fields="selectablePFields" small hover responsive selectable select-mode="single" @row-selected="selectableEntityPClicked" :current-page="currentPatientPage" :per-page="perPage">
                   <template #cell(selected)="data">
-                    <template v-if="data.item.id == form.patientId">
+                    <template v-if="data.item.id === form.patientId">
                       <span aria-hidden="true">&check;</span>
                       <span class="sr-only">Selected</span>
                     </template>
@@ -42,6 +44,7 @@
                   :total-rows="patientRows"
                   :per-page="perPage"
                   aria-controls="my-patients-table"
+                  align="center"
                 ></b-pagination>
               </div>
             </b-form-group>
@@ -49,26 +52,28 @@
               id="input-group-biometricdatatype"
               label="Biometric Data Type:"
               label-for="input-biometricdatatype"
+              label-class="font-weight-bold"
             >
               <b-input-group>
                 <b-form-input
                   id="input-biometricdatatype"
-                  v-model="form.biometricTypeName"
+                  v-model="form.biometricDataTypeName"
                   type="text"
-                  placeholder="Enter Type"
+                  placeholder="Select the Biometric Data Type"
                   required
+                  disabled
                 ></b-form-input>
                 <b-input-group-append>
-                  <b-button variant="outline-info"><b-icon icon="search" @click="selectBiometricType"></b-icon></b-button>
+                  <b-button variant="outline-info"><b-icon icon="search" @click.prevent="selectBiometricType"></b-icon></b-button>
                 </b-input-group-append>
                 <b-input-group-append>
-                  <b-button variant="outline-danger"><b-icon icon="backspace" @click="unselectBiometricType"></b-icon></b-button>
+                  <b-button variant="outline-danger"><b-icon icon="backspace" @click.prevent="unselectBiometricType"></b-icon></b-button>
                 </b-input-group-append>
               </b-input-group>
-              <div v-if="toggleTSelect" class="pt-3">
+              <div v-show="toggleTSelect" class="pt-3">
                 <b-table  id="my-bioData-table" :items="selectableTEntity" :fields="selectableTFields" small hover responsive selectable select-mode="single" @row-selected="selectableEntityTClicked" :current-page="currentBioDataPage" :per-page="perPage">
                   <template #cell(selected)="data">
-                    <template v-if="data.item.id == form.biometricTypeId">
+                    <template v-if="data.item.id === form.biometricTypeId">
                       <span aria-hidden="true">&check;</span>
                       <span class="sr-only">Selected</span>
                     </template>
@@ -83,23 +88,38 @@
                   :total-rows="bioDataRows"
                   :per-page="perPage"
                   aria-controls="my-patients-table"
+                  align="center"
                 ></b-pagination>
               </div>
             </b-form-group>
-            <b-form-group id="input-group-value" label="Value:" label-for="input-value">
-              <b-input-group :append="form.biometricTypeUnit">
-                <b-form-input
-                  id="input-value"
-                  v-model="form.value"
-                  placeholder="X"
-                  required
-                  type="number"
-                  step="0.01"
-                  @change="parseFloat(form.value).toFixed(2)"
-                ></b-form-input>
-              </b-input-group>
-            </b-form-group>
-            <b-form-group  id="input-group-notes" label="Notes:" label-for="input-notes">
+            <div class="d-flex flex-row flex-wrap">
+              <div v-if="fieldProperties('value').visible" class="flex-grow-1 px-1">
+                <b-form-group id="input-group-value" label="Value:" label-for="input-value" label-class="font-weight-bold">
+                  <b-input-group :append="form.valueUnit">
+                    <b-form-input
+                      id="input-value"
+                      v-model="form.value"
+                      placeholder="X"
+                      required
+                      type="number"
+                      step="0.01"
+                      @change="parseFloat(form.value).toFixed(2)"
+                      :disabled="!fieldProperties('value').editable"
+                    ></b-form-input>
+                  </b-input-group>
+                </b-form-group>
+              </div>
+              <div v-if="fieldProperties('biometricDataIssueId').visible" class="flex-grow-1 px-1">
+                <b-form-group id="input-group-issue" label="Automatic Classification:" label-for="input-issue" label-class="font-weight-bold">
+                  <b-form-input
+                    id="input-issue"
+                    :value="form.biometricDataIssueName ? form.biometricDataIssueName : 'N/A'"
+                    :disabled="!fieldProperties('biometricDataIssueId').editable"
+                  ></b-form-input>
+                </b-form-group>
+              </div>
+            </div>
+            <b-form-group id="input-group-notes" label="Notes:" label-for="input-notes" label-class="font-weight-bold">
               <b-form-textarea
                 id="input-notes"
                 v-model="form.notes"
@@ -107,6 +127,39 @@
                 rows="3"
                 max-rows="6"
               ></b-form-textarea>
+            </b-form-group>
+            <b-form-group
+              id="input-group-source"
+              label="Source:"
+              label-for="input-source"
+              label-class="font-weight-bold"
+              v-if="fieldProperties('source').visible"
+            >
+              <b-form-select
+                id="input-source"
+                v-model="form.source"
+                :disabled="!fieldProperties('source').editable"
+                :options="sourceValues"
+                required
+              />
+            </b-form-group>
+            <b-form-group id="input-group-createdAt" label="Created At:" label-for="input-createdAt" label-class="font-weight-bold" class="">
+              <div class="d-flex flex-row flex-wrap">
+                <div class="flex-grow-1 px-1 mb-2">
+                  <b-form-datepicker
+                    id="input-createdAt"
+                    v-model="form.created_at"
+                    :disabled="!fieldProperties('created_at').editable"
+                  />
+                </div>
+                <div class="flex-grow-1 px-1 mb-2">
+                  <b-form-timepicker
+                    id="timepicker-createdAt"
+                    v-model="form.created_at_time"
+                    :disabled="!fieldProperties('created_at').editable"
+                  />
+                </div>
+              </div>
             </b-form-group>
 
             <b-button type="submit" variant="primary">Submit</b-button>
@@ -123,13 +176,21 @@ export default {
   data() {
     return {
       form: {
-        patient: '',
-        patientId: '',
+        id: '',
         biometricTypeId: '',
-        biometricTypeName: '',
-        biometricTypeUnit: '',
         value: '',
-        notes: ''
+        notes: '',
+        patientId: '',
+        created_at: '',
+        created_at_time: '',
+        created_by: '',
+        patientName: '',
+        healthNo: '',
+        biometricDataTypeName: '',
+        valueUnit: '',
+        source: '',
+        biometricDataIssueId: '',
+        biometricDataIssueName: '',
       },
       show: true,
 
@@ -144,6 +205,14 @@ export default {
       selectableTEntity: [],
       selectableTFields: [],
       toggleTSelect: false,
+
+      clone: {},
+
+      sourceValues: [
+        { value: 'Exam', text: 'Exam' },
+        { value: 'Sensor', text: 'Sensor' },
+        { value: 'Wearable', text: 'Wearable' },
+      ]
     }
   },
   computed: {
@@ -152,7 +221,7 @@ export default {
     },
     bioDataRows() {
       return this.selectableTEntity.length
-    }
+    },
   },
   props:{
     entity:Object,
@@ -162,22 +231,22 @@ export default {
   methods: {
     selectableEntityPClicked(record){
       if (record[0]) {
-        this.form.patient = record[0].name
+        this.form.patientName = record[0].name
         this.form.patientId = record[0].id
       }
     },
     selectableEntityTClicked(record){
       if (record[0]) {
         this.form.biometricTypeId = record[0].id
-        this.form.biometricTypeName = record[0].name
-        this.form.biometricTypeUnit = record[0].unit + ' ' + record[0].unit_name
+        this.form.biometricDataTypeName = record[0].name
+        this.form.valueUnit = record[0].unit_name
       }
     },
     selectPatient(){
       this.togglePSelect = !this.togglePSelect;
     },
     unselectPatient(){
-      this.form.patient = ""
+      this.form.patientName = ""
       this.form.patientId = ""
     },
     selectBiometricType(){
@@ -185,15 +254,53 @@ export default {
     },
     unselectBiometricType(){
       this.form.biometricTypeId = ""
-      this.form.biometricTypeName = ""
-      this.form.biometricTypeUnit = ""
+      this.form.biometricDataTypeName = ""
+      this.form.valueUnit = ""
     },
     onReset(){
       this.$emit("onReset")
     },
+    resetBtnPressed() {
+      console.log(this.form)
+      this.form = Object.assign({}, this.clone)
+      console.log(this.clone)
+    },
     onSubmit(){
       this.$emit("onSubmit",this.form, this.method)
     },
+    fieldProperties(fieldName) {
+      switch (this.method) {
+        case 'edit':
+          if (fieldName === 'biometricTypeId') return { visible: true, editable: true }
+          if (fieldName === 'value') return { visible: true, editable: true }
+          if (fieldName === 'notes') return { visible: true, editable: true }
+          if (fieldName === 'patientId') return { visible: true, editable: true }
+          if (fieldName === 'created_at') return { visible: true, editable: true }
+          if (fieldName === 'source') return { visible: true, editable: true }
+          if (fieldName === 'biometricDataIssueId') return { visible: true, editable: false }
+          break;
+        case 'create':
+          if (fieldName === 'biometricTypeId') return { visible: true, editable: true }
+          if (fieldName === 'value') return { visible: true, editable: true }
+          if (fieldName === 'notes') return { visible: true, editable: true }
+          if (fieldName === 'patientId') return { visible: true, editable: true }
+          if (fieldName === 'created_at') return { visible: true, editable: true }
+          if (fieldName === 'source') return { visible: true, editable: true }
+          if (fieldName === 'biometricDataIssueId') return { visible: false, editable: false }
+          break;
+        default: return { visible: true, editable: true }
+      }
+    },
+    formatDate(dateStr) {
+      if (dateStr == null || dateStr === '') return ''
+      let date = new Date(dateStr)
+      return date.toLocaleString('pt-PT')
+    },
+    formatTime(dateStr) {
+      if (dateStr == null || dateStr === '') return ''
+      let date = new Date(dateStr)
+      return date.toTimeString().split(' ')[0]
+    }
   },
   mounted() {
     //Load patients
@@ -202,24 +309,22 @@ export default {
       .then(patients => {
         this.selectablePEntity = patients.entities
         this.selectablePFields = patients.columns
-        this.toggleSelect = true
         this.selectablePFields.unshift("selected")
       })
       .catch((err)=>{
-        console.log(err);
+        this.$toast.error(err).goAway(3000);
       });
 
-      //Load Biometric Data Types
-      this.$axios
+    //Load Biometric Data Types
+    this.$axios
       .$get('/api/biometricdatatypes')
       .then(biometricdatatypes => {
         this.selectableTEntity = biometricdatatypes.entities
         this.selectableTFields = biometricdatatypes.columns
-        this.toggleTSelect = true
         this.selectableTFields.unshift("selected")
       })
       .catch((err)=>{
-        console.log(err);
+        this.$toast.error(err).goAway(3000);
       });
   },
   watch: {
@@ -230,29 +335,63 @@ export default {
         this.$refs.bvEntity.hide()
       }
     },
-    entity(newEntity, oldVar){
+    entity(newEntity){
+      this.togglePSelect = false;
+      this.toggleTSelect = false;
+
       if (newEntity != null) {
-        this.togglePSelect = false
-        this.toggleTSelect = false
-        if (this.method == 'edit') {
-          this.form.patient = this.entity.patientName
-          this.form.patientId = this.entity.patientId
-          this.form.biometricTypeId = this.entity.biometricTypeId;
-          this.form.biometricTypeName = this.entity.biometricDataTypeName;
-          let biometricType = this.selectableTEntity.filter((e) => e.id == this.entity.biometricTypeId)[0];
-          this.form.biometricTypeUnit = biometricType.unit + ' ' + biometricType.unit_name
-          this.form.notes = this.entity.notes
-          //this.form.biometricTypeUnit = this.entity.
-          this.form.value = this.entity.value;
-        }else {
-          this.form.patient = ""
-          this.form.biometricTypeId = ""
-          this.form.biometricTypeName = ""
-          this.form.biometricTypeUnit = ""
-          this.form.value = ""
-          this.form.patientId = ""
-          this.form.notes = ""
+        if (this.method === 'edit') {
+          this.$axios
+            .$get('/api/biometricdata/' + this.entity.id)
+            .then(biometricData => {
+              this.form.id = biometricData.id;
+              this.form.biometricTypeId = biometricData.biometricTypeId;
+              this.form.value =  biometricData.value;
+              this.form.notes = biometricData.notes;
+              this.form.patientId = biometricData.patientId;
+              this.form.created_at = biometricData.created_at;
+              this.form.created_at_time = this.formatTime(biometricData.created_at);
+              this.form.created_by = biometricData.created_by;
+              this.form.patientName = biometricData.patientName;
+              this.form.healthNo = biometricData.healthNo;
+              this.form.biometricDataTypeName = biometricData.biometricDataTypeName;
+              this.form.valueUnit = biometricData.valueUnit;
+              this.form.source = biometricData.source;
+              this.form.biometricDataIssueId = biometricData.biometricDataIssueId;
+              this.form.biometricDataIssueName = biometricData.biometricDataIssueName;
+
+              let types = this.selectableTEntity.filter((e) => e.id === biometricData.biometricTypeId)
+              if (types.length > 0) {
+                let biometricType = types[0];
+                this.form.biometricTypeUnit = biometricType.unit_name;
+              }
+
+              this.clone = Object.assign({}, this.form)
+            })
+            .catch((err) => {
+              this.$toast.error(err).goAway(3000);
+              this.$refs.bvEntity.hide()
+            })
         }
+        else {
+          this.form.id = '';
+          this.form.biometricTypeId = '';
+          this.form.value = '';
+          this.form.notes = '';
+          this.form.patientId = '';
+          this.form.created_at = '';
+          this.form.created_by = '';
+          this.form.patientName = '';
+          this.form.healthNo = '';
+          this.form.biometricDataTypeName = '';
+          this.form.valueUnit = '';
+          this.form.source = '';
+          this.form.biometricDataIssueId = '';
+          this.form.biometricDataIssueName = '';
+
+          this.clone = Object.assign({}, this.form)
+        }
+
         this.$refs.bvEntity.show()
       }
     }
