@@ -293,7 +293,7 @@ export default {
               this.form.biometricDatas = patient.biometricDatas;
               this.form.observations = patient.observations;
               this.form.created_by = patient.created_by;
-              this.form.healthNo = patient.healthNo;
+              this.form.healthNo = patient.healthNo+"";
             })
             .catch((err) => {
               this.$toast.error(err).goAway(3000);
