@@ -10,14 +10,14 @@
 
     <b-collapse id="nav-collapse" is-nav>
       <b-navbar-nav class="ml-auto text-center">
-        <b-nav-item :class="this.$route.name == 'BiometricData' ? 'active' : ''" to="BiometricData">Biometric Data</b-nav-item>
-        <b-nav-item :class="this.$route.name == 'BiometricDataIssues' ? 'active' : ''" to="BiometricDataIssues">Biometric Data Issues</b-nav-item>
-        <b-nav-item :class="this.$route.name == 'BiometricDataTypes' ? 'active' : ''" to="BiometricDataTypes">Biometric Data Types</b-nav-item>
-        <b-nav-item :class="this.$route.name == 'Prescriptions' ? 'active' : ''" to="Prescriptions">Prescriptions</b-nav-item>
-        <b-nav-item :class="this.$route.name == 'Observations' ? 'active' : ''" to="Observations">Observations</b-nav-item>
-        <b-nav-item :class="this.$route.name == 'Patients' ? 'active' : ''" to="Patients">Patients</b-nav-item>
-        <b-nav-item :class="this.$route.name == 'HealthcareProfessionals' ? 'active' : ''" to="HealthcareProfessionals">Healthcare Professionals</b-nav-item>
-        <b-nav-item :class="this.$route.name == 'Administrators' ? 'active' : ''" to="Administrators">Administrators</b-nav-item>
+        <b-nav-item v-if="$auth.user.scope === 'HealthcareProfessional' || $auth.user.scope === 'Patient'" :class="this.$route.name == 'BiometricData' ? 'active' : ''" to="BiometricData">Biometric Data</b-nav-item>
+        <b-nav-item v-if="$auth.user.scope === 'HealthcareProfessional'" :class="this.$route.name == 'BiometricDataIssues' ? 'active' : ''" to="BiometricDataIssues">Biometric Data Issues</b-nav-item>
+        <b-nav-item v-if="$auth.user.scope === 'Administrator'" :class="this.$route.name == 'BiometricDataTypes' ? 'active' : ''" to="BiometricDataTypes">Biometric Data Types</b-nav-item>
+        <b-nav-item v-if="$auth.user.scope === 'HealthcareProfessional' || $auth.user.scope === 'Patient'" :class="this.$route.name == 'Prescriptions' ? 'active' : ''" to="Prescriptions">Prescriptions</b-nav-item>
+        <b-nav-item v-if="$auth.user.scope === 'HealthcareProfessional'" :class="this.$route.name == 'Observations' ? 'active' : ''" to="Observations">Observations</b-nav-item>
+        <b-nav-item v-if="$auth.user.scope === 'Administrator' || $auth.user.scope === 'HealthcareProfessional'" :class="this.$route.name == 'Patients' ? 'active' : ''" to="Patients">Patients</b-nav-item>
+        <b-nav-item v-if="$auth.user.scope === 'Administrator'" :class="this.$route.name == 'HealthcareProfessionals' ? 'active' : ''" to="HealthcareProfessionals">Healthcare Professionals</b-nav-item>
+        <b-nav-item v-if="$auth.user.scope === 'Administrator'" :class="this.$route.name == 'Administrators' ? 'active' : ''" to="Administrators">Administrators</b-nav-item>
       </b-navbar-nav>
 
       <!-- Right aligned nav items -->
@@ -28,6 +28,7 @@
             <em>{{currentUser.name}}</em>
           </template>
           <b-dropdown-item :class="this.$route.name == 'Profile' ? 'active' : ''" to="Profile">Profile</b-dropdown-item>
+          <b-dropdown-item :class="this.$route.name == 'ChangePassword' ? 'active' : ''" to="ChangePassword">Change Password</b-dropdown-item>
           <b-dropdown-item href="#" @click="logout">Sign Out</b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>

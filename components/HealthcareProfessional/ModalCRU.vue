@@ -26,9 +26,16 @@
             >
               <b-form-input
                 id="input-email"
+                aria-describedby="input-email-feedback"
                 v-model="form.email"
+                :state="emailState"
                 :disabled="!fieldProperties('email').editable"
+                trim
+                required
               ></b-form-input>
+              <b-form-invalid-feedback id="input-email-feedback">
+                {{form.emailError}}
+              </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
               id="input-group-password"
@@ -39,10 +46,17 @@
             >
               <b-form-input
                 id="input-password"
+                aria-describedby="input-password-feedback"
                 v-model="form.password"
                 type="password"
+                :state="passwordState"
                 :disabled="!fieldProperties('password').editable"
+                trim
+                required
               ></b-form-input>
+              <b-form-invalid-feedback id="input-password-feedback">
+                {{form.passwordError}}
+              </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
               id="input-group-name"
@@ -53,9 +67,16 @@
             >
               <b-form-input
                 id="input-name"
+                aria-describedby="input-name-feedback"
                 v-model="form.name"
+                :state="nameState"
                 :disabled="!fieldProperties('name').editable"
+                trim
+                required
               ></b-form-input>
+              <b-form-invalid-feedback id="input-name-feedback">
+                {{form.nameError}}
+              </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
               id="input-group-gender"
@@ -66,11 +87,17 @@
             >
               <b-form-select
                 id="input-gender"
+                aria-describedby="input-gender-feedback"
                 v-model="form.gender"
+                :state="genderState"
                 :disabled="!fieldProperties('gender').editable"
                 :options="genderValues"
                 required
+                trim
               />
+              <b-form-invalid-feedback id="input-gender-feedback">
+                {{form.genderError}}
+              </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
               id="input-group-specialty"
@@ -81,9 +108,16 @@
             >
               <b-form-input
                 id="input-specialty"
+                aria-describedby="input-specialty-feedback"
                 v-model="form.specialty"
+                :state="specialtyState"
                 :disabled="!fieldProperties('specialty').editable"
+                trim
+                required
               ></b-form-input>
+              <b-form-invalid-feedback id="input-specialty-feedback">
+                {{form.specialtyError}}
+              </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
               id="input-group-createdBy"
@@ -143,10 +177,15 @@ export default {
       form: {
         id: null,
         email: null,
+        emailError: '',
         password: null,
+        passwordError: '',
         name: null,
+        nameError: '',
         gender: null,
+        genderError: '',
         specialty: null,
+        specialtyError: '',
         prescriptions: [],
         observations: [],
         created_by: null,
@@ -159,6 +198,59 @@ export default {
         { value: 'Female', text: 'Female' },
         { value: 'Other', text: 'Other' }
       ]
+    }
+  },
+  computed: {
+    emailState(){
+      if (this.form.email == "" || this.form.email == null) {
+        return null
+      }
+      var re = /\S+@\S+\.\S+/;
+      if (!re.test(this.form.email)) {
+        this.form.emailError = "Invalid email!"
+        return false
+      }
+      return true
+    },
+    nameState(){
+      if (this.form.name == "" || this.form.name == null) {
+        return null
+      }
+      if (!(this.form.name.length > 5)) {
+        this.form.nameError = "Name need to contains at least 6 characters!"
+        return false
+      }
+      return true
+    },
+    genderState(){
+      if (this.form.gender == "" || this.form.gender == null) {
+        return null
+      }
+      if (!(this.form.gender === 'Male' || this.form.gender === 'Female' || this.form.gender === 'Other')) {
+        this.form.genderError = "Invalid gender!"
+        return false
+      }
+      return true
+    },
+    passwordState(){
+      if (this.form.password == "" || this.form.password == null) {
+        return null
+      }
+      if (!(this.form.password.length > 3)) {
+        this.form.passwordError = "Password need to contains at least 4 characters!"
+        return false
+      }
+      return true
+    },
+    specialtyState(){
+      if (this.form.specialty == "" || this.form.specialty == null) {
+        return null
+      }
+      if (!(this.form.specialty.length > 3)) {
+        this.form.specialtyError = "Specialty need to contains at least 4 characters!"
+        return false
+      }
+      return true
     }
   },
   methods: {
@@ -235,7 +327,7 @@ export default {
           this.form.id = ""
           this.form.email = ""
           this.form.name = ""
-          this.form.gender = ""
+          this.form.gender = "Male"
           this.form.specialty = ""
           this.form.prescriptions = ""
           this.form.observations = ""

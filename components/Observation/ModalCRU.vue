@@ -41,6 +41,7 @@
                 id="input-healthProfessionalName"
                 v-model="form.healthcareProfessionalName"
                 :disabled="!fieldProperties('healthcareProfessionalName').editable"
+                trim
               ></b-form-input>
             </b-form-group>
             <b-form-group
@@ -54,7 +55,50 @@
                 id="input-patientId"
                 v-model="form.patientId"
                 :disabled="!fieldProperties('patientId').editable"
+                required
               ></b-form-input>
+            </b-form-group>
+            <b-form-group
+              id="input-group-patient"
+              label-for="input-patient"
+            >
+              <b-input-group>
+                <b-form-input
+                  id="input-patient"
+                  v-model="form.patientName"
+                  type="text"
+                  placeholder="Enter Patient"
+                  disabled
+                  required
+                ></b-form-input>
+                <b-input-group-append v-if="method === 'create'">
+                  <b-button variant="outline-info"><b-icon icon="search" @click="selectPatient"></b-icon></b-button>
+                </b-input-group-append>
+                <b-input-group-append v-if="method === 'create'">
+                  <b-button variant="outline-danger"><b-icon icon="backspace" @click="unselectPatient"></b-icon></b-button>
+                </b-input-group-append>
+              </b-input-group>
+              <div v-if="togglePSelect && method === 'create'" class="pt-3">
+                <b-table id="my-patients-table" :items="selectablePEntity" :fields="selectablePFields" small hover responsive selectable select-mode="single" @row-selected="selectableEntityPClicked" :current-page="currentPatientPage" :per-page="perPage">
+                  <template #cell(selected)="data">
+                    <template v-if="data.item.id == form.patientId">
+                      <span aria-hidden="true">&check;</span>
+                      <span class="sr-only">Selected</span>
+                    </template>
+                    <template v-else>
+                      <span aria-hidden="true">&nbsp;</span>
+                      <span class="sr-only">Not selected</span>
+                    </template>
+                  </template>
+                </b-table>
+                <b-pagination
+                  v-model="currentPatientPage"
+                  :total-rows="patientRows"
+                  :per-page="perPage"
+                  aria-controls="my-patients-table"
+                  align="center"
+                ></b-pagination>
+              </div>
             </b-form-group>
             <b-form-group
               id="input-group-patientName"
@@ -76,11 +120,13 @@
               label-class="font-weight-bold"
               v-if="fieldProperties('notes').visible"
             >
-              <b-form-input
+              <b-form-textarea
                 id="input-notes"
                 v-model="form.notes"
                 :disabled="!fieldProperties('notes').editable"
-              ></b-form-input>
+                rows="3"
+                max-rows="6"
+              ></b-form-textarea>
             </b-form-group>
             <b-form-group
               id="input-group-createdAt"
@@ -97,7 +143,7 @@
             </b-form-group>
           </b-tab>
 
-          <b-tab title="Prescription">
+          <b-tab title="Prescription" v-if="hasPrescription">
             <b-form-group
               id="input-group-prescriptionId"
               label="Id:"
@@ -147,12 +193,14 @@
               label-class="font-weight-bold"
               v-if="fieldProperties('prescriptionNotes').visible"
             >
-              <b-form-input
+              <b-form-textarea
                 id="input-prescriptionNotes"
                 v-model="form.prescription.notes"
                 placeholder="Enter notes"
                 :disabled="!fieldProperties('prescriptionNotes').editable"
-              ></b-form-input>
+                rows="3"
+                max-rows="6"
+              ></b-form-textarea>
             </b-form-group>
           </b-tab>
         </b-tabs>
@@ -167,6 +215,7 @@
 <script>
 
 export default {
+  middleware: 'healthcareprofessional',
   props:{
     entity:Object,
     method:String,
@@ -190,9 +239,49 @@ export default {
         },
       },
       show: true,
+
+      perPage: 4,
+
+      currentPatientPage: 1,
+      selectablePEntity: [],
+      selectablePFields: [],
+      togglePSelect: false,
+
+      hasPrescription: false
     }
   },
+  computed: {
+    patientRows() {
+      return this.selectablePEntity.length
+    },
+  },
+  mounted() {
+    this.$axios
+      .$get('/api/patients')
+      .then(patients => {
+        this.selectablePEntity = patients.entities
+        this.selectablePFields = patients.columns
+        this.toggleSelect = true
+        this.selectablePFields.unshift("selected")
+      })
+      .catch((err)=>{
+        console.log(err);
+      });
+  },
   methods: {
+    selectableEntityPClicked(record){
+      if (record[0]) {
+        this.form.patientName = record[0].name
+        this.form.patientId = record[0].id
+      }
+    },
+    selectPatient(){
+      this.togglePSelect = !this.togglePSelect;
+    },
+    unselectPatient(){
+      this.form.patientName = null
+      this.form.patientId = null
+    },
     onReset(){
       this.$emit("onReset")
     },
@@ -245,6 +334,7 @@ export default {
     },
     entity(newEntity){
       if (newEntity != null) {
+        this.hasPrescription = false
         if (this.method === 'edit') {
           this.$axios
             .$get('/api/observations/' + this.entity.id)
@@ -256,6 +346,7 @@ export default {
               this.form.patientName = observation.patientName;
               this.form.notes = observation.notes;
               this.form.created_at = this.formatDate(observation.created_at);
+              if (observation.prescription == null) return; else this.hasPrescription = true
               this.form.prescription.id = observation.prescription.id;
               this.form.prescription.start_date = observation.prescription.start_date;
               this.form.prescription.end_date = observation.prescription.end_date;
@@ -265,17 +356,18 @@ export default {
               this.$toast.error(err).goAway(3000);
             })
         } else {
-          this.form.id = observation.id;
-          this.form.healthcareProfessionalId = ""
-          this.form.healthcareProfessionalName = ""
-          this.form.patientId = ""
-          this.form.patientName = ""
-          this.form.notes = ""
-          this.form.created_at = ""
-          this.form.prescription.id = ""
-          this.form.prescription.start_date = ""
-          this.form.prescription.end_date = ""
-          this.form.prescription.notes = ""
+          this.form.id = -1
+          this.form.healthcareProfessionalId = -1
+          this.form.healthcareProfessionalName = null
+          this.form.patientId = null
+          this.form.patientName = null
+          this.form.notes = null
+          this.form.created_at = null
+          this.form.prescription.id = -1
+          this.form.prescription.start_date = null
+          this.form.prescription.end_date = null
+          this.form.prescription.notes = null
+          this.hasPrescription = true
         }
 
         this.$refs.bvEntity.show()

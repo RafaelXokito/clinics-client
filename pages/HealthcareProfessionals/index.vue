@@ -14,6 +14,7 @@ import navbar from "../../components/NavBar.vue"
 import modalCRU from "~/components/HealthcareProfessional/ModalCRU";
 
 export default {
+  middleware: ('auth','administrator'),
   components: {
     navbar,
     EntitiesTable,
@@ -48,7 +49,7 @@ export default {
           .$post('/api/healthcareprofessionals', form)
           .then(() => {
             this.list();
-            this.$toast.success('Healthcare Professional created').goAway(3000);
+            this.$toast.success('Healthcare Professional '+form.name+' created').goAway(3000);
             this.modalShow = false;
           })
           .catch((err)=>{
@@ -59,7 +60,7 @@ export default {
           .$put('/api/healthcareprofessionals/'+form.id, form)
           .then(() => {
             this.list();
-            this.$toast.success('Healthcare Professional '+form.id+' updated').goAway(3000);
+            this.$toast.success('Healthcare Professional '+form.name+' updated').goAway(3000);
             this.modalShow = false;
           })
           .catch((err)=>{
@@ -90,7 +91,7 @@ export default {
         .$delete('/api/healthcareprofessionals/'+entity.id)
         .then(() => {
           this.list()
-          this.$toast.success('Healthcare Professional '+entity.id+' deleted').goAway(3000);
+          this.$toast.success('Healthcare Professional '+entity.name+' deleted').goAway(3000);
         })
         .catch((err) => {
           this.$toast.error(err).goAway(3000);

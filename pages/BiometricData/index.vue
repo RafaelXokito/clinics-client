@@ -14,6 +14,7 @@ import modalCRU from '~/components/BiometricData/ModalCRU.vue'
 import navbar from "../../components/NavBar.vue"
 
 export default {
+  middleware: ('auth', 'biometricdata'),
   components: {
     navbar,
     EntitiesTable,
@@ -69,7 +70,7 @@ export default {
           .$put('/api/biometricdata/'+this.biometricData.id, form)
           .then(() => {
             this.list();
-            this.$toast.success('Biometric Data '+form.id+' updated').goAway(3000);
+            this.$toast.success('Biometric Data updated').goAway(3000);
             this.modalShow = false
             this.biometricData = null;
           })
@@ -105,7 +106,7 @@ export default {
         .$delete('/api/biometricdata/'+item.id)
           .then(() => {
             this.list()
-            this.$toast.success('Biometric Data '+item.id+' deleted').goAway(3000);
+            this.$toast.success('Biometric Data deleted').goAway(3000);
           })
           .catch((err) => {
             this.$toast.error(err).goAway(3000);

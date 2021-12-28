@@ -13,6 +13,7 @@ import EntitiesTable from '~/components/EntitiesTable.vue'
 import modalCRU from '~/components/BiometricDataType/ModalCRU.vue'
 import navbar from "../../components/NavBar.vue"
 export default {
+  middleware: ('auth','administrator'),
   components: {
     navbar,
     EntitiesTable,
@@ -53,7 +54,7 @@ export default {
           .$put('/api/biometricdatatypes/'+form.id, form)
           .then(() => {
             this.list();
-            this.$toast.success('Biometric Data Type '+form.id+' updated').goAway(3000);
+            this.$toast.success('Biometric Data Type '+form.name+' updated').goAway(3000);
             this.modalShow = false
           })
           .catch((err)=>{

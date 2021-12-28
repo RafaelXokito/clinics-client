@@ -43,7 +43,7 @@ export default {
 
   auth: {
     redirect: {
-      login: '/auth/login',
+      login: '/',
       logout: '/',
       home: '/'
     },
@@ -65,6 +65,12 @@ export default {
         },
       }
     }
+  },
+
+  router: {
+    middleware: [
+      'auth'
+    ]
   },
 
   bootstrapVue: {

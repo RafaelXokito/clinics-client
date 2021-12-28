@@ -5,7 +5,7 @@
       <b-row class="vertical-center mt-5">
         <b-col>
           <div class="inner-block">
-            <login/>
+            <login />
           </div>
         </b-col>
       </b-row>

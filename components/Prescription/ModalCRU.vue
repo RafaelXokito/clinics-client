@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
+    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Global Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
         <b-form-group
           id="input-group-healthProfessionalId"
@@ -65,8 +65,14 @@
             id="input-startDate"
             v-model="form.start_date" class="mb-2"
             :disabled="!fieldProperties('startDate').editable"
+            :state="start_dateState"
+            aria-describedby="input-startdate-feedback"
+            required
           >
           </b-form-datepicker>
+          <b-form-invalid-feedback id="input-startdate-feedback">
+            {{form.start_dateError}}
+          </b-form-invalid-feedback>
         </b-form-group>
         <b-form-group
           id="input-group-endDate"
@@ -79,8 +85,14 @@
             id="input-endDate"
             v-model="form.end_date" class="mb-2"
             :disabled="!fieldProperties('endDate').editable"
+            aria-describedby="input-enddate-feedback"
+            :state="end_dateState"
+            required
           >
           </b-form-datepicker>
+          <b-form-invalid-feedback id="input-enddate-feedback">
+            {{form.end_dateError}}
+          </b-form-invalid-feedback>
         </b-form-group>
 
         <b-form-group
@@ -90,12 +102,14 @@
           label-class="font-weight-bold"
           v-if="fieldProperties('notes').visible"
         >
-          <b-form-input
+          <b-form-textarea
             id="input-notes"
             v-model="form.notes"
             placeholder="Enter notes"
             :disabled="!fieldProperties('notes').editable"
-          ></b-form-input>
+            rows="3"
+            max-rows="6"
+          ></b-form-textarea>
         </b-form-group>
 
         <b-form-group
@@ -105,6 +119,9 @@
           label-class="font-weight-bold"
           v-if="fieldProperties('issues').visible"
         >
+          <span v-if="issuesState" style="color: red;">
+            {{form.issuesError}}
+          </span>
           <div class="pt-3">
             <b-table  id="issues-table" :items="issues" :fields="fields" small hover responsive selectable select-mode="multi" @row-selected="onRowSelected" :current-page="currentPage" :per-page="perPage">
               <template #cell(selected)="data">
@@ -119,7 +136,7 @@
               </template>
             </b-table>
             <b-pagination
-              v-if="issues.length > 4"
+              v-if="issues.length > perPage"
               v-model="currentPage"
               :total-rows="dataRows"
               :per-page="perPage"
@@ -148,12 +165,16 @@ export default {
       form: {
         id: null,
         issues: null,
+        issuesError: '',
+        issuesState: false,
         healthcareProfessionalId: null,
         healthcareProfessionalName: null,
         patientId: null,
         patientName: null,
         start_date: null,
+        start_dateError: '',
         end_date: null,
+        end_dateError: '',
         notes: '',
       },
       issues: [],
@@ -163,11 +184,46 @@ export default {
       perPage: 4
     }
   },
+  computed: {
+    start_dateState(){
+      if (this.form.start_date > this.form.end_date) {
+        this.form.start_dateError = "End date should be lower then start date"
+        return false
+      }
+      return true
+    },
+    end_dateState(){
+      if (this.form.end_date < this.form.start_date) {
+        this.form.end_dateError = "End date should be higher then start date"
+        return false
+      }
+      return true
+    },
+    issuesState(){
+      if ((this.form.issues == null || this.form.issues.length == 0)) {
+        this.form.issuesError = "Issues is required"
+        return true
+      }
+      return false
+    },
+    dataRows() {
+      return this.issues.length
+    }
+  },
   methods: {
     onReset(){
       this.$emit("onReset")
     },
     onSubmit(){
+      if (this.form.start_date == "") {
+        return
+      }
+      if (this.form.end_date === "") {
+        return
+      }
+      if (this.form.issues == null) {
+        return
+      }
       this.$emit("onSubmit", this.form, this.method)
     },
     fieldProperties(fieldName) {
@@ -206,11 +262,6 @@ export default {
       }
 
       return false
-    }
-  },
-  computed: {
-    dataRows() {
-      return this.issues.length
     }
   },
   watch: {
@@ -253,13 +304,13 @@ export default {
             })
         } else {
           this.form.id = ""
-          this.form.issues = ""
+          this.form.issues = null
           this.form.healthcareProfessionalId = ""
           this.form.healthcareProfessionalName = ""
           this.form.patientId = ""
           this.form.patientName = ""
-          this.form.start_date = ""
-          this.form.end_date = ""
+          this.form.start_date = new Date().toISOString().slice(0,10)
+          this.form.end_date = new Date().toISOString().slice(0,10)
           this.form.notes = ""
           this.$axios
             .$get('/api/biometricdataissues')
