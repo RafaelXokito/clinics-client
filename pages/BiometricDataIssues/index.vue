@@ -2,9 +2,9 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="biometricdataissue" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteBioDataIssue"></entities-table>
+    <entities-table :items="biometricDataIssues" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteBioDataIssue"></entities-table>
   </b-container>
-  <modalCRU :entity="oneBiometricdataissue" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
+  <modalCRU :entity="biometricDataIssue" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
 </div>
 </template>
 
@@ -22,8 +22,8 @@ export default {
   data() {
     return {
       fields: [],
-      biometricdataissue: [],
-      oneBiometricdataissue: {},
+      biometricDataIssues: [],
+      biometricDataIssue: {},
       method: '',
       modalShow: false
     }
@@ -32,22 +32,31 @@ export default {
     this.list();
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     modalCRU(item, method){
       this.modalShow = true
-      this.oneBiometricdataissue = item;
+      this.biometricDataIssue = item;
       this.method = method;
     },
     onSubmit(form, method){
-      if (method == 'create') {
+      if (method === 'create') {
         this.$axios
           .$post('/api/biometricdataissues', form)
-          .then((e) => {
+          .then((biometricDataIssue) => {
             this.list();
-            this.$toast.success('Biometric Data Issue "'+e.name+'" created').goAway(3000);
+            this.$toast.success('Biometric Data Issue "'+biometricDataIssue.name+'" created').goAway(3000);
             this.modalShow = false
+            this.biometricDataIssue = null;
           })
           .catch((err)=>{
-            console.log(err);
+            this.showErrorMessage(err);
           });
       } else {
         this.$axios
@@ -56,28 +65,28 @@ export default {
             this.list();
             this.$toast.success('Biometric Data Issue "'+form.name+'" updated').goAway(3000);
             this.modalShow = false
+            this.biometricDataIssue = null;
           })
           .catch((err)=>{
-            console.log(err);
+            this.showErrorMessage(err);
           });
       }
-      this.oneBiometricdataissue = null;
     },
     resetEntity(){
-      this.oneBiometricdataissue = null;
+      this.biometricDataIssue = null;
     },
     list() {
       this.$axios
       .$get('/api/biometricdataissues')
-      .then(biometricdataissue => {
-        this.biometricdataissue = biometricdataissue.entities
-        this.fields = biometricdataissue.columns
+      .then(biometricDataIssues => {
+        this.biometricDataIssues = biometricDataIssues.entities
+        this.fields = biometricDataIssues.columns
 
         this.fields.push("update");
         this.fields.push("delete");
       })
       .catch((err)=>{
-        console.log(err);
+        this.showErrorMessage(err);
       });
     },
     deleteBioDataIssue(item){
@@ -88,7 +97,7 @@ export default {
             this.$toast.success('Biometric Data Issue "'+item.name+'" deleted').goAway(3000);
           })
           .catch((err) => {
-            console.log(err)
+            this.showErrorMessage(err);
           })
     }
   },

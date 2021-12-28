@@ -30,6 +30,14 @@ export default {
     }
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     modalCRU(item, method){
       this.modalShow = true;
       this.biometricData = item;
@@ -58,12 +66,7 @@ export default {
             this.biometricData = null;
           })
           .catch((err)=>{
-            if (err.response) {
-              this.$toast.error(err.response.data).goAway(3000);
-            }
-            else {
-              this.$toast.error(err).goAway(3000);
-            }
+            this.showErrorMessage(err)
           });
       } else {
         this.$axios
@@ -75,12 +78,7 @@ export default {
             this.biometricData = null;
           })
           .catch((err)=>{
-            if (err.response) {
-              this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
-            }
-            else {
-              this.$toast.error(err).goAway(3000);
-            }
+            this.showErrorMessage(err)
           });
       }
     },
@@ -98,7 +96,7 @@ export default {
           this.fields.push("delete")
         })
         .catch((err) => {
-          this.$toast.error(err).goAway(3000);
+          this.showErrorMessage(err)
         })
     },
     deleteAdmin(item){
@@ -109,7 +107,7 @@ export default {
             this.$toast.success('Biometric Data deleted').goAway(3000);
           })
           .catch((err) => {
-            this.$toast.error(err).goAway(3000);
+            this.showErrorMessage(err)
           })
     }
   },

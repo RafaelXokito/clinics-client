@@ -229,6 +229,14 @@ export default {
     modalShow: Boolean,
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     selectableEntityPClicked(record){
       if (record[0]) {
         this.form.patientName = record[0].name
@@ -261,9 +269,7 @@ export default {
       this.$emit("onReset")
     },
     resetBtnPressed() {
-      console.log(this.form)
       this.form = Object.assign({}, this.clone)
-      console.log(this.clone)
     },
     onSubmit(){
       this.$emit("onSubmit",this.form, this.method)
@@ -312,7 +318,7 @@ export default {
         this.selectablePFields.unshift("selected")
       })
       .catch((err)=>{
-        this.$toast.error(err).goAway(3000);
+        this.showErrorMessage(err);
       });
 
     //Load Biometric Data Types
@@ -324,7 +330,7 @@ export default {
         this.selectableTFields.unshift("selected")
       })
       .catch((err)=>{
-        this.$toast.error(err).goAway(3000);
+        this.showErrorMessage(err);
       });
   },
   watch: {
@@ -361,7 +367,7 @@ export default {
               this.form.biometricDataIssueName = biometricData.biometricDataIssueName;
 
               let types = this.selectableTEntity.filter((e) => e.id === biometricData.biometricTypeId)
-              if (types.length > 0) {
+              if (types != null && types.length > 0) {
                 let biometricType = types[0];
                 this.form.biometricTypeUnit = biometricType.unit_name;
               }
@@ -369,7 +375,7 @@ export default {
               this.clone = Object.assign({}, this.form)
             })
             .catch((err) => {
-              this.$toast.error(err).goAway(3000);
+              this.showErrorMessage(err)
               this.$refs.bvEntity.hide()
             })
         }
