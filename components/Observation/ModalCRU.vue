@@ -5,32 +5,6 @@
         <b-tabs content-class="p-2 pt-3">
           <b-tab title="Observation" active>
             <b-form-group
-              id="input-group-id"
-              label="Id:"
-              label-for="input-id"
-              label-class="font-weight-bold"
-              v-if="fieldProperties('id').visible"
-            >
-              <b-form-input
-                id="input-id"
-                v-model="form.id"
-                :disabled="!fieldProperties('id').editable"
-              ></b-form-input>
-            </b-form-group>
-            <b-form-group
-              id="input-group-healthProfessionalId"
-              label="Healthcare Professional Id:"
-              label-for="input-healthProfessionalId"
-              label-class="font-weight-bold"
-              v-if="fieldProperties('healthcareProfessionalId').visible"
-            >
-              <b-form-input
-                id="input-healthProfessionalId"
-                v-model="form.healthcareProfessionalId"
-                :disabled="!fieldProperties('healthcareProfessionalId').editable"
-              ></b-form-input>
-            </b-form-group>
-            <b-form-group
               id="input-group-healthProfessionalName"
               label="Healthcare Professional Name:"
               label-for="input-healthProfessionalName"
@@ -42,20 +16,6 @@
                 v-model="form.healthcareProfessionalName"
                 :disabled="!fieldProperties('healthcareProfessionalName').editable"
                 trim
-              ></b-form-input>
-            </b-form-group>
-            <b-form-group
-              id="input-group-patientId"
-              label="Patient Id:"
-              label-for="input-patientId"
-              label-class="font-weight-bold"
-              v-if="fieldProperties('patientId').visible"
-            >
-              <b-form-input
-                id="input-patientId"
-                v-model="form.patientId"
-                :disabled="!fieldProperties('patientId').editable"
-                required
               ></b-form-input>
             </b-form-group>
             <b-form-group
@@ -214,14 +174,17 @@
                 over
                 :items="documents"
                 :fields="documentsFields"
+                class="mt-3"
               >
                 <template #cell(actions)="row">
                   <b-btn
-                    class="btn btn-link"
+                    class="btn btn-outline-info"
+                    variant="outline-info"
                     target="_blank"
                     @click.prevent="download(row.item)"
+                    pill
                   >
-                    Download
+                    <b-icon icon="download" />
                   </b-btn>
                 </template>
               </b-table>
