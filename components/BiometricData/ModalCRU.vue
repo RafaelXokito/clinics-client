@@ -388,6 +388,7 @@ export default {
           this.form.source = '';
           this.form.biometricDataIssueId = '';
           this.form.biometricDataIssueName = '';
+          this.form.created_at_time = '';
 
           this.clone = Object.assign({}, this.form)
         }
