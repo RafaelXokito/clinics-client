@@ -61,6 +61,8 @@
             <b-form-group
               id="input-group-patient"
               label-for="input-patient"
+              label="Patient Name:"
+              label-class="font-weight-bold"
             >
               <b-input-group>
                 <b-form-input
@@ -99,19 +101,6 @@
                   align="center"
                 ></b-pagination>
               </div>
-            </b-form-group>
-            <b-form-group
-              id="input-group-patientName"
-              label="Patient Name:"
-              label-for="input-patientName"
-              label-class="font-weight-bold"
-              v-if="fieldProperties('patientName').visible"
-            >
-              <b-form-input
-                id="input-patientName"
-                v-model="form.patientName"
-                :disabled="!fieldProperties('patientName').editable"
-              ></b-form-input>
             </b-form-group>
             <b-form-group
               id="input-group-notes"
@@ -203,6 +192,44 @@
               ></b-form-textarea>
             </b-form-group>
           </b-tab>
+
+          <b-tab title="Documents">
+            <b-form-group
+              id="input-group-files"
+              label-for="input-files"
+              label-class="font-weight-bold"
+              v-if="fieldProperties('files').visible"
+            >
+              <b-form-file multiple v-model="form.documents">
+              <template slot="file-name" slot-scope="{ names }">
+                  <b-badge variant="dark">{{ names[0] }}</b-badge>
+                  <b-badge v-if="names.length > 1" variant="dark" class="ml-1">
+                    + {{ names.length - 1 }} More files
+                  </b-badge>
+              </template>
+              </b-form-file>
+              <b-table
+                v-if="documents.length && fieldProperties('filesTable').visible"
+                striped
+                over
+                :items="documents"
+                :fields="documentsFields"
+              >
+                <template #cell(actions)="row">
+                  <b-btn
+                    class="btn btn-link"
+                    target="_blank"
+                    @click.prevent="download(row.item)"
+                  >
+                    Download
+                  </b-btn>
+                </template>
+              </b-table>
+              <p v-else-if="fieldProperties('filesTable').visible">
+                No documents.
+              </p>
+            </b-form-group>
+          </b-tab>
         </b-tabs>
 
         <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
@@ -231,6 +258,7 @@ export default {
         patientName: null,
         notes: null,
         created_at: null,
+        documents: [],
         prescription: {
           id: null,
           start_date: null,
@@ -247,7 +275,10 @@ export default {
       selectablePFields: [],
       togglePSelect: false,
 
-      hasPrescription: false
+      hasPrescription: false,
+
+      documents: [],
+      documentsFields: ['filename', 'actions']
     }
   },
   computed: {
@@ -269,6 +300,21 @@ export default {
       });
   },
   methods: {
+    download (fileToDownload) {
+      const documentId = fileToDownload.id
+      this.$axios.$get('/api/documents/download/' + documentId, {
+        responseType:
+          'arraybuffer'
+      })
+        .then((file) => {
+          const url = window.URL.createObjectURL(new Blob([file]))
+          const link = document.createElement('a')
+          link.href = url
+          link.setAttribute('download', fileToDownload.filename)
+          document.body.appendChild(link)
+          link.click()
+        })
+    },
     selectableEntityPClicked(record){
       if (record[0]) {
         this.form.patientName = record[0].name
@@ -300,6 +346,8 @@ export default {
           if (fieldName === 'healthcareProfessionalName') return { visible: true, editable: false }
           if (fieldName === 'patientId') return { visible: true, editable: false }
           if (fieldName === 'patientName') return { visible: true, editable: false }
+          if (fieldName === 'files') return { visible: true, editable: false }
+          if (fieldName === 'filesTable') return { visible: true, editable: false }
           if (fieldName === 'createdAt') return { visible: true, editable: false }
           if (fieldName === 'prescriptionId') return { visible: true, editable: false }
           if (fieldName === 'prescriptionStartDate') return { visible: true, editable: true }
@@ -313,6 +361,8 @@ export default {
           if (fieldName === 'healthcareProfessionalName') return { visible: false, editable: false }
           if (fieldName === 'patientId') return { visible: true, editable: true }
           if (fieldName === 'patientName') return { visible: false, editable: false }
+          if (fieldName === 'files') return { visible: true, editable: false }
+          if (fieldName === 'filesTable') return { visible: false, editable: false }
           if (fieldName === 'createdAt') return { visible: false, editable: false }
           if (fieldName === 'prescriptionId') return { visible: false, editable: false }
           if (fieldName === 'prescriptionStartDate') return { visible: true, editable: true }
@@ -335,6 +385,7 @@ export default {
     entity(newEntity){
       if (newEntity != null) {
         this.hasPrescription = false
+        this.form.documents = []
         if (this.method === 'edit') {
           this.$axios
             .$get('/api/observations/' + this.entity.id)
@@ -344,6 +395,7 @@ export default {
               this.form.healthcareProfessionalName = observation.healthcareProfessionalName;
               this.form.patientId = observation.patientId;
               this.form.patientName = observation.patientName;
+              this.documents = observation.documents || [];
               this.form.notes = observation.notes;
               this.form.created_at = this.formatDate(observation.created_at);
               if (observation.prescription == null) return; else this.hasPrescription = true

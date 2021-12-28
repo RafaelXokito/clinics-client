@@ -50,10 +50,32 @@ export default {
         form.prescription.end_date = this.getFormatedDate(form.prescription.end_date)
         this.$axios
           .$post('/api/observations', form)
-          .then(() => {
+          .then((e) => {
             this.list();
             this.$toast.success('Observation created').goAway(3000);
             this.modalShow = false;
+            form.documents.forEach(file => {
+
+              let formData = new FormData()
+
+              formData.append('id', e.id)
+
+              if (file) {
+                formData.append('file', file)
+              }
+
+              let promisse = this.$axios.$post('/api/documents/upload', formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                }
+              })
+              promisse.then(() => {
+                this.$toast.success('File uploaded!').goAway(3000)
+              })
+              promisse.catch(() => {
+                this.$toast.error('Sorry, could no upload file!').goAway(3000)
+              })
+            });
           })
           .catch((err)=>{
             this.$toast.error(err).goAway(3000);
@@ -63,10 +85,32 @@ export default {
         form.prescription.end_date = this.getFormatedDate(form.prescription.end_date)
         this.$axios
           .$put('/api/observations/'+form.id, form)
-          .then(() => {
+          .then((e) => {
             this.list();
             this.$toast.success('Observation updated').goAway(3000);
             this.modalShow = false;
+            form.documents.forEach(file => {
+
+              let formData = new FormData()
+
+              formData.append('id', e.id)
+
+              if (file) {
+                formData.append('file', file)
+              }
+
+              let promisse = this.$axios.$post('/api/documents/upload', formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                }
+              })
+              promisse.then(() => {
+                this.$toast.success('File uploaded!').goAway(3000)
+              })
+              promisse.catch(() => {
+                this.$toast.error('Sorry, could no upload file!').goAway(3000)
+              })
+            });
           })
           .catch((err)=>{
             this.$toast.error(err).goAway(3000);
