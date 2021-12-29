@@ -20,10 +20,10 @@
                   disabled
                 ></b-form-input>
                 <b-input-group-append>
-                  <b-button variant="outline-info"><b-icon icon="search" @click="selectPatient"></b-icon></b-button>
+                  <b-button variant="outline-info" @click="selectPatient"><b-icon icon="search"></b-icon></b-button>
                 </b-input-group-append>
                 <b-input-group-append>
-                  <b-button variant="outline-danger"><b-icon icon="backspace" @click="unselectPatient"></b-icon></b-button>
+                  <b-button variant="outline-danger" @click="unselectPatient"><b-icon icon="backspace"></b-icon></b-button>
                 </b-input-group-append>
               </b-input-group>
               <div v-show="togglePSelect" class="pt-3">
@@ -64,10 +64,10 @@
                   disabled
                 ></b-form-input>
                 <b-input-group-append>
-                  <b-button variant="outline-info"><b-icon icon="search" @click.prevent="selectBiometricType"></b-icon></b-button>
+                  <b-button variant="outline-info" @click="selectBiometricType"><b-icon icon="search"></b-icon></b-button>
                 </b-input-group-append>
                 <b-input-group-append>
-                  <b-button variant="outline-danger"><b-icon icon="backspace" @click.prevent="unselectBiometricType"></b-icon></b-button>
+                  <b-button variant="outline-danger" @click="unselectBiometricType"><b-icon icon="backspace"></b-icon></b-button>
                 </b-input-group-append>
               </b-input-group>
               <div v-show="toggleTSelect" class="pt-3">

@@ -34,10 +34,10 @@
                   required
                 ></b-form-input>
                 <b-input-group-append v-if="method === 'create'">
-                  <b-button variant="outline-info"><b-icon icon="search" @click="selectPatient"></b-icon></b-button>
+                  <b-button variant="outline-info" @click="selectPatient"><b-icon icon="search"></b-icon></b-button>
                 </b-input-group-append>
                 <b-input-group-append v-if="method === 'create'">
-                  <b-button variant="outline-danger"><b-icon icon="backspace" @click="unselectPatient"></b-icon></b-button>
+                  <b-button variant="outline-danger" @click="unselectPatient"><b-icon icon="backspace"></b-icon></b-button>
                 </b-input-group-append>
               </b-input-group>
               <div v-if="togglePSelect && method === 'create'" class="pt-3">
@@ -163,7 +163,7 @@
                 :fields="documentsFields"
                 class="mt-3"
               >
-                <template #cell(actions)="row">
+                <template #cell(download)="row">
                   <b-btn
                     class="btn btn-outline-info"
                     variant="outline-info"
@@ -172,6 +172,17 @@
                     pill
                   >
                     <b-icon icon="download" />
+                  </b-btn>
+                </template>
+                <template #cell(delete)="row">
+                  <b-btn
+                    class="btn btn-outline-danger"
+                    variant="outline-danger"
+                    target="_blank"
+                    @click.prevent="deleteFile(row.item, row.index)"
+                    pill
+                  >
+                    <b-icon icon="trash" />
                   </b-btn>
                 </template>
               </b-table>
@@ -228,7 +239,7 @@ export default {
       hasPrescription: false,
 
       documents: [],
-      documentsFields: ['filename', 'actions']
+      documentsFields: ['filename', 'download', 'delete']
     }
   },
   computed: {
@@ -272,9 +283,21 @@ export default {
           document.body.appendChild(link)
           link.click()
         })
-      .catch((err) => {
-        this.showErrorMessage(err);
-      })
+        .catch(() => {
+          this.$toast.error('Sorry, could no download file!').goAway(3000)
+        })
+    },
+    deleteFile (fileToDelete, index){
+      const documentId = fileToDelete.id
+      this.$axios.$delete('/api/documents/delete/' + documentId)
+        .then(() => {
+          if (index > -1)
+            this.documents.splice(index, 1)
+          this.$toast.success('File deleted!').goAway(3000)
+        })
+        .catch(() => {
+          this.$toast.error('Sorry, could no delete file!').goAway(3000)
+        })
     },
     selectableEntityPClicked(record){
       if (record[0]) {
