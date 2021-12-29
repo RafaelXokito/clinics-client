@@ -33,6 +33,14 @@ export default {
     this.list();
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     modalCRU(item, method){
       this.modalShow = true;
       this.observation = item;
@@ -78,7 +86,7 @@ export default {
             });
           })
           .catch((err)=>{
-            this.$toast.error(err).goAway(3000);
+            this.showErrorMessage(err);
           });
       } else {
         form.prescription.start_date = this.getFormatedDate(form.prescription.start_date)
@@ -113,7 +121,7 @@ export default {
             });
           })
           .catch((err)=>{
-            this.$toast.error(err).goAway(3000);
+            this.showErrorMessage(err);
           });
       }
       this.observation = null;
@@ -132,7 +140,7 @@ export default {
           this.fields.push("delete")
         })
         .catch((err) => {
-          this.$toast.error(err).goAway(3000);
+          this.showErrorMessage(err);
         })
     },
     deleteEntity(entity){
@@ -143,7 +151,7 @@ export default {
           this.$toast.success('Observation deleted').goAway(3000);
         })
         .catch((err) => {
-          this.$toast.error(err).goAway(3000);
+          this.showErrorMessage(err);
         })
     }
   }

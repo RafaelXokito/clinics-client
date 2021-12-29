@@ -120,20 +120,49 @@
             </b-form-group>
           </b-tab>
 
-          <b-tab v-if="form.biometricDatas && form.biometricDatas.length > 0" title="Biometric Data">
+          <b-tab id="biometric-datas-table" v-if="form.biometricDatas && form.biometricDatas.length > 0" title="Biometric Data">
             <b-table striped hover responsive :items="form.biometricDatas" :fields="fieldsBiometricData">
               <template #cell(created_at)="data">
                 {{formatDate(data.item.created_at)}}
               </template>
             </b-table>
+            <b-pagination
+              v-if="form.biometricDatas.length > perPage"
+              v-model="currentPageBiometricDatas"
+              :total-rows="dataRowsBiometricDatas"
+              :per-page="perPage"
+              aria-controls="biometric-datas-table"
+              align="center"
+            ></b-pagination>
           </b-tab>
 
-          <b-tab title="Observations" v-if="form.observations && form.observations.length > 0">
+          <b-tab id="observations-table" title="Observations" v-if="form.observations && form.observations.length > 0">
             <b-table striped hover responsive :items="form.observations" :fields="fieldsObservations">
               <template #cell(created_at)="data">
                 {{formatDate(data.item.created_at)}}
               </template>
+              <template #cell(Documents)="data">
+                {{data.item.nDocuments}}
+              </template>
+              <template #cell(hasPrescription)="data">
+                <template v-if="data.item.hasPrescription">
+                  <span aria-hidden="true">&check;</span>
+                  <span class="sr-only">Yes</span>
+                </template>
+                <template v-else>
+                  <span aria-hidden="true">&cross;</span>
+                  <span class="sr-only">No</span>
+                </template>
+              </template>
             </b-table>
+            <b-pagination
+              v-if="form.observations.length > perPage"
+              v-model="currentPageObservations"
+              :total-rows="dataRowsObservations"
+              :per-page="perPage"
+              aria-controls="observations-table"
+              align="center"
+            ></b-pagination>
           </b-tab>
         </b-tabs>
 
@@ -168,19 +197,29 @@ export default {
         observations: [],
         created_by: null,
         healthNo: null,
-        healthNoError: ''
+        healthNoError: '',
       },
       show: true,
       fieldsBiometricData: ["value", "valueUnit", "biometricDataTypeName", "created_at"],
-      fieldsObservations: ["id", "healthcareProfessionalName", "created_at", "prescription"],
+      fieldsObservations: ["healthcareProfessionalName", "created_at", "Documents", "hasPrescription"],
       genderValues: [
         { value: 'Male', text: 'Male' },
         { value: 'Female', text: 'Female' },
         { value: 'Other', text: 'Other' }
-      ]
+      ],
+
+      currentPageBiometricDatas: 1,
+      currentPageObservations: 1,
+      perPage: 4
     }
   },
   computed: {
+    dataRowsBiometricDatas() {
+      return this.form.biometricDatas
+    },
+    dataRowsObservations() {
+      return this.form.observations
+    },
     emailState(){
       if (this.form.email == "" || this.form.email == null) {
         return null
@@ -234,6 +273,14 @@ export default {
     }
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     formatDate(dateStr) {
       let date = new Date(dateStr)
       return date.toLocaleString('pt-PT')
@@ -296,7 +343,7 @@ export default {
               this.form.healthNo = patient.healthNo+"";
             })
             .catch((err) => {
-              this.$toast.error(err).goAway(3000);
+              this.showErrorMessage(err);
             })
         } else {
           this.form.id = ""

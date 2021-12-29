@@ -47,6 +47,14 @@ export default {
     this.list();
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     modalCRU(item, method){
       this.modalShow = true;
       this.prescription = item;
@@ -69,7 +77,7 @@ export default {
             this.modalShow = false;
           })
           .catch((err)=>{
-            this.$toast.error(err).goAway(3000);
+            this.showErrorMessage(err);
           });
       } else {
         form.start_date = this.getFormatedDate(form.start_date)
@@ -82,7 +90,7 @@ export default {
             this.modalShow = false;
           })
           .catch((err)=>{
-            this.$toast.error(err).goAway(3000);
+            this.showErrorMessage(err);
           });
       }
       this.prescription = null;
@@ -105,7 +113,7 @@ export default {
             this.fields.push("delete")
         })
         .catch((err) => {
-          this.$toast.error(err).goAway(3000);
+          this.showErrorMessage(err);
         })
     },
     deleteEntity(entity){
@@ -116,7 +124,7 @@ export default {
           this.$toast.success('Prescription deleted').goAway(3000);
         })
         .catch((err) => {
-          this.$toast.error(err).goAway(3000);
+          this.showErrorMessage(err);
         })
     }
   }

@@ -254,6 +254,14 @@ export default {
     }
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     formatDate(dateStr, isFull) {
       let date = new Date(dateStr)
       if (isFull)
@@ -321,7 +329,7 @@ export default {
               this.form.created_by = healthcareProfessional.created_by;
             })
             .catch((err) => {
-              this.$toast.error(err).goAway(3000);
+              this.showErrorMessage(err);
             })
         } else {
           this.form.id = ""

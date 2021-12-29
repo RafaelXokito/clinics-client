@@ -1,9 +1,9 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Categories'" ref="bvEntity" @hide="onReset" :hide-footer="true">
+    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Biometric Data Issue'" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
         <b-tabs content-class="p-2 pt-3">
-          <b-tab title="Category" active>
+          <b-tab title="Biometric Data Issue" active>
             <b-form-group id="input-group-2" label="Name:" label-for="input-2" label-class="font-weight-bold">
               <b-form-input
                 id="input-2"
@@ -17,7 +17,7 @@
                 <b-form-input
                   id="input-min"
                   v-model="form.min"
-                  :placeholder="'≥ ' + form.biometricDataTypeMin"
+                  :placeholder="form.biometricDataTypeMin ? '≥ ' + form.biometricDataTypeMin : 'X'"
                   required
                   type="number"
                   step="0.01"
@@ -30,7 +30,7 @@
                 <b-form-input
                   id="input-max"
                   v-model="form.max"
-                  :placeholder="'≤ ' + form.biometricDataTypeMax"
+                  :placeholder="form.biometricDataTypeMax ? '≤ ' + form.biometricDataTypeMax : 'X'"
                   required
                   type="number"
                   step="0.01"
@@ -83,10 +83,10 @@
                     </div>
             </b-form-group>
           </b-tab>
-          <b-tab v-if="hasIssues" title="Categories">
+          <b-tab v-if="hasIssues" :title="form.biometricDataTypeName">
             <b-form-group
               id="input-group-biometricdatatypeissues"
-              :label="form.biometricDataTypeName + ' Categories:'"
+              :label="'Biometric Data Issues:'"
               label-for="input-biometricdatatypeissues"
               label-class="font-weight-bold"
             >
@@ -232,13 +232,12 @@ export default {
               this.form.max = biometricData.max;
               this.form.biometricDataTypeId = biometricData.biometricDataTypeId;
               this.form.biometricDataTypeName = biometricData.biometricDataTypeName;
-              this.form.biometricDataTypeMax = biometricData.biometricDataTypeMax;
-              this.form.biometricDataTypeMin = biometricData.biometricDataTypeMin;
 
-              let biometricType = this.selectableTEntity.filter((e) => e.id === this.entity.biometricDataTypeId);
+              let biometricType = this.selectableTEntity.filter((e) => e.id === biometricData.biometricDataTypeId);
               if (biometricType != null && biometricType.length > 0) {
-                console.log("alooooooooooo")
-                this.form.biometricDataTypeUnitName = biometricType.unit_name;
+                this.form.biometricDataTypeUnitName = biometricType[0].unit_name;
+                this.form.biometricDataTypeMax = biometricType[0].max;
+                this.form.biometricDataTypeMin = biometricType[0].min;
               }
 
               this.clone = Object.assign({}, this.form)
@@ -268,6 +267,8 @@ export default {
           this.form.biometricDataTypeId = ''
           this.form.biometricDataTypeName = ''
           this.form.biometricDataTypeUnitName = ''
+          this.form.biometricDataTypeMax = '';
+          this.form.biometricDataTypeMin = '';
           this.issues = []
 
           this.clone = Object.assign({}, this.form)

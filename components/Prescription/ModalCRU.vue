@@ -4,28 +4,28 @@
       <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
         <b-form-group
           id="input-group-healthProfessionalName"
-          label="Healthcare Professional Name:"
+          label="Healthcare Professional:"
           label-for="input-healthProfessionalName"
           label-class="font-weight-bold"
-          v-if="fieldProperties('healthProfessionalName').visible"
+          v-if="fieldProperties('healthProfessional').visible"
         >
           <b-form-input
             id="input-healthProfessionalName"
             v-model="form.healthcareProfessionalName"
-            :disabled="!fieldProperties('healthProfessionalName').editable"
+            :disabled="!fieldProperties('healthProfessional').editable"
           ></b-form-input>
         </b-form-group>
         <b-form-group
           id="input-group-patientName"
-          label="Patient Name:"
+          label="Patient:"
           label-for="input-patientName"
           label-class="font-weight-bold"
-          v-if="fieldProperties('patientName').visible"
+          v-if="fieldProperties('patient').visible"
         >
           <b-form-input
             id="input-patientName"
             v-model="form.patientName"
-            :disabled="!fieldProperties('patientName').editable"
+            :disabled="!fieldProperties('patient').editable"
           ></b-form-input>
         </b-form-group>
         <b-form-group
@@ -96,8 +96,24 @@
           <span v-if="issuesState" style="color: red;">
             {{form.issuesError}}
           </span>
-          <div class="pt-3">
-            <b-table  id="issues-table" :items="issues" :fields="fields" small hover responsive :selectable="fieldProperties('issues').editable" select-mode="multi" @row-selected="onRowSelected" :current-page="currentPage" :per-page="perPage">
+          <b-input-group>
+            <b-form-input
+              id="input-issues"
+              :value="issuesSelectedString"
+              type="text"
+              placeholder="Select at least one item"
+              required
+              disabled
+            ></b-form-input>
+            <b-input-group-append>
+              <b-button variant="outline-info"><b-icon icon="search" @click="selectIssues"></b-icon></b-button>
+            </b-input-group-append>
+            <b-input-group-append>
+              <b-button variant="outline-danger"><b-icon icon="backspace" @click="unselectIssues"></b-icon></b-button>
+            </b-input-group-append>
+          </b-input-group>
+          <div v-show="toggleISelect" class="pt-3">
+            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive selectable select-mode="multi" @row-selected="onRowSelected" :current-page="currentPage" :per-page="perPage">
               <template #cell(selected)="data">
                 <template v-if="containsIssue(data.item.id)">
                   <span aria-hidden="true">&check;</span>
@@ -157,10 +173,21 @@ export default {
       show: true,
       fields: ["selected", "name", "biometricDataTypeName"],
       currentPage: 1,
-      perPage: 4
+      perPage: 4,
+
+      toggleISelect: false,
     }
   },
   computed: {
+    issuesSelectedString() {
+      if (this.form.issues == null) return '';
+
+      let str = '';
+      this.form.issues.forEach((issue) => {
+        str += ', ' + issue.name;
+      })
+      return str.slice(2);
+    },
     start_dateState(){
       if (this.form.start_date > this.form.end_date) {
         this.form.start_dateError = "End date should be lower then start date"
@@ -187,6 +214,14 @@ export default {
     }
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     onReset(){
       this.$emit("onReset")
     },
@@ -206,20 +241,16 @@ export default {
       switch (this.method) {
         case 'edit':
           if (fieldName === 'issues') return { visible: this.form.patientId === 0, editable: true }
-          if (fieldName === 'healthProfessionalUsername') return { visible: true, editable: false }
-          if (fieldName === 'healthProfessionalName') return { visible: true, editable: false }
-          if (fieldName === 'patientId') return { visible: this.form.patientId !== 0, editable: false }
-          if (fieldName === 'patientName') return { visible: this.form.patientId !== 0, editable: false }
+          if (fieldName === 'healthProfessional') return { visible: true, editable: false }
+          if (fieldName === 'patient') return { visible: this.form.patientId !== 0, editable: false }
           if (fieldName === 'startDate') return { visible: true, editable: true }
           if (fieldName === 'endDate') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
           break;
         case 'create':
           if (fieldName === 'issues') return { visible: true, editable: true }
-          if (fieldName === 'healthProfessionalUsername') return { visible: false, editable: false }
-          if (fieldName === 'healthProfessionalName') return { visible: false, editable: false }
-          if (fieldName === 'patientId') return { visible: false, editable: false }
-          if (fieldName === 'patientName') return { visible: false, editable: false }
+          if (fieldName === 'healthProfessional') return { visible: false, editable: false }
+          if (fieldName === 'patient') return { visible: false, editable: false }
           if (fieldName === 'startDate') return { visible: true, editable: true }
           if (fieldName === 'endDate') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
@@ -238,7 +269,13 @@ export default {
       }
 
       return false
-    }
+    },
+    selectIssues(){
+      this.toggleISelect = !this.toggleISelect;
+    },
+    unselectIssues(){
+      this.form.issues = []
+    },
   },
   watch: {
     modalShow(newVal){
@@ -271,12 +308,12 @@ export default {
                     this.issues = biometricdataissues.entities;
                   })
                   .catch((err) => {
-                    this.$toast.error(err).goAway(3000);
+                    this.showErrorMessage(err);
                   })
               }
             })
             .catch((err) => {
-              this.$toast.error(err).goAway(3000);
+              this.showErrorMessage(err);
             })
         } else {
           this.form.id = ""
@@ -294,7 +331,7 @@ export default {
               this.issues = biometricdataissues.entities;
             })
             .catch((err) => {
-              this.$toast.error(err).goAway(3000);
+              this.showErrorMessage(err);
             })
         }
 

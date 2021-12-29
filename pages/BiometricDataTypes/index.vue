@@ -47,7 +47,7 @@ export default {
             this.modalShow = false
           })
           .catch((err)=>{
-            console.log(err);
+            this.showErrorMessage(err);
           });
       } else {
         this.$axios
@@ -58,7 +58,7 @@ export default {
             this.modalShow = false
           })
           .catch((err)=>{
-            console.log(err);
+            this.showErrorMessage(err);
           });
       }
       this.oneBiometricdatatype = null;
@@ -77,7 +77,7 @@ export default {
         this.fields.push("delete");
       })
       .catch((err)=>{
-        console.log(err);
+        this.showErrorMessage(err);
       });
     },
     deleteBioDataType(item){
@@ -88,7 +88,7 @@ export default {
             this.$toast.success('Biometric Data Type '+item.name+' deleted').goAway(3000);
           })
           .catch((err) => {
-            console.log(err)
+            this.showErrorMessage(err);
           })
     }
   },

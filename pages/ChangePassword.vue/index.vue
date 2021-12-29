@@ -61,6 +61,14 @@ export default {
     }
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     onSubmit(){
       this.$axios
         .$patch('/api/auth/updatepassword', this.form)
@@ -69,7 +77,6 @@ export default {
         })
         .catch((err)=>{
           this.$toast.error('Password was not updated').goAway(3000);
-          console.log(err);
         });
     },
   },
