@@ -6,7 +6,7 @@
           <b-tab title="Observation" active>
             <b-form-group
               id="input-group-healthProfessionalName"
-              label="Healthcare Professional Name:"
+              label="Healthcare Professional:"
               label-for="input-healthProfessionalName"
               label-class="font-weight-bold"
               v-if="fieldProperties('healthcareProfessionalName').visible"
@@ -21,7 +21,7 @@
             <b-form-group
               id="input-group-patient"
               label-for="input-patient"
-              label="Patient Name:"
+              label="Patient:"
               label-class="font-weight-bold"
             >
               <b-input-group>
@@ -93,19 +93,6 @@
           </b-tab>
 
           <b-tab title="Prescription" v-if="hasPrescription">
-            <b-form-group
-              id="input-group-prescriptionId"
-              label="Id:"
-              label-for="input-prescriptionId"
-              label-class="font-weight-bold"
-              v-if="fieldProperties('prescriptionId').visible"
-            >
-              <b-form-input
-                id="input-createdAt"
-                v-model="form.prescription.id"
-                :disabled="!fieldProperties('prescriptionId').editable"
-              ></b-form-input>
-            </b-form-group>
             <b-form-group
               id="input-group-prescriptionStartDate"
               label="Start Date:"
@@ -188,7 +175,7 @@
                   </b-btn>
                 </template>
               </b-table>
-              <p v-else-if="fieldProperties('filesTable').visible">
+              <p v-else-if="fieldProperties('filesTable').visible" class="mt-2 ml-1">
                 No documents.
               </p>
             </b-form-group>
@@ -259,10 +246,18 @@ export default {
         this.selectablePFields.unshift("selected")
       })
       .catch((err)=>{
-        console.log(err);
+        this.showErrorMessage(err);
       });
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     download (fileToDownload) {
       const documentId = fileToDownload.id
       this.$axios.$get('/api/documents/download/' + documentId, {
@@ -277,6 +272,9 @@ export default {
           document.body.appendChild(link)
           link.click()
         })
+      .catch((err) => {
+        this.showErrorMessage(err);
+      })
     },
     selectableEntityPClicked(record){
       if (record[0]) {
@@ -368,7 +366,7 @@ export default {
               this.form.prescription.notes = observation.prescription.notes;
             })
             .catch((err) => {
-              this.$toast.error(err).goAway(3000);
+              this.showErrorMessage(err);
             })
         } else {
           this.form.id = -1
