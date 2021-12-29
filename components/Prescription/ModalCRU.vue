@@ -113,7 +113,7 @@
             </b-input-group-append>
           </b-input-group>
           <div v-show="toggleISelect" class="pt-3">
-            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive selectable select-mode="multi" @row-selected="onRowSelected" :current-page="currentPage" :per-page="perPage">
+            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive selectable select-mode="multi" @row-selected="onRowSelected" :current-page="currentPage" :per-page="perPage" ref="myTableIssues">
               <template #cell(selected)="data">
                 <template v-if="containsIssue(data.item.id)">
                   <span aria-hidden="true">&check;</span>
@@ -135,8 +135,10 @@
             ></b-pagination>
           </div>
         </b-form-group>
-        <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
-        <b-button type="reset" variant="danger">Reset</b-button>
+        <div v-if="this.method === 'edit' || this.method === 'create'">
+          <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
+          <b-button type="reset" variant="danger">Reset</b-button>
+        </div>
       </b-form>
     </b-modal>
   </div>
@@ -228,10 +230,12 @@ export default {
       this.$emit("onReset")
     },
     onSubmit(){
-      if (this.form.start_date == "") {
+      if (!this.start_dateState) {
+        this.showErrorMessage("Check start date errors!")
         return
       }
-      if (this.form.end_date === "") {
+      if (!this.end_dateState) {
+        this.showErrorMessage("Check end date errors!")
         return
       }
       if (this.form.issues == null) {
@@ -257,7 +261,7 @@ export default {
           if (fieldName === 'endDate') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
           break;
-        default: return { visible: true, editable: true }
+        default: return { visible: true, editable: false }
       }
     },
     onRowSelected(items) {
@@ -267,7 +271,9 @@ export default {
       if (this.form.issues == null) return false
 
       for (let i = 0; i < this.form.issues.length; i++) {
-        if (this.form.issues[i].id === id) return true
+        if (this.form.issues[i].id === id) {
+          return true
+        }
       }
 
       return false
@@ -291,7 +297,7 @@ export default {
       this.toggleISelect = false;
 
       if (newEntity != null) {
-        if (this.method === 'edit') {
+        if (this.method === 'edit' || this.method === 'watch') {
           this.$axios
             .$get('/api/prescriptions/' + this.entity.id)
             .then(prescription => {
@@ -309,6 +315,15 @@ export default {
                   .$get('/api/biometricdataissues')
                   .then(biometricdataissues => {
                     this.issues = biometricdataissues.entities;
+
+                    this.issues.forEach(issue => {
+                      for (let i = 0; i < this.form.issues.length; i++) {
+                        if (this.form.issues[i].id === issue.id) {
+                          this.$refs.myTableIssues.selectRow(i)
+                        }
+                      }
+                    });
+
                   })
                   .catch((err) => {
                     this.showErrorMessage(err);

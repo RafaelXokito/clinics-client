@@ -2,7 +2,7 @@
 <div>
   <navbar />
   <b-container>
-    <entities-table :items="prescriptions" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteEntity" />
+    <entities-table :items="prescriptions" :fields="fields" :ownModalCRU="true" :showCreate="showCreate" :showEdit="showEdit" :showDelete="showDelete" :showWatch="showWatch" @modal="modalCRU" @deleteEntity="deleteEntity" />
   </b-container>
   <modalCRU :entity="prescription" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>
@@ -27,6 +27,20 @@ export default {
       prescription: {},
       method: '',
       modalShow: false,
+    }
+  },
+  computed: {
+    showCreate(){
+      return this.$auth.user.scope == 'HealthcareProfessional'
+    },
+    showEdit(){
+      return this.$auth.user.scope == 'HealthcareProfessional'
+    },
+    showWatch(){
+      return this.$auth.user.scope == 'Patient'
+    },
+    showDelete(){
+      return this.$auth.user.scope == 'HealthcareProfessional'
     }
   },
   created(){
@@ -91,8 +105,12 @@ export default {
           this.prescriptions=prescriptions.entities
           this.fields=prescriptions.columns
 
-          this.fields.push("update")
-          this.fields.push("delete")
+          if (this.showWatch)
+            this.fields.push("watch")
+          if (this.showEdit)
+            this.fields.push("update")
+          if (this.showDelete)
+            this.fields.push("delete")
         })
         .catch((err) => {
           this.showErrorMessage(err);
