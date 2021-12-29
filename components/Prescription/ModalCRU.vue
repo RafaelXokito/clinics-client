@@ -226,10 +226,12 @@ export default {
       this.$emit("onReset")
     },
     onSubmit(){
-      if (this.form.start_date == "") {
+      if (!this.start_dateState) {
+        this.showErrorMessage("Check start date errors!")
         return
       }
-      if (this.form.end_date === "") {
+      if (!this.end_dateState) {
+        this.showErrorMessage("Check end date errors!")
         return
       }
       if (this.form.issues == null) {
