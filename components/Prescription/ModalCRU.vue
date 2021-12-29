@@ -113,7 +113,7 @@
             </b-input-group-append>
           </b-input-group>
           <div v-show="toggleISelect" class="pt-3">
-            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive selectable select-mode="multi" @row-selected="onRowSelected" :current-page="currentPage" :per-page="perPage">
+            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive selectable select-mode="multi" @row-selected="onRowSelected" :current-page="currentPage" :per-page="perPage" ref="myTableIssues">
               <template #cell(selected)="data">
                 <template v-if="containsIssue(data.item.id)">
                   <span aria-hidden="true">&check;</span>
@@ -265,7 +265,9 @@ export default {
       if (this.form.issues == null) return false
 
       for (let i = 0; i < this.form.issues.length; i++) {
-        if (this.form.issues[i].id === id) return true
+        if (this.form.issues[i].id === id) {
+          return true
+        }
       }
 
       return false
@@ -306,6 +308,15 @@ export default {
                   .$get('/api/biometricdataissues')
                   .then(biometricdataissues => {
                     this.issues = biometricdataissues.entities;
+
+                    this.issues.forEach(issue => {
+                      for (let i = 0; i < this.form.issues.length; i++) {
+                        if (this.form.issues[i].id === issue.id) {
+                          this.$refs.myTableIssues.selectRow(i)
+                        }
+                      }
+                    });
+
                   })
                   .catch((err) => {
                     this.showErrorMessage(err);
