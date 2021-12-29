@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Observation '" ref="bvEntity" @hide="onReset" :hide-footer="true">
-      <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
+      <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
         <b-tabs content-class="p-2 pt-3">
           <b-tab title="Observation" active>
             <b-form-group
@@ -239,7 +239,8 @@ export default {
       hasPrescription: false,
 
       documents: [],
-      documentsFields: ['filename', 'download', 'delete']
+      documentsFields: ['filename', 'download', 'delete'],
+      clone: {},
     }
   },
   computed: {
@@ -253,7 +254,7 @@ export default {
       .then(patients => {
         this.selectablePEntity = patients.entities
         this.selectablePFields = patients.columns
-        this.toggleSelect = true
+        this.togglePSelect = true
         this.selectablePFields.unshift("selected")
       })
       .catch((err)=>{
@@ -311,6 +312,9 @@ export default {
     unselectPatient(){
       this.form.patientName = null
       this.form.patientId = null
+    },
+    resetBtnPressed() {
+      this.form = Object.assign({}, this.clone)
     },
     onReset(){
       this.$emit("onReset")
@@ -387,6 +391,7 @@ export default {
               this.form.prescription.start_date = observation.prescription.start_date;
               this.form.prescription.end_date = observation.prescription.end_date;
               this.form.prescription.notes = observation.prescription.notes;
+              this.clone = Object.assign({}, this.form)
             })
             .catch((err) => {
               this.showErrorMessage(err);
@@ -404,6 +409,7 @@ export default {
           this.form.prescription.end_date = null
           this.form.prescription.notes = null
           this.hasPrescription = true
+          this.clone = Object.assign({}, this.form)
         }
 
         this.$refs.bvEntity.show()

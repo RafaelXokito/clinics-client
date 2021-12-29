@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-modal id="bv-entity" size="lg" :title="method+' Biometric Data Type'" ref="bvEntity" @hide="onReset" :hide-footer="true">
-      <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
+      <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
         <b-form-group
           id="input-group-name"
           label="Name:"
@@ -102,7 +102,8 @@ export default {
         unit_name: '',
         unit_nameError: '',
       },
-      show: true
+      show: true,
+      clone: {},
     }
   },
   props:{
@@ -174,6 +175,9 @@ export default {
         this.$toast.error(err).goAway(3000);
       }
     },
+    resetBtnPressed() {
+      this.form = Object.assign({}, this.clone)
+    },
     onReset(){
       this.$emit("onReset")
     },
@@ -189,17 +193,20 @@ export default {
         this.$refs.bvEntity.hide()
       }
     },
-    entity(newEntity, oldVar){
+    entity(newEntity){
       if (newEntity != null) {
-        if (this.method == 'edit') {
+        if (this.method === 'edit') {
           this.form.id = this.entity.id;
           this.form.name = this.entity.name;
           this.form.min = this.entity.min;
           this.form.max = this.entity.max;
           this.form.unit = this.entity.unit;
           this.form.unit_name = this.entity.unit_name;
-        }else {
+          this.clone = Object.assign({}, this.form)
+        }
+        else {
           this.form = {}
+          this.clone = Object.assign({}, this.form)
         }
 
         // if (newEntity["name"] != undefined) {

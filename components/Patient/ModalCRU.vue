@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Patient '" ref="bvEntity" @hide="onReset" :hide-footer="true">
-      <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
+      <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
         <b-tabs content-class="p-2 pt-3">
           <b-tab title="Patient" active>
             <b-form-group
@@ -210,7 +210,8 @@ export default {
 
       currentPageBiometricDatas: 1,
       currentPageObservations: 1,
-      perPage: 4
+      perPage: 4,
+      clone: {},
     }
   },
   computed: {
@@ -285,6 +286,9 @@ export default {
       let date = new Date(dateStr)
       return date.toLocaleString('pt-PT')
     },
+    resetBtnPressed() {
+      this.form = Object.assign({}, this.clone)
+    },
     onReset() {
       this.$emit("onReset")
     },
@@ -341,6 +345,7 @@ export default {
               this.form.observations = patient.observations;
               this.form.created_by = patient.created_by;
               this.form.healthNo = patient.healthNo+"";
+              this.clone = Object.assign({}, this.form)
             })
             .catch((err) => {
               this.showErrorMessage(err);
@@ -355,6 +360,7 @@ export default {
           this.form.observations = ""
           this.form.created_by = ""
           this.form.healthNo = ""
+          this.clone = Object.assign({}, this.form)
         }
         this.$refs.bvEntity.show()
       }

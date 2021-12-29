@@ -1,7 +1,7 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ((form.issues == null || form.issues.length === 0) ? ' Particular' : ' Global') + ' Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
-      <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
+    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + (isGlobal ? ' Global' : ' Particular') + ' Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
+      <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
         <b-form-group
           id="input-group-healthProfessionalName"
           label="Healthcare Professional:"
@@ -93,13 +93,11 @@
           label-class="font-weight-bold"
           v-if="fieldProperties('issues').visible"
         >
-          <span v-if="issuesState" style="color: red;">
-            {{form.issuesError}}
-          </span>
           <b-input-group>
             <b-form-input
               id="input-issues"
               :value="issuesSelectedString"
+              :class="issuesState ? 'border border-danger text-danger' : ''"
               type="text"
               placeholder="Select at least one item"
               required
@@ -167,6 +165,7 @@ export default {
         end_date: null,
         end_dateError: '',
         notes: '',
+        isGlobal: false
       },
       issues: [],
       show: true,
@@ -175,6 +174,7 @@ export default {
       perPage: 4,
 
       toggleISelect: false,
+      clone: {},
     }
   },
   computed: {
@@ -226,6 +226,9 @@ export default {
         this.$toast.error(err).goAway(3000);
       }
     },
+    resetBtnPressed() {
+      this.form = Object.assign({}, this.clone)
+    },
     onReset(){
       this.$emit("onReset")
     },
@@ -246,9 +249,9 @@ export default {
     fieldProperties(fieldName) {
       switch (this.method) {
         case 'edit':
-          if (fieldName === 'issues') return { visible: this.form.issues != null && this.form.issues.length > 0, editable: true }
+          if (fieldName === 'issues') return { visible: this.form.isGlobal, editable: true }
           if (fieldName === 'healthProfessional') return { visible: true, editable: false }
-          if (fieldName === 'patient') return { visible: this.form.issues == null || this.form.issues.length === 0, editable: false }
+          if (fieldName === 'patient') return { visible: !this.form.isGlobal, editable: false }
           if (fieldName === 'startDate') return { visible: true, editable: true }
           if (fieldName === 'endDate') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
@@ -275,7 +278,6 @@ export default {
           return true
         }
       }
-
       return false
     },
     selectIssues(){
@@ -303,6 +305,7 @@ export default {
             .then(prescription => {
               this.form.id = prescription.id;
               this.form.issues = prescription.issues;
+              this.form.isGlobal = prescription.issues != null && prescription.issues.length > 0
               this.form.healthcareProfessionalId = prescription.healthcareProfessionalId;
               this.form.healthcareProfessionalName = prescription.healthcareProfessionalName;
               this.form.patients = prescription.patients;
@@ -323,19 +326,19 @@ export default {
                         }
                       }
                     });
-
                   })
                   .catch((err) => {
                     this.showErrorMessage(err);
                   })
               }
+              this.clone = Object.assign({}, this.form)
             })
             .catch((err) => {
               this.showErrorMessage(err);
             })
         } else {
           this.form.id = ""
-          this.form.issues = null
+          this.form.issues = []
           this.form.healthcareProfessionalId = ""
           this.form.healthcareProfessionalName = ""
           this.form.patientId = ""
@@ -343,6 +346,8 @@ export default {
           this.form.start_date = new Date().toISOString().slice(0,10)
           this.form.end_date = new Date().toISOString().slice(0,10)
           this.form.notes = ""
+          this.form.isGlobal = true
+          this.clone = Object.assign({}, this.form)
           this.$axios
             .$get('/api/biometricdataissues')
             .then(biometricdataissues => {

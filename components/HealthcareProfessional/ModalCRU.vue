@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Healthcare Professional'" ref="bvEntity" @hide="onReset" :hide-footer="true">
-      <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
+      <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
         <b-tabs content-class="p-2 pt-3">
           <b-tab title="Healthcare Professional" active>
             <b-form-group
@@ -197,7 +197,8 @@ export default {
         { value: 'Male', text: 'Male' },
         { value: 'Female', text: 'Female' },
         { value: 'Other', text: 'Other' }
-      ]
+      ],
+      clone: {},
     }
   },
   computed: {
@@ -261,6 +262,9 @@ export default {
       else {
         this.$toast.error(err).goAway(3000);
       }
+    },
+    resetBtnPressed() {
+      this.form = Object.assign({}, this.clone)
     },
     formatDate(dateStr, isFull) {
       let date = new Date(dateStr)
@@ -327,6 +331,7 @@ export default {
               this.form.prescriptions = healthcareProfessional.prescriptions;
               this.form.observations = healthcareProfessional.observations;
               this.form.created_by = healthcareProfessional.created_by;
+              this.clone = Object.assign({}, this.form)
             })
             .catch((err) => {
               this.showErrorMessage(err);
@@ -340,6 +345,7 @@ export default {
           this.form.prescriptions = ""
           this.form.observations = ""
           this.form.created_by = ""
+          this.clone = Object.assign({}, this.form)
         }
 
         this.$refs.bvEntity.show()
