@@ -54,10 +54,10 @@
                       disabled
                     ></b-form-input>
                     <b-input-group-append>
-                      <b-button variant="outline-info"><b-icon icon="search" @click="selectBiometricType"></b-icon></b-button>
+                      <b-button variant="outline-info" @click="selectBiometricType"><b-icon icon="search"></b-icon></b-button>
                     </b-input-group-append>
                     <b-input-group-append>
-                      <b-button variant="outline-danger"><b-icon icon="backspace" @click="unselectBiometricType"></b-icon></b-button>
+                      <b-button variant="outline-danger" @click="unselectBiometricType"><b-icon icon="backspace"></b-icon></b-button>
                     </b-input-group-append>
                   </b-input-group>
                   <div v-if="toggleTSelect" class="pt-3">
