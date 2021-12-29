@@ -3,19 +3,6 @@
     <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Global Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
         <b-form-group
-          id="input-group-healthProfessionalId"
-          label="Healthcare Professional Id:"
-          label-for="input-healthProfessionalId"
-          label-class="font-weight-bold"
-          v-if="fieldProperties('healthProfessionalUsername').visible"
-        >
-          <b-form-input
-            id="input-healthProfessionalId"
-            v-model="form.healthcareProfessionalId"
-            :disabled="!fieldProperties('healthProfessionalUsername').editable"
-          ></b-form-input>
-        </b-form-group>
-        <b-form-group
           id="input-group-healthProfessionalName"
           label="Healthcare Professional Name:"
           label-for="input-healthProfessionalName"
@@ -26,19 +13,6 @@
             id="input-healthProfessionalName"
             v-model="form.healthcareProfessionalName"
             :disabled="!fieldProperties('healthProfessionalName').editable"
-          ></b-form-input>
-        </b-form-group>
-        <b-form-group
-          id="input-group-patientId"
-          label="Patient Id:"
-          label-for="input-patientId"
-          label-class="font-weight-bold"
-          v-if="fieldProperties('patientId').visible"
-        >
-          <b-form-input
-            id="input-patientId"
-            v-model="form.patientId"
-            :disabled="!fieldProperties('patientId').editable"
           ></b-form-input>
         </b-form-group>
         <b-form-group
@@ -123,7 +97,7 @@
             {{form.issuesError}}
           </span>
           <div class="pt-3">
-            <b-table  id="issues-table" :items="issues" :fields="fields" small hover responsive selectable select-mode="multi" @row-selected="onRowSelected" :current-page="currentPage" :per-page="perPage">
+            <b-table  id="issues-table" :items="issues" :fields="fields" small hover responsive :selectable="fieldProperties('issues').editable" select-mode="multi" @row-selected="onRowSelected" :current-page="currentPage" :per-page="perPage">
               <template #cell(selected)="data">
                 <template v-if="containsIssue(data.item.id)">
                   <span aria-hidden="true">&check;</span>
@@ -145,8 +119,10 @@
             ></b-pagination>
           </div>
         </b-form-group>
-        <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
-        <b-button type="reset" variant="danger">Reset</b-button>
+        <div v-if="this.method === 'edit' || this.method === 'create'">
+          <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
+          <b-button type="reset" variant="danger">Reset</b-button>
+        </div>
       </b-form>
     </b-modal>
   </div>
@@ -248,7 +224,7 @@ export default {
           if (fieldName === 'endDate') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
           break;
-        default: return { visible: true, editable: true }
+        default: return { visible: true, editable: false }
       }
     },
     onRowSelected(items) {
@@ -274,7 +250,7 @@ export default {
     },
     entity(newEntity){
       if (newEntity != null) {
-        if (this.method === 'edit') {
+        if (this.method === 'edit' || this.method === 'watch') {
           this.$axios
             .$get('/api/prescriptions/' + this.entity.id)
             .then(prescription => {

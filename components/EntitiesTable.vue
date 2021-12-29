@@ -2,6 +2,7 @@
   <div class="mt-3">
     <b-form-group>
       <b-button
+        v-if="showCreate"
         variant="success"
         @click="showEntity(Object.assign({}, fields), 'create')"
         >Create
@@ -44,12 +45,24 @@
             : "No End"
         }}
       </template>
+      <template #cell(watch)="data">
+        <b-button
+          variant="primary"
+          @click="showEntity(data.item, 'watch')"
+          size="sm"
+          class="mr-2"
+          v-if="showWatch"
+        >
+          <b-icon-eyeglasses></b-icon-eyeglasses>
+        </b-button>
+      </template>
       <template #cell(update)="data">
         <b-button
           variant="primary"
           @click="showEntity(data.item, 'edit')"
           size="sm"
           class="mr-2"
+          v-if="showEdit"
         >
           <b-icon-pencil-fill></b-icon-pencil-fill>
         </b-button>
@@ -60,6 +73,7 @@
           @click="deleteEntity(data.item)"
           size="sm"
           class="mr-2"
+          v-if="showDelete"
         >
           <b-icon-trash-fill></b-icon-trash-fill>
         </b-button>
@@ -81,6 +95,22 @@ export default {
     ownModalCRU: {
       type: Boolean,
       default: false,
+    },
+    showCreate: {
+      type: Boolean,
+      default: true
+    },
+    showEdit: {
+      type: Boolean,
+      default: true
+    },
+    showDelete: {
+      type: Boolean,
+      default: true
+    },
+    showWatch: {
+      type: Boolean,
+      default: true
     },
   },
   data() {
