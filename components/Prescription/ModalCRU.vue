@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Global Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
+    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ((form.issues == null || form.issues.length === 0) ? ' Particular' : ' Global') + ' Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
         <b-form-group
           id="input-group-healthProfessionalName"
@@ -24,7 +24,7 @@
         >
           <b-form-input
             id="input-patientName"
-            v-model="form.patientName"
+            :value="patientName"
             :disabled="!fieldProperties('patient').editable"
           ></b-form-input>
         </b-form-group>
@@ -159,8 +159,7 @@ export default {
         issuesState: false,
         healthcareProfessionalId: null,
         healthcareProfessionalName: null,
-        patientId: null,
-        patientName: null,
+        patients: [],
         start_date: null,
         start_dateError: '',
         end_date: null,
@@ -209,6 +208,11 @@ export default {
     },
     dataRows() {
       return this.issues.length
+    },
+    patientName() {
+      if (this.form.patients == null || this.form.patients.length === 0) return ''
+
+      return this.form.patients[0].name
     }
   },
   methods: {
@@ -238,9 +242,9 @@ export default {
     fieldProperties(fieldName) {
       switch (this.method) {
         case 'edit':
-          if (fieldName === 'issues') return { visible: this.form.patientId === 0, editable: true }
+          if (fieldName === 'issues') return { visible: this.form.issues != null && this.form.issues.length > 0, editable: true }
           if (fieldName === 'healthProfessional') return { visible: true, editable: false }
-          if (fieldName === 'patient') return { visible: this.form.patientId !== 0, editable: false }
+          if (fieldName === 'patient') return { visible: this.form.issues == null || this.form.issues.length === 0, editable: false }
           if (fieldName === 'startDate') return { visible: true, editable: true }
           if (fieldName === 'endDate') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
@@ -284,6 +288,8 @@ export default {
       }
     },
     entity(newEntity){
+      this.toggleISelect = false;
+
       if (newEntity != null) {
         if (this.method === 'edit') {
           this.$axios
@@ -293,13 +299,12 @@ export default {
               this.form.issues = prescription.issues;
               this.form.healthcareProfessionalId = prescription.healthcareProfessionalId;
               this.form.healthcareProfessionalName = prescription.healthcareProfessionalName;
-              this.form.patientId = prescription.patientId;
-              this.form.patientName = prescription.patientName;
+              this.form.patients = prescription.patients;
               this.form.start_date = prescription.start_date;
               this.form.end_date = prescription.end_date;
               this.form.notes = prescription.notes;
 
-              if (prescription.patientId === 0) {
+              if (prescription.issues != null && prescription.issues.length > 0) {
                 this.$axios
                   .$get('/api/biometricdataissues')
                   .then(biometricdataissues => {
