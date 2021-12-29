@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + (isGlobal ? ' Global' : ' Particular') + ' Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
+    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + (show ? (form.isGlobal ? ' Global' : ' Particular') : '') + ' Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
         <b-form-group
           id="input-group-healthProfessionalName"
@@ -97,7 +97,7 @@
             <b-form-input
               id="input-issues"
               :value="issuesSelectedString"
-              :class="issuesState ? 'border border-danger text-danger' : ''"
+              :class="issuesSelectedString === '' ? 'border border-danger text-danger' : ''"
               type="text"
               placeholder="Select at least one item"
               required
@@ -111,16 +111,9 @@
             </b-input-group-append>
           </b-input-group>
           <div v-show="toggleISelect" class="pt-3">
-            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive selectable select-mode="multi" @row-selected="onRowSelected" :current-page="currentPage" :per-page="perPage" ref="myTableIssues">
+            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive :current-page="currentPage" :per-page="perPage">
               <template #cell(selected)="data">
-                <template v-if="containsIssue(data.item.id)">
-                  <span aria-hidden="true">&check;</span>
-                  <span class="sr-only">Selected</span>
-                </template>
-                <template v-else>
-                  <span aria-hidden="true">&nbsp;</span>
-                  <span class="sr-only">Not selected</span>
-                </template>
+                <input type="checkbox" v-model="data.item.selected" />
               </template>
             </b-table>
             <b-pagination
@@ -138,6 +131,9 @@
           <b-button type="reset" variant="danger">Reset</b-button>
         </div>
       </b-form>
+      <div v-else class="d-flex align-items-center justify-content-center">
+        <b-spinner class="m-5" style="width: 3rem; height: 3rem;" label="Loading" />
+      </div>
     </b-modal>
   </div>
 </template>
@@ -168,7 +164,7 @@ export default {
         isGlobal: false
       },
       issues: [],
-      show: true,
+      show: false,
       fields: ["selected", "name", "biometricDataTypeName"],
       currentPage: 1,
       perPage: 4,
@@ -179,11 +175,12 @@ export default {
   },
   computed: {
     issuesSelectedString() {
-      if (this.form.issues == null) return '';
+      if (this.issues == null || this.issues.length === 0) return '';
 
       let str = '';
-      this.form.issues.forEach((issue) => {
-        str += ', ' + issue.name;
+      this.issues.forEach((issue) => {
+        if (issue.selected)
+          str += ', ' + issue.name;
       })
       return str.slice(2);
     },
@@ -241,6 +238,10 @@ export default {
         this.showErrorMessage("Check end date errors!")
         return
       }
+      if (this.issues == null)
+        return;
+
+      this.form.issues = this.issues.filter(issue => issue.selected)
       if (this.form.issues == null) {
         return
       }
@@ -267,24 +268,14 @@ export default {
         default: return { visible: true, editable: false }
       }
     },
-    onRowSelected(items) {
-      this.form.issues = items;
-    },
-    containsIssue(id) {
-      if (this.form.issues == null) return false
-
-      for (let i = 0; i < this.form.issues.length; i++) {
-        if (this.form.issues[i].id === id) {
-          return true
-        }
-      }
-      return false
-    },
     selectIssues(){
       this.toggleISelect = !this.toggleISelect;
     },
     unselectIssues(){
       this.form.issues = []
+      this.issues.forEach(issue => {
+        issue.selected = false
+      })
     },
   },
   watch: {
@@ -296,9 +287,9 @@ export default {
       }
     },
     entity(newEntity){
-      this.toggleISelect = false;
-
       if (newEntity != null) {
+        this.toggleISelect = false;
+        this.show = false
         if (this.method === 'edit' || this.method === 'watch') {
           this.$axios
             .$get('/api/prescriptions/' + this.entity.id)
@@ -313,6 +304,8 @@ export default {
               this.form.end_date = prescription.end_date;
               this.form.notes = prescription.notes;
 
+              this.show = true
+
               if (prescription.issues != null && prescription.issues.length > 0) {
                 this.$axios
                   .$get('/api/biometricdataissues')
@@ -322,7 +315,7 @@ export default {
                     this.issues.forEach(issue => {
                       for (let i = 0; i < this.form.issues.length; i++) {
                         if (this.form.issues[i].id === issue.id) {
-                          this.$refs.myTableIssues.selectRow(i)
+                          issue.selected = true;
                         }
                       }
                     });
@@ -347,6 +340,9 @@ export default {
           this.form.end_date = new Date().toISOString().slice(0,10)
           this.form.notes = ""
           this.form.isGlobal = true
+
+          this.show = true
+
           this.clone = Object.assign({}, this.form)
           this.$axios
             .$get('/api/biometricdataissues')
