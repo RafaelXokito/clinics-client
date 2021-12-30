@@ -9,7 +9,13 @@
         {{ this.$route.name.replace(/([A-Z])/g, " $1").trim() }}</b-button
       >
     </b-form-group>
-    <b-table striped hover responsive :items="items" :fields="fields">
+    <b-input-group>
+      <b-input-group-prepend is-text>
+        <b-icon icon="search"></b-icon>
+      </b-input-group-prepend>
+      <b-form-input v-model="searchIssue" />
+    </b-input-group>
+    <b-table striped hover responsive :items="items" :fields="fields" :filter="searchIssue">
       <template #cell(created_at)="data">
         {{
           data.item.created_at != null
@@ -117,6 +123,8 @@ export default {
     return {
       entity: {},
       method: "create",
+
+      searchIssue: ''
     };
   },
   methods: {

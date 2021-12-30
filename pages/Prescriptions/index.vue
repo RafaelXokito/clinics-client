@@ -104,7 +104,7 @@ export default {
         .then(prescriptions => {
           this.prescriptions=prescriptions.entities
           this.fields=prescriptions.columns
-
+          
           if (this.showWatch)
             this.fields.push("watch")
           if (this.showEdit)
