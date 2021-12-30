@@ -124,7 +124,7 @@
           <div v-show="toggleISelect" class="pt-3">
             <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive :current-page="currentPage" :per-page="perPage">
               <template #cell(selected)="data">
-                <input type="checkbox" v-model="data.item.selected" />
+                  <b-form-checkbox @change="issueClicked(data.item)" :checked="data.item.selected" />
               </template>
             </b-table>
             <b-pagination
@@ -252,6 +252,10 @@ export default {
 
       return date
     },
+    issueClicked(item) {
+      item.selected = !item.selected
+      this.issues = [...this.issues]
+    },
     resetBtnPressed() {
       this.form = Object.assign({}, this.clone)
     },
@@ -301,10 +305,10 @@ export default {
         default: return { visible: true, editable: false }
       }
     },
-    selectIssues(){
+    selectIssues() {
       this.toggleISelect = !this.toggleISelect;
     },
-    unselectIssues(){
+    unselectIssues() {
       this.form.issues = []
       this.issues.forEach(issue => {
         issue.selected = false
@@ -329,6 +333,7 @@ export default {
       if (newEntity != null) {
         this.toggleISelect = false;
         this.show = false
+        this.currentPage = 1
         if (this.method === 'edit' || this.method === 'watch') {
           this.$axios
             .$get('/api/prescriptions/' + this.entity.id)
@@ -354,9 +359,12 @@ export default {
                     this.issues = biometricdataissues.entities;
 
                     this.issues.forEach(issue => {
+                      issue.selected = false;
+
                       for (let i = 0; i < this.form.issues.length; i++) {
                         if (this.form.issues[i].id === issue.id) {
                           issue.selected = true;
+                          break;
                         }
                       }
                     });
