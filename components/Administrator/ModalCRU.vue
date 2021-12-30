@@ -1,26 +1,12 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="lg" :title="method+' Administrator'" ref="bvEntity" @hide="onReset" :hide-footer="true">
+    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1)+' Administrator'" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
         <b-form-group
-          id="input-group-id"
-          label-for="input-id"
-          v-if="method=='edit'"
-        >
-          <b-form-input
-            id="input-id"
-            :disabled="method=='edit'"
-            v-model="form.id"
-            type="text"
-            placeholder="Enter id"
-            required
-            trim
-          ></b-form-input>
-        </b-form-group>
-        <b-form-group
           id="input-group-email"
-          label="Email address:"
+          label="Email:"
           label-for="input-email"
+          label-class="font-weight-bold"
         >
           <b-form-input
             id="input-email"
@@ -38,8 +24,9 @@
         </b-form-group>
           <b-form-group
           id="input-group-password"
-          label="Enter password:"
+          label="Password:"
           label-for="input-password"
+          label-class="font-weight-bold"
           v-if="method !=='edit'"
         >
           <b-form-input
@@ -56,7 +43,7 @@
             {{form.passwordError}}
           </b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group id="input-group-name" label="Your Name:" label-for="input-name">
+        <b-form-group id="input-group-name" label="Name:" label-for="input-name" label-class="font-weight-bold">
           <b-form-input
             id="input-name"
             v-model.lazy="form.name"
@@ -70,7 +57,7 @@
             {{form.nameError}}
           </b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group id="input-group-gender" label="Gender:" label-for="input-gender">
+        <b-form-group id="input-group-gender" label="Gender:" label-for="input-gender" label-class="font-weight-bold">
           <b-form-select
             id="input-gender"
             :state="genderState"
@@ -84,7 +71,7 @@
           </b-form-invalid-feedback>
         </b-form-group>
 
-        <b-button type="submit" variant="primary">Submit</b-button>
+        <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
         <b-button type="reset" variant="danger">Reset</b-button>
       </b-form>
     </b-modal>
@@ -107,13 +94,13 @@ export default {
         password: '',
         passwordError: null,
       },
-      genders: [{ text: 'Select One', value: null }, 'Male', 'Female'],
+      genders: ['Male', 'Female', 'Other'],
       show: true,
     }
   },
   computed: {
     emailState(){
-      if (this.form.email == "") {
+      if (this.form.email === "") {
         return null
       }
       var re = /\S+@\S+\.\S+/;
@@ -124,7 +111,7 @@ export default {
       return true
     },
     nameState(){
-      if (this.form.name == "") {
+      if (this.form.name === "") {
         return null
       }
       if (!(this.form.name.length > 5)) {
@@ -134,7 +121,7 @@ export default {
       return true
     },
     genderState(){
-      if (this.form.gender == "") {
+      if (this.form.gender === "") {
         return null
       }
       if (!(this.form.gender === 'Male' || this.form.gender === 'Female' || this.form.gender === 'Other')) {
@@ -144,7 +131,7 @@ export default {
       return true
     },
     passwordState(){
-      if (this.form.password == "") {
+      if (this.form.password === "") {
         return null
       }
       if (!(this.form.password.length > 3)) {
@@ -175,25 +162,20 @@ export default {
         this.$refs.bvEntity.hide()
       }
     },
-    entity(newEntity, oldVar){
+    entity(newEntity){
       if (newEntity != null) {
-        if (this.method == 'edit') {
+        if (this.method === 'edit') {
           this.form.id = this.entity.id;
           this.form.email = this.entity.email;
           this.form.name = this.entity.name;
           this.form.gender = this.entity.gender;
-        }else {
+        }
+        else {
           this.form.id = ""
           this.form.email = ""
           this.form.name = ""
-          this.form.gender = ""
+          this.form.gender = "Male"
         }
-
-        // if (newEntity["name"] != undefined) {
-        //   this.name = newEntity["name"];
-        // }else{
-        //   this.name = this.$route.name.replace(/([A-Z])/g, ' $1').trim()
-        // }
 
         this.$refs.bvEntity.show()
       }

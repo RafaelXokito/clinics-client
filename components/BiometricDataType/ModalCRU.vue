@@ -1,11 +1,12 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="lg" :title="method+' Biometric Data Type'" ref="bvEntity" @hide="onReset" :hide-footer="true">
+    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1)+' Biometric Data Type'" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
         <b-form-group
           id="input-group-name"
           label="Name:"
           label-for="input-name"
+          label-class="font-weight-bold"
         >
           <b-form-input
             id="input-name"
@@ -20,8 +21,8 @@
             {{form.nameError}}
           </b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group id="input-group-min" label="Min:" label-for="input-min">
-          <b-input-group :append="buildUnitName">
+        <b-form-group id="input-group-min" label="Min:" label-for="input-min" label-class="font-weight-bold">
+          <b-input-group :append="form.unit_name">
             <b-form-input
               id="input-min"
               v-model="form.min"
@@ -37,8 +38,8 @@
             </b-form-invalid-feedback>
           </b-input-group>
         </b-form-group>
-        <b-form-group id="input-group-max" label="Max:" label-for="input-max">
-          <b-input-group :append="buildUnitName">
+        <b-form-group id="input-group-max" label="Max:" label-for="input-max" label-class="font-weight-bold">
+          <b-input-group :append="form.unit_name">
             <b-form-input
               id="input-max"
               v-model="form.max"
@@ -54,7 +55,7 @@
             </b-form-invalid-feedback>
           </b-input-group>
         </b-form-group>
-        <b-form-group id="input-group-unit" label="Unit:" label-for="input-unit">
+        <b-form-group id="input-group-unit" label="Unit:" label-for="input-unit" label-class="font-weight-bold">
           <b-form-input
             id="input-unit"
             v-model="form.unit"
@@ -66,7 +67,7 @@
             {{form.unitError}}
           </b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group id="input-group-unit-name" label="Unit Name:" label-for="input-unit-name">
+        <b-form-group id="input-group-unit-name" label="Unit Name:" label-for="input-unit-name" label-class="font-weight-bold">
           <b-form-input
             id="input-unit-name"
             v-model="form.unit_name"
@@ -78,7 +79,7 @@
             {{form.unit_nameError}}
           </b-form-invalid-feedback>
         </b-form-group>
-        <b-button type="submit" variant="primary">Submit</b-button>
+        <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
         <b-button type="reset" variant="danger">Reset</b-button>
       </b-form>
     </b-modal>
@@ -112,11 +113,8 @@ export default {
     modalShow: Boolean,
   },
   computed: {
-    buildUnitName(){
-      return this.form.unit || this.form.unit_name ? (this.form.unit ?? '') + ' ' + (this.form.unit_name ?? '') : ''
-    },
     nameState(){
-      if (this.form.name == "" || this.form.name == null) {
+      if (this.form.name === "" || this.form.name == null) {
         return null
       }
       if (!(this.form.name.length >= 2)) {
@@ -126,7 +124,7 @@ export default {
       return true
     },
     minState(){
-      if (this.form.min == "" || this.form.min == null) {
+      if (this.form.min === "" || this.form.min == null) {
         return null
       }
       if (!(this.form.min < this.form.max)) {
@@ -136,7 +134,7 @@ export default {
       return true
     },
     maxState(){
-      if (this.form.max == "" || this.form.max == null) {
+      if (this.form.max === "" || this.form.max == null) {
         return null
       }
       if (!(this.form.max > this.form.min)) {
@@ -146,7 +144,7 @@ export default {
       return true
     },
     unitState(){
-      if (this.form.unit == "" || this.form.unit == null) {
+      if (this.form.unit === "" || this.form.unit == null) {
         return null
       }
       if (!(this.form.unit.length >= 1)) {
@@ -156,7 +154,7 @@ export default {
       return true
     },
     unit_nameState(){
-      if (this.form.unit_name == "" || this.form.unit_name == null) {
+      if (this.form.unit_name === "" || this.form.unit_name == null) {
         return null
       }
       if (!(this.form.unit_name.length >= 2)) {

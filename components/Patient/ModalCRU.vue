@@ -144,15 +144,16 @@
               <template #cell(Documents)="data">
                 {{data.item.nDocuments}}
               </template>
-              <template #cell(hasPrescription)="data">
-                <template v-if="data.item.hasPrescription">
-                  <span aria-hidden="true">&check;</span>
-                  <span class="sr-only">Yes</span>
-                </template>
-                <template v-else>
-                  <span aria-hidden="true">&cross;</span>
-                  <span class="sr-only">No</span>
-                </template>
+              <template #cell(Prescription)="data">
+                <b-button
+                  variant="warning"
+                  @click="data.toggleDetails"
+                  size="sm"
+                  class="mr-2"
+                  v-if="data.item.hasPrescription"
+                >
+                  <b-icon-pencil-fill></b-icon-pencil-fill>
+                </b-button>
               </template>
             </b-table>
             <b-pagination
@@ -203,8 +204,18 @@ export default {
         healthNoError: '',
       },
       show: false,
-      fieldsBiometricData: ["value", "valueUnit", "biometricDataTypeName", "created_at"],
-      fieldsObservations: ["healthcareProfessionalName", "created_at", "Documents", "hasPrescription"],
+      fieldsBiometricData: [
+        {key: "value", sortable: true},
+        {key: "valueUnit", sortable: true},
+        {key: "biometricDataTypeName", sortable: true},
+        {key: "created_at", sortable: true},
+      ],
+      fieldsObservations: [
+        {key: "healthcareProfessionalName", sortable: true},
+        {key: "created_at", sortable: true},
+        {key: "Documents", sortable: true},
+        {key: "Prescription", sortable: true},
+      ],
       genderValues: [
         { value: 'Male', text: 'Male' },
         { value: 'Female', text: 'Female' },

@@ -194,8 +194,17 @@ export default {
         created_by: null,
       },
       show: false,
-      fieldsPrescriptions: ["id", "healthcareProfessionalName", "start_date", "end_date", "isGlobal"],
-      fieldsObservations: ["id", "healthcareProfessionalName", "patientName", "created_at"],
+      fieldsPrescriptions: [
+        {key: "healthcareProfessionalName", sortable: true},
+        {key: "start_date", sortable: true},
+        {key: "end_date", sortable: true},
+        {key: "isGlobal", sortable: true},
+      ],
+      fieldsObservations: [
+        {key: "healthcareProfessionalName", sortable: true},
+        {key: "patientName", sortable: true},
+        {key: "created_at", sortable: true},
+      ],
       genderValues: [
         { value: 'Male', text: 'Male' },
         { value: 'Female', text: 'Female' },
@@ -285,7 +294,7 @@ export default {
     fieldProperties(fieldName) {
       switch (this.method) {
         case 'edit':
-          if (fieldName === 'id') return { visible: true, editable: false }
+          if (fieldName === 'id') return { visible: false, editable: false }
           if (fieldName === 'email') return { visible: true, editable: true }
           if (fieldName === 'password') return { visible: false, editable: false }
           if (fieldName === 'name') return { visible: true, editable: true }
@@ -294,7 +303,7 @@ export default {
           if (fieldName === 'prescriptions') return { visible: true, editable: false }
           if (fieldName === 'observations') return { visible: true, editable: false }
           if (fieldName === 'patients') return { visible: true, editable: false }
-          if (fieldName === 'createdBy') return { visible: true, editable: false }
+          if (fieldName === 'createdBy') return { visible: false, editable: false }
           break;
         case 'create':
           if (fieldName === 'id') return { visible: false, editable: false }
