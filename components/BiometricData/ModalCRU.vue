@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="xl" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Biometric Data'" ref="bvEntity" @hide="onReset" :hide-footer="true">
+    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + ' Biometric Data'" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <div class="row">
         <div class="col">
           <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
