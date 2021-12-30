@@ -121,8 +121,14 @@
               <b-button variant="outline-danger" @click="unselectIssues"><b-icon icon="backspace"></b-icon></b-button>
             </b-input-group-append>
           </b-input-group>
-          <div v-show="toggleISelect" class="pt-3">
-            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive :current-page="currentPage" :per-page="perPage">
+          <div v-show="toggleISelect" class="pt-3 mx-2">
+            <b-input-group>
+              <b-input-group-prepend is-text>
+                <b-icon icon="search"></b-icon>
+              </b-input-group-prepend>
+              <b-form-input v-model="searchIssue" />
+            </b-input-group>
+            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive :current-page="currentPage" :per-page="perPage" :filter="searchIssue" @filtered="onFiltered">
               <template #cell(selected)="data">
                   <b-form-checkbox @change="issueClicked(data.item)" :checked="data.item.selected" />
               </template>
@@ -176,7 +182,8 @@ export default {
       },
       issues: [],
       show: false,
-      fields: ["selected", "name", "biometricDataTypeName"],
+      fields: [{key: 'selected', label: 'Selected',sortable: true}, {key: 'name', label: 'Name',sortable: true}, {key: 'biometricDataTypeName', label: 'Biometric Data Type',sortable: true}],
+      dataRows: 0,
       currentPage: 1,
       perPage: 4,
 
@@ -185,6 +192,8 @@ export default {
 
       start_date_time: null,
       end_date_time: null,
+
+      searchIssue: ''
     }
   },
   computed: {
@@ -219,9 +228,6 @@ export default {
       }
       return false
     },
-    dataRows() {
-      return this.issues.length
-    },
     patientName() {
       if (this.form.patients == null || this.form.patients.length === 0) return ''
 
@@ -229,6 +235,10 @@ export default {
     }
   },
   methods: {
+    onFiltered(filteredItems) {
+      this.dataRows = filteredItems.length
+      this.currentPage = 1
+    },
     showErrorMessage(err) {
       if (err.response) {
         this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
@@ -342,6 +352,7 @@ export default {
         this.toggleISelect = false;
         this.show = false
         this.currentPage = 1
+        this.searchIssue = ''
         if (this.method === 'edit' || this.method === 'watch') {
           this.$axios
             .$get('/api/prescriptions/' + this.entity.id)
@@ -360,7 +371,7 @@ export default {
 
               this.show = true
               if (this.method === 'watch') {
-                this.fields = ["name", "biometricDataTypeName"]
+                this.fields = [{key: 'name', label: 'Name',sortable: true}, {key: 'biometricDataTypeName', label: 'Biometric Data Type',sortable: true}]
                 this.issues = this.form.issues;
               }else
               if (prescription.issues != null && prescription.issues.length > 0) {
@@ -379,6 +390,7 @@ export default {
                         }
                       }
                     });
+                    this.dataRows = this.issues.length
                   })
                   .catch((err) => {
                     this.showErrorMessage(err);
