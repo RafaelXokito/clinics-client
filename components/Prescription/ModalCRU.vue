@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + (isGlobal ? ' Global' : ' Particular') + ' Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
+    <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1) + (show ? (form.isGlobal ? ' Global' : ' Particular') : '') + ' Prescription '" ref="bvEntity" @hide="onReset" :hide-footer="true">
       <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
         <b-form-group
           id="input-group-healthProfessionalName"
@@ -28,47 +28,58 @@
             :disabled="!fieldProperties('patient').editable"
           ></b-form-input>
         </b-form-group>
-        <b-form-group
-          id="input-group-startDate"
-          label="Start Date:"
-          label-for="input-startDate"
-          label-class="font-weight-bold"
-          v-if="fieldProperties('startDate').visible"
-        >
-          <b-form-datepicker
-            id="input-startDate"
-            v-model="form.start_date" class="mb-2"
-            :disabled="!fieldProperties('startDate').editable"
-            :state="start_dateState"
-            aria-describedby="input-startdate-feedback"
-            required
-          >
-          </b-form-datepicker>
-          <b-form-invalid-feedback id="input-startdate-feedback">
-            {{form.start_dateError}}
-          </b-form-invalid-feedback>
+        <b-form-group id="input-group-start-date" label="Start Date:" label-for="input-start-date" label-class="font-weight-bold">
+          <div class="d-flex flex-row flex-wrap">
+            <div class="flex-grow-1 px-1 mb-2">
+              <b-form-datepicker
+                id="input-start-date"
+                v-model="form.start_date"
+                :disabled="!fieldProperties('startDate').editable"
+                :state="start_dateState"
+                aria-describedby="input-startdate-feedback"
+                required
+              />
+              <b-form-invalid-feedback id="input-startdate-feedback">
+                {{form.start_dateError}}
+              </b-form-invalid-feedback>
+            </div>
+            <div class="flex-grow-1 px-1 mb-2">
+              <b-form-timepicker
+                id="timepicker-start-date"
+                v-model="start_date_time"
+                :disabled="!fieldProperties('startDate').editable"
+                :state="start_dateState"
+                required
+              />
+            </div>
+          </div>
         </b-form-group>
-        <b-form-group
-          id="input-group-endDate"
-          label="End Date:"
-          label-for="input-endDate"
-          label-class="font-weight-bold"
-          v-if="fieldProperties('endDate').visible"
-        >
-          <b-form-datepicker
-            id="input-endDate"
-            v-model="form.end_date" class="mb-2"
-            :disabled="!fieldProperties('endDate').editable"
-            aria-describedby="input-enddate-feedback"
-            :state="end_dateState"
-            required
-          >
-          </b-form-datepicker>
-          <b-form-invalid-feedback id="input-enddate-feedback">
-            {{form.end_dateError}}
-          </b-form-invalid-feedback>
+        <b-form-group id="input-group-end-date" label="End Date:" label-for="input-end-date" label-class="font-weight-bold">
+          <div class="d-flex flex-row flex-wrap">
+            <div class="flex-grow-1 px-1 mb-2">
+              <b-form-datepicker
+                id="input-end-date"
+                v-model="form.end_date"
+                :disabled="!fieldProperties('endDate').editable"
+                :state="end_dateState"
+                aria-describedby="input-enddate-feedback"
+                required
+              />
+              <b-form-invalid-feedback id="input-enddate-feedback">
+                {{form.end_dateError}}
+              </b-form-invalid-feedback>
+            </div>
+            <div class="flex-grow-1 px-1 mb-2">
+              <b-form-timepicker
+                id="timepicker-end-date"
+                v-model="end_date_time"
+                :disabled="!fieldProperties('endDate').editable"
+                :state="end_dateState"
+                required
+              />
+            </div>
+          </div>
         </b-form-group>
-
         <b-form-group
           id="input-group-notes"
           label="Notes:"
@@ -97,30 +108,23 @@
             <b-form-input
               id="input-issues"
               :value="issuesSelectedString"
-              :class="issuesState ? 'border border-danger text-danger' : ''"
+              :class="issuesSelectedString === '' ? 'border border-danger text-danger' : ''"
               type="text"
               placeholder="Select at least one item"
               required
               disabled
             ></b-form-input>
             <b-input-group-append>
-              <b-button variant="outline-info"><b-icon icon="search" @click="selectIssues"></b-icon></b-button>
+              <b-button variant="outline-info" @click="selectIssues"><b-icon icon="search"></b-icon></b-button>
             </b-input-group-append>
             <b-input-group-append>
-              <b-button variant="outline-danger"><b-icon icon="backspace" @click="unselectIssues"></b-icon></b-button>
+              <b-button variant="outline-danger" @click="unselectIssues"><b-icon icon="backspace"></b-icon></b-button>
             </b-input-group-append>
           </b-input-group>
           <div v-show="toggleISelect" class="pt-3">
-            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive selectable select-mode="multi" @row-selected="onRowSelected" :current-page="currentPage" :per-page="perPage" ref="myTableIssues">
+            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive :current-page="currentPage" :per-page="perPage">
               <template #cell(selected)="data">
-                <template v-if="containsIssue(data.item.id)">
-                  <span aria-hidden="true">&check;</span>
-                  <span class="sr-only">Selected</span>
-                </template>
-                <template v-else>
-                  <span aria-hidden="true">&nbsp;</span>
-                  <span class="sr-only">Not selected</span>
-                </template>
+                <input type="checkbox" v-model="data.item.selected" />
               </template>
             </b-table>
             <b-pagination
@@ -138,6 +142,9 @@
           <b-button type="reset" variant="danger">Reset</b-button>
         </div>
       </b-form>
+      <div v-else class="d-flex align-items-center justify-content-center">
+        <b-spinner class="m-5" style="width: 3rem; height: 3rem;" label="Loading" />
+      </div>
     </b-modal>
   </div>
 </template>
@@ -168,22 +175,26 @@ export default {
         isGlobal: false
       },
       issues: [],
-      show: true,
+      show: false,
       fields: ["selected", "name", "biometricDataTypeName"],
       currentPage: 1,
       perPage: 4,
 
       toggleISelect: false,
       clone: {},
+
+      start_date_time: null,
+      end_date_time: null,
     }
   },
   computed: {
     issuesSelectedString() {
-      if (this.form.issues == null) return '';
+      if (this.issues == null || this.issues.length === 0) return '';
 
       let str = '';
-      this.form.issues.forEach((issue) => {
-        str += ', ' + issue.name;
+      this.issues.forEach((issue) => {
+        if (issue.selected)
+          str += ', ' + issue.name;
       })
       return str.slice(2);
     },
@@ -226,6 +237,21 @@ export default {
         this.$toast.error(err).goAway(3000);
       }
     },
+    formatTime(dateStr) {
+      if (dateStr == null || dateStr === '') return ''
+      let date = new Date(dateStr)
+      return date.toTimeString().split(' ')[0]
+    },
+    getDateAndTimeSum(date, timeString) {
+      if (date == null || timeString == null || timeString === '') return ''
+      let timePieces = timeString.split(':');
+
+      if (timePieces.length !== 3) return ''
+
+      date.setHours(timePieces[0], timePieces[1], timePieces[2])
+
+      return date
+    },
     resetBtnPressed() {
       this.form = Object.assign({}, this.clone)
     },
@@ -241,9 +267,17 @@ export default {
         this.showErrorMessage("Check end date errors!")
         return
       }
+      if (this.issues == null)
+        return;
+
+      this.form.issues = this.issues.filter(issue => issue.selected)
       if (this.form.issues == null) {
         return
       }
+
+      this.form.start_date = this.getDateAndTimeSum(new Date(this.form.start_date), this.start_date_time)
+      this.form.end_date = this.getDateAndTimeSum(new Date(this.form.end_date), this.end_date_time)
+
       this.$emit("onSubmit", this.form, this.method)
     },
     fieldProperties(fieldName) {
@@ -267,27 +301,23 @@ export default {
         default: return { visible: true, editable: false }
       }
     },
-    onRowSelected(items) {
-      this.form.issues = items;
-    },
-    containsIssue(id) {
-      if (this.form.issues == null) return false
-
-      for (let i = 0; i < this.form.issues.length; i++) {
-        if (this.form.issues[i].id === id) {
-          return true
-        }
-      }
-      return false
-    },
     selectIssues(){
       this.toggleISelect = !this.toggleISelect;
     },
     unselectIssues(){
       this.form.issues = []
+      this.issues.forEach(issue => {
+        issue.selected = false
+      })
     },
   },
   watch: {
+    start_date_time(newTime) {
+      this.form.start_date = this.getDateAndTimeSum(new Date(this.form.start_date), newTime)
+    },
+    end_date_time(newTime) {
+      this.form.end_date = this.getDateAndTimeSum(new Date(this.form.end_date), newTime)
+    },
     modalShow(newVal){
       if (newVal === true) {
         this.$refs.bvEntity.show()
@@ -296,9 +326,9 @@ export default {
       }
     },
     entity(newEntity){
-      this.toggleISelect = false;
-
       if (newEntity != null) {
+        this.toggleISelect = false;
+        this.show = false
         if (this.method === 'edit' || this.method === 'watch') {
           this.$axios
             .$get('/api/prescriptions/' + this.entity.id)
@@ -310,8 +340,12 @@ export default {
               this.form.healthcareProfessionalName = prescription.healthcareProfessionalName;
               this.form.patients = prescription.patients;
               this.form.start_date = prescription.start_date;
+              this.start_date_time = this.formatTime(prescription.start_date);
               this.form.end_date = prescription.end_date;
+              this.end_date_time = this.formatTime(prescription.end_date);
               this.form.notes = prescription.notes;
+
+              this.show = true
 
               if (prescription.issues != null && prescription.issues.length > 0) {
                 this.$axios
@@ -322,7 +356,7 @@ export default {
                     this.issues.forEach(issue => {
                       for (let i = 0; i < this.form.issues.length; i++) {
                         if (this.form.issues[i].id === issue.id) {
-                          this.$refs.myTableIssues.selectRow(i)
+                          issue.selected = true;
                         }
                       }
                     });
@@ -347,6 +381,9 @@ export default {
           this.form.end_date = new Date().toISOString().slice(0,10)
           this.form.notes = ""
           this.form.isGlobal = true
+
+          this.show = true
+
           this.clone = Object.assign({}, this.form)
           this.$axios
             .$get('/api/biometricdataissues')
