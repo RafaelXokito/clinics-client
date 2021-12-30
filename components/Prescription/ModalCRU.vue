@@ -378,7 +378,7 @@ export default {
                 this.$axios
                   .$get('/api/biometricdataissues')
                   .then(biometricdataissues => {
-                    this.issues = biometricdataissues.entities;
+                    this.issues = biometricdataissues;
 
                     this.issues.forEach(issue => {
                       issue.selected = false;
@@ -400,7 +400,9 @@ export default {
               this.clone = Object.assign({}, this.form)
             })
             .catch((err) => {
+              this.show = true
               this.showErrorMessage(err);
+              this.$refs.bvEntity.hide()
             })
         } else {
           this.form.id = ""
@@ -420,7 +422,7 @@ export default {
           this.$axios
             .$get('/api/biometricdataissues')
             .then(biometricdataissues => {
-              this.issues = biometricdataissues.entities;
+              this.issues = biometricdataissues;
             })
             .catch((err) => {
               this.showErrorMessage(err);

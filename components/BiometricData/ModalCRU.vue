@@ -5,6 +5,7 @@
         <div class="col">
           <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
             <b-form-group
+              v-if="fieldProperties('patientId').visible"
               id="input-group-patient"
               label="Patient:"
               label-for="input-patient"
@@ -27,7 +28,7 @@
                 </b-input-group-append>
               </b-input-group>
               <div v-show="togglePSelect" class="pt-3">
-                <b-table id="my-patients-table" :items="selectablePEntity" :fields="selectablePFields" small hover responsive selectable select-mode="single" @row-selected="selectableEntityPClicked" :current-page="currentPatientPage" :per-page="perPage">
+                <b-table id="my-patients-table" :busy="isBusy" :items="selectablePEntity" :fields="selectablePFields" small hover responsive selectable select-mode="single" @row-selected="selectableEntityPClicked" :current-page="currentPatientPage" :per-page="perPage">
                   <template #cell(selected)="data">
                     <template v-if="data.item.id === form.patientId">
                       <span aria-hidden="true">&check;</span>
@@ -177,6 +178,9 @@
                 </b-button>
               </b-button-group>
           </b-form>
+          <div v-else class="d-flex align-items-center justify-content-center">
+            <b-spinner class="m-5" style="width: 3rem; height: 3rem;" label="Loading" />
+          </div>
           <b-form-file v-if="method=='create'" id="importFileInput" class="d-none" accept=".csv" v-model="importFile"></b-form-file>
         </div>
       </div>
@@ -205,7 +209,7 @@ export default {
         biometricDataIssueId: '',
         biometricDataIssueName: '',
       },
-      show: true,
+      show: false,
 
       perPage: 4,
 
@@ -227,7 +231,8 @@ export default {
         { value: 'Wearable', text: 'Wearable' },
       ],
 
-      importFile: null
+      importFile: null,
+      isBusy: false,
     }
   },
   computed: {
@@ -298,7 +303,7 @@ export default {
           if (fieldName === 'biometricTypeId') return { visible: true, editable: true }
           if (fieldName === 'value') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
-          if (fieldName === 'patientId') return { visible: true, editable: true }
+          if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: true }
           if (fieldName === 'created_at') return { visible: true, editable: true }
           if (fieldName === 'source') return { visible: true, editable: true }
           if (fieldName === 'biometricDataIssueId') return { visible: true, editable: false }
@@ -307,7 +312,7 @@ export default {
           if (fieldName === 'biometricTypeId') return { visible: true, editable: true }
           if (fieldName === 'value') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
-          if (fieldName === 'patientId') return { visible: true, editable: true }
+          if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: true }
           if (fieldName === 'created_at') return { visible: true, editable: true }
           if (fieldName === 'source') return { visible: true, editable: true }
           if (fieldName === 'biometricDataIssueId') return { visible: false, editable: false }
@@ -328,24 +333,34 @@ export default {
   },
   mounted() {
     //Load patients
-    this.$axios
-      .$get('/api/patients')
-      .then(patients => {
-        this.selectablePEntity = patients.entities
-        this.selectablePFields = patients.columns
-        this.selectablePFields.unshift("selected")
-      })
-      .catch((err)=>{
-        this.showErrorMessage(err);
-      });
+    if (this.$auth.user.scope === 'HealthcareProfessional')
+      this.$axios
+        .$get('/api/patients')
+        .then(patients => {
+          this.selectablePEntity = patients
+          this.selectablePFields = [
+            {key: "selected", sortable: true},
+            {key: "email", sortable: true},
+            {key: "name", sortable: true},
+            {key: "gender", sortable: true},
+            {key: "healthNo", sortable: true},
+          ]
+        })
+        .catch((err)=>{
+          this.showErrorMessage(err);
+        });
 
     //Load Biometric Data Types
     this.$axios
       .$get('/api/biometricdatatypes')
       .then(biometricdatatypes => {
-        this.selectableTEntity = biometricdatatypes.entities
-        this.selectableTFields = biometricdatatypes.columns
-        this.selectableTFields.unshift("selected")
+        this.selectableTEntity = biometricdatatypes
+        this.selectableTFields = [
+          {key: "selected", sortable: true},
+          {key: "name", sortable: true},
+          {key: "unit", sortable: true},
+          {key: "unit_name", sortable: true},
+        ]
       })
       .catch((err)=>{
         this.showErrorMessage(err);
@@ -364,10 +379,10 @@ export default {
       }
     },
     entity(newEntity){
-      this.togglePSelect = false;
-      this.toggleTSelect = false;
-
       if (newEntity != null) {
+        this.togglePSelect = false;
+        this.toggleTSelect = false;
+        this.show = false
         if (this.method === 'edit') {
           this.$axios
             .$get('/api/biometricdata/' + this.entity.id)
@@ -395,10 +410,12 @@ export default {
               }
 
               this.clone = Object.assign({}, this.form)
+              this.show = true
             })
             .catch((err) => {
               this.showErrorMessage(err)
               this.$refs.bvEntity.hide()
+              this.show = true
             })
         }
         else {
@@ -419,6 +436,7 @@ export default {
           this.form.created_at_time = '';
 
           this.clone = Object.assign({}, this.form)
+          this.show = true
         }
 
         this.$refs.bvEntity.show()

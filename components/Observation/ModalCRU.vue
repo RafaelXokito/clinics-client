@@ -196,6 +196,9 @@
         <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
         <b-button type="reset" variant="danger">Reset</b-button>
       </b-form>
+      <div v-else class="d-flex align-items-center justify-content-center">
+        <b-spinner class="m-5" style="width: 3rem; height: 3rem;" label="Loading" />
+      </div>
     </b-modal>
   </div>
 </template>
@@ -227,7 +230,7 @@ export default {
           notes: null
         },
       },
-      show: true,
+      show: false,
 
       perPage: 4,
 
@@ -252,10 +255,15 @@ export default {
     this.$axios
       .$get('/api/patients')
       .then(patients => {
-        this.selectablePEntity = patients.entities
-        this.selectablePFields = patients.columns
+        this.selectablePEntity = patients
+        this.selectablePFields = [
+          {key: "selected", sortable: true},
+          {key: "email", sortable: true},
+          {key: "name", sortable: true},
+          {key: "gender", sortable: true},
+          {key: "healthNo", sortable: true},
+        ]
         this.togglePSelect = true
-        this.selectablePFields.unshift("selected")
       })
       .catch((err)=>{
         this.showErrorMessage(err);
@@ -374,6 +382,7 @@ export default {
       if (newEntity != null) {
         this.hasPrescription = false
         this.form.documents = []
+        this.show = false
         if (this.method === 'edit') {
           this.$axios
             .$get('/api/observations/' + this.entity.id)
@@ -392,9 +401,12 @@ export default {
               this.form.prescription.end_date = observation.prescription.end_date;
               this.form.prescription.notes = observation.prescription.notes;
               this.clone = Object.assign({}, this.form)
+              this.show = true
             })
             .catch((err) => {
               this.showErrorMessage(err);
+              this.$refs.bvEntity.hide()
+              this.show = true
             })
         } else {
           this.form.id = -1
@@ -410,6 +422,7 @@ export default {
           this.form.prescription.notes = null
           this.hasPrescription = true
           this.clone = Object.assign({}, this.form)
+          this.show = true
         }
 
         this.$refs.bvEntity.show()
