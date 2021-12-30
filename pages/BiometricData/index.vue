@@ -56,7 +56,29 @@ export default {
     onSubmit(form, method){
       form.created_at = this.getDateAndTimeSum(new Date(form.created_at), form.created_at_time)
 
-      if (method === 'create') {
+      if (method === 'importFile'){
+        let formData = new FormData()
+
+        if (form.file) {
+          formData.append('file', form.file)
+        }
+
+        let promisse = this.$axios.$post('/api/biometricdata/import', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+        promisse.then(() => {
+          this.list();
+          this.$toast.success('File imported!').goAway(3000)
+        })
+        promisse.catch(() => {
+          this.$toast.error('Sorry, could no import that file!').goAway(3000)
+        })
+
+        this.modalShow = false
+        this.biometricData = null;
+      } else if (method === 'create') {
         this.$axios
           .$post('/api/biometricdata', form)
           .then(() => {

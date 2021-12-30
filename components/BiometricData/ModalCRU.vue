@@ -161,10 +161,23 @@
                 </div>
               </div>
             </b-form-group>
-
-            <b-button type="submit" variant="primary">Submit</b-button>
-            <b-button type="reset" variant="danger">Reset</b-button>
+              <b-button type="submit" variant="primary">Submit</b-button>
+              <b-button type="reset" variant="danger">Reset</b-button>
+              <b-button variant="info" class="float-right" @click="openImportFile" v-if="method=='create'">
+                <b-icon icon="file-earmark-excel" aria-hidden="true"></b-icon>
+                Import
+              </b-button>
+              <b-button-group class="float-right mr-2" v-if="method=='create'">
+                <b-button href="importBiometricDataModel.csv" target="_blank">
+                  <b-icon variant="warning" icon="file-earmark-excel" aria-hidden="true"></b-icon>
+                  Example
+                </b-button>
+                <b-button variant="outline-secondary" href="importBiometricDataModel.csv" download>
+                  <b-icon variant="warning" icon="cloud-download" aria-hidden="true"></b-icon>
+                </b-button>
+              </b-button-group>
           </b-form>
+          <b-form-file v-if="method=='create'" id="importFileInput" class="d-none" accept=".csv" v-model="importFile"></b-form-file>
         </div>
       </div>
     </b-modal>
@@ -212,7 +225,9 @@ export default {
         { value: 'Exam', text: 'Exam' },
         { value: 'Sensor', text: 'Sensor' },
         { value: 'Wearable', text: 'Wearable' },
-      ]
+      ],
+
+      importFile: null
     }
   },
   computed: {
@@ -229,6 +244,9 @@ export default {
     modalShow: Boolean,
   },
   methods: {
+    openImportFile(){
+      document.getElementById('importFileInput').click()
+    },
     showErrorMessage(err) {
       if (err.response) {
         this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
@@ -334,6 +352,10 @@ export default {
       });
   },
   watch: {
+    importFile(newVal){
+      let form = {file: newVal}
+      this.$emit("onSubmit",form, "importFile")
+    },
     modalShow(newVal){
       if (newVal === true) {
         this.$refs.bvEntity.show()
