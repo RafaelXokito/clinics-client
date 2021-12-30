@@ -117,7 +117,7 @@
             <b-input-group-append>
               <b-button variant="outline-info" @click="selectIssues"><b-icon icon="search"></b-icon></b-button>
             </b-input-group-append>
-            <b-input-group-append>
+            <b-input-group-append v-if="fieldProperties('issues').editable">
               <b-button variant="outline-danger" @click="unselectIssues"><b-icon icon="backspace"></b-icon></b-button>
             </b-input-group-append>
           </b-input-group>
@@ -193,7 +193,7 @@ export default {
 
       let str = '';
       this.issues.forEach((issue) => {
-        if (issue.selected)
+        if (issue.selected || this.method === 'watch')
           str += ', ' + issue.name;
       })
       return str.slice(2);
@@ -286,6 +286,14 @@ export default {
     },
     fieldProperties(fieldName) {
       switch (this.method) {
+        case 'watch':
+          if (fieldName === 'issues') return { visible: this.form.isGlobal, editable: false }
+          if (fieldName === 'healthProfessional') return { visible: true, editable: false }
+          if (fieldName === 'patient') return { visible: !this.form.isGlobal, editable: false }
+          if (fieldName === 'startDate') return { visible: true, editable: false }
+          if (fieldName === 'endDate') return { visible: true, editable: false }
+          if (fieldName === 'notes') return { visible: true, editable: false }
+          break;
         case 'edit':
           if (fieldName === 'issues') return { visible: this.form.isGlobal, editable: true }
           if (fieldName === 'healthProfessional') return { visible: true, editable: false }
@@ -351,7 +359,10 @@ export default {
               this.form.notes = prescription.notes;
 
               this.show = true
-
+              if (this.method === 'watch') {
+                this.fields = ["name", "biometricDataTypeName"]
+                this.issues = this.form.issues;
+              }else
               if (prescription.issues != null && prescription.issues.length > 0) {
                 this.$axios
                   .$get('/api/biometricdataissues')
@@ -373,6 +384,7 @@ export default {
                     this.showErrorMessage(err);
                   })
               }
+
               this.clone = Object.assign({}, this.form)
             })
             .catch((err) => {
