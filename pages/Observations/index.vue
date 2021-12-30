@@ -14,7 +14,7 @@ import navbar from "../../components/NavBar.vue"
 import modalCRU from "~/components/Observation/ModalCRU";
 
 export default {
-  middleware: ('auth'),
+  middleware: ('auth', 'observations'),
   components: {
     navbar,
     EntitiesTable,
