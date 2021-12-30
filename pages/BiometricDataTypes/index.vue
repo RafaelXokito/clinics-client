@@ -71,8 +71,10 @@ export default {
       .$get('/api/biometricdatatypes')
       .then(biometricdatatype => {
         this.biometricdatatype = biometricdatatype.entities
-        this.fields = biometricdatatype.columns
-
+        //this.fields = biometricdatatype.columns
+        for (let index = 0; index < biometricdatatype.columns.length; index++) {
+          this.fields.push({key: biometricdatatype.columns[index], sortable: true})
+        }
         this.fields.push("update");
         this.fields.push("delete");
       })

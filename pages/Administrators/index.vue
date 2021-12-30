@@ -72,8 +72,10 @@ export default {
         .$get('/api/administrators')
         .then(administrators => {
           this.administrators=administrators.entities
-          this.fields=administrators.columns
-
+          //this.fields=administrators.columns
+          for (let index = 0; index < administrators.columns.length; index++) {
+            this.fields.push({key: administrators.columns[index], sortable: true})
+          }
           this.fields.push("update")
           this.fields.push("delete")
         })

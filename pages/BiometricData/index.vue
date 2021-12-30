@@ -112,8 +112,10 @@ export default {
         .$get('/api/biometricdata')
         .then(biometricDatas => {
           this.biometricDatas = biometricDatas.entities
-          this.fields = biometricDatas.columns
-
+          //this.fields = biometricDatas.columns
+          for (let index = 0; index < biometricDatas.columns.length; index++) {
+            this.fields.push({key: biometricDatas.columns[index], sortable: true})
+          }
           this.fields.push("update")
           this.fields.push("delete")
         })

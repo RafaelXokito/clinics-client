@@ -103,8 +103,10 @@ export default {
         .$get('/api/prescriptions')
         .then(prescriptions => {
           this.prescriptions=prescriptions.entities
-          this.fields=prescriptions.columns
-          
+          //this.fields=prescriptions.columns
+          for (let index = 0; index < prescriptions.columns.length; index++) {
+            this.fields.push({key: prescriptions.columns[index], sortable: true})
+          }
           if (this.showWatch)
             this.fields.push("watch")
           if (this.showEdit)

@@ -85,8 +85,10 @@ export default {
         .$get('/api/patients')
         .then(patients => {
           this.patients=patients.entities
-          this.fields=patients.columns
-
+          //this.fields=patients.columns
+          for (let index = 0; index < patients.columns.length; index++) {
+            this.fields.push({key: patients.columns[index], sortable: true})
+          }
           this.fields.push("update")
           this.fields.push("delete")
         })

@@ -85,8 +85,10 @@ export default {
         .$get('/api/healthcareprofessionals')
         .then(healthcareprofessionals => {
           this.healthcareProfessionals=healthcareprofessionals.entities
-          this.fields=healthcareprofessionals.columns
-
+          //this.fields=healthcareprofessionals.columns
+          for (let index = 0; index < healthcareprofessionals.columns.length; index++) {
+            this.fields.push({key: healthcareprofessionals.columns[index], sortable: true})
+          }
           this.fields.push("update")
           this.fields.push("delete")
         })

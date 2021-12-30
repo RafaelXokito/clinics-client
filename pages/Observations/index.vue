@@ -14,7 +14,7 @@ import navbar from "../../components/NavBar.vue"
 import modalCRU from "~/components/Observation/ModalCRU";
 
 export default {
-  middleware: ('auth', 'healthcareprofessional'),
+  middleware: ('auth', 'healthcareprofessional', 'patient'),
   components: {
     navbar,
     EntitiesTable,
@@ -134,8 +134,10 @@ export default {
         .$get('/api/observations')
         .then(observations => {
           this.observations=observations.entities
-          this.fields=observations.columns
-
+          //this.fields=observations.columns
+          for (let index = 0; index < observations.columns.length; index++) {
+            this.fields.push({key: observations.columns[index], sortable: true})
+          }
           this.fields.push("update")
           this.fields.push("delete")
         })
