@@ -2,7 +2,7 @@
 <div>
   <navbar />
   <b-container>
-    <entities-table :items="observations" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteEntity" />
+    <entities-table :items="observations" :fields="fields" :ownModalCRU="true" :showCreate="showCreate" :showEdit="showEdit" :showDelete="showDelete" :showWatch="showWatch" @modal="modalCRU" @deleteEntity="deleteEntity" />
   </b-container>
   <modalCRU :entity="observation" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>
@@ -31,6 +31,28 @@ export default {
   },
   created(){
     this.list();
+  },
+  computed: {
+    showCreate() {
+      return this.$auth.user.scope == 'HealthcareProfessional'
+    },
+    showEdit(){
+      return this.$auth.user.scope == 'HealthcareProfessional'
+    },
+    showWatch(){
+      return this.$auth.user.scope == 'Patient'
+    },
+    showDelete(){
+      return this.$auth.user.scope == 'HealthcareProfessional'
+    }
+  },
+  mounted() {
+    this.fields =
+      [
+        {key: "healthcareProfessionalName", sortable: true},
+        {key: "patientName", sortable: true},
+        {key: "created_at", sortable: true},
+      ]
   },
   methods: {
     showErrorMessage(err) {
@@ -133,13 +155,14 @@ export default {
       this.$axios
         .$get('/api/observations')
         .then(observations => {
-          this.observations=observations.entities
-          //this.fields=observations.columns
-          for (let index = 0; index < observations.columns.length; index++) {
-            this.fields.push({key: observations.columns[index], sortable: true})
-          }
-          this.fields.push("update")
-          this.fields.push("delete")
+          this.observations=observations
+
+          if (this.showWatch)
+            this.fields.push("watch")
+          if (this.showEdit)
+            this.fields.push("update")
+          if (this.showDelete)
+            this.fields.push("delete")
         })
         .catch((err) => {
           this.showErrorMessage(err);

@@ -97,6 +97,9 @@
         <b-button type="submit" variant="primary">Submit</b-button>
         <b-button type="reset" variant="danger">Reset</b-button>
       </b-form>
+      <div v-else class="d-flex align-items-center justify-content-center">
+        <b-spinner class="m-5" style="width: 3rem; height: 3rem;" label="Loading" />
+      </div>
     </b-modal>
   </div>
 </template>
@@ -114,7 +117,7 @@ export default {
         biometricDataTypeName: '',
         biometricDataTypeUnitName: ''
       },
-      show: true,
+      show: false,
 
       perPage: 4,
 
@@ -147,9 +150,13 @@ export default {
       this.$axios
       .$get('/api/biometricdatatypes')
       .then(biometricdatatypes => {
-        this.selectableTEntity = biometricdatatypes.entities
-        this.selectableTFields = biometricdatatypes.columns
-        this.selectableTFields.unshift("selected")
+        this.selectableTEntity = biometricdatatypes
+        this.selectableTFields = [
+          {key: "selected", sortable: true},
+          {key: "name", sortable: true},
+          {key: "unit", sortable: true},
+          {key: "unit_name", sortable: true},
+        ]
       })
       .catch((err)=>{
         this.showErrorMessage(err);
@@ -221,6 +228,7 @@ export default {
       this.toggleTSelect = false;
 
       if (newEntity != null) {
+        this.show = false
         if (this.method === 'edit') {
           this.$axios
             .$get('/api/biometricdataissues/' + this.entity.id)
@@ -241,6 +249,7 @@ export default {
               }
 
               this.clone = Object.assign({}, this.form)
+              this.show = true
 
               //GET CURRENT ISSUES OF THAT BIO TYPE
               this.issues = []
@@ -257,6 +266,7 @@ export default {
             })
             .catch((err) => {
               this.showErrorMessage(err);
+              this.$refs.bvEntity.hide()
             })
         }
         else {
@@ -273,6 +283,7 @@ export default {
 
           this.clone = Object.assign({}, this.form)
           this.cloneIssues = []
+          this.show = true
         }
 
         this.$refs.bvEntity.show()

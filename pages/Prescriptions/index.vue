@@ -46,6 +46,14 @@ export default {
   created(){
     this.list();
   },
+  mounted() {
+    this.fields =
+      [
+        {key: "healthcareProfessionalName", sortable: true},
+        {key: "start_date", sortable: true},
+        {key: "end_date", sortable: true},
+      ]
+  },
   methods: {
     showErrorMessage(err) {
       if (err.response) {
@@ -102,11 +110,8 @@ export default {
       this.$axios
         .$get('/api/prescriptions')
         .then(prescriptions => {
-          this.prescriptions=prescriptions.entities
-          //this.fields=prescriptions.columns
-          for (let index = 0; index < prescriptions.columns.length; index++) {
-            this.fields.push({key: prescriptions.columns[index], sortable: true})
-          }
+          this.prescriptions=prescriptions
+
           if (this.showWatch)
             this.fields.push("watch")
           if (this.showEdit)

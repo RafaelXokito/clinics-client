@@ -169,6 +169,9 @@
         <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
         <b-button type="reset" variant="danger">Reset</b-button>
       </b-form>
+      <div v-else class="d-flex align-items-center justify-content-center">
+        <b-spinner class="m-5" style="width: 3rem; height: 3rem;" label="Loading" />
+      </div>
     </b-modal>
   </div>
 </template>
@@ -199,7 +202,7 @@ export default {
         healthNo: null,
         healthNoError: '',
       },
-      show: true,
+      show: false,
       fieldsBiometricData: ["value", "valueUnit", "biometricDataTypeName", "created_at"],
       fieldsObservations: ["healthcareProfessionalName", "created_at", "Documents", "hasPrescription"],
       genderValues: [
@@ -333,6 +336,7 @@ export default {
     },
     entity(newEntity) {
       if (newEntity != null) {
+        this.show = false
         if (this.method === 'edit') {
           this.$axios
             .$get('/api/patients/' + this.entity.id)
@@ -346,9 +350,12 @@ export default {
               this.form.created_by = patient.created_by;
               this.form.healthNo = patient.healthNo+"";
               this.clone = Object.assign({}, this.form)
+              this.show = true
             })
             .catch((err) => {
               this.showErrorMessage(err);
+              this.$refs.bvEntity.hide()
+              this.show = true
             })
         } else {
           this.form.id = ""
@@ -361,6 +368,7 @@ export default {
           this.form.created_by = ""
           this.form.healthNo = ""
           this.clone = Object.assign({}, this.form)
+          this.show = true
         }
         this.$refs.bvEntity.show()
       }

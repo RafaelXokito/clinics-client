@@ -32,6 +32,15 @@ export default {
   created(){
     this.list();
   },
+  mounted() {
+    this.fields =
+      [
+        {key: "email", sortable: true},
+        {key: "name", sortable: true},
+        {key: "gender", sortable: true},
+        {key: "specialty", sortable: true}
+      ]
+  },
   methods: {
     showErrorMessage(err) {
       if (err.response) {
@@ -84,11 +93,8 @@ export default {
       this.$axios
         .$get('/api/healthcareprofessionals')
         .then(healthcareprofessionals => {
-          this.healthcareProfessionals=healthcareprofessionals.entities
-          //this.fields=healthcareprofessionals.columns
-          for (let index = 0; index < healthcareprofessionals.columns.length; index++) {
-            this.fields.push({key: healthcareprofessionals.columns[index], sortable: true})
-          }
+          this.healthcareProfessionals=healthcareprofessionals
+
           this.fields.push("update")
           this.fields.push("delete")
         })

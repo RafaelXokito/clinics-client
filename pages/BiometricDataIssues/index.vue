@@ -31,6 +31,13 @@ export default {
   created(){
     this.list();
   },
+  mounted() {
+    this.fields =
+      [
+        {key: "name", sortable: true},
+        {key: "biometricDataTypeName", sortable: true}
+      ]
+  },
   methods: {
     showErrorMessage(err) {
       if (err.response) {
@@ -79,11 +86,8 @@ export default {
       this.$axios
       .$get('/api/biometricdataissues')
       .then(biometricDataIssues => {
-        this.biometricDataIssues = biometricDataIssues.entities
-        //this.fields = biometricDataIssues.columns
-        for (let index = 0; index < biometricDataIssues.columns.length; index++) {
-          this.fields.push({key: biometricDataIssues.columns[index], sortable: true})
-        }
+        this.biometricDataIssues = biometricDataIssues
+
         this.fields.push("update");
         this.fields.push("delete");
       })

@@ -29,6 +29,19 @@ export default {
       modalShow: false,
     }
   },
+  mounted() {
+    this.fields =
+      [
+        {key: "healthNo", sortable: true},
+        {key: "biometricDataTypeName", sortable: true},
+        {key: "value", sortable: true},
+        {key: "valueUnit", sortable: true},
+        {key: "created_at", sortable: true}
+      ]
+
+    if (this.$auth.user.scope !== 'HealthcareProfessional')
+      this.fields = this.fields.slice(1)
+  },
   methods: {
     showErrorMessage(err) {
       if (err.response) {
@@ -111,11 +124,8 @@ export default {
       this.$axios
         .$get('/api/biometricdata')
         .then(biometricDatas => {
-          this.biometricDatas = biometricDatas.entities
-          //this.fields = biometricDatas.columns
-          for (let index = 0; index < biometricDatas.columns.length; index++) {
-            this.fields.push({key: biometricDatas.columns[index], sortable: true})
-          }
+          this.biometricDatas = biometricDatas
+
           this.fields.push("update")
           this.fields.push("delete")
         })
