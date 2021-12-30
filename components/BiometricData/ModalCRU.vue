@@ -264,6 +264,7 @@ export default {
       if (record[0]) {
         this.form.patientName = record[0].name
         this.form.patientId = record[0].id
+        this.togglePSelect = false
       }
     },
     selectableEntityTClicked(record){
@@ -271,6 +272,7 @@ export default {
         this.form.biometricTypeId = record[0].id
         this.form.biometricDataTypeName = record[0].name
         this.form.valueUnit = record[0].unit_name
+        this.toggleTSelect = false
       }
     },
     selectPatient(){
@@ -424,7 +426,7 @@ export default {
           this.form.value = '';
           this.form.notes = '';
           this.form.patientId = '';
-          this.form.created_at = '';
+          this.form.created_at = new Date();
           this.form.created_by = '';
           this.form.patientName = '';
           this.form.healthNo = '';
@@ -433,7 +435,7 @@ export default {
           this.form.source = '';
           this.form.biometricDataIssueId = '';
           this.form.biometricDataIssueName = '';
-          this.form.created_at_time = '';
+          this.form.created_at_time = this.formatTime(new Date());
 
           this.clone = Object.assign({}, this.form)
           this.show = true

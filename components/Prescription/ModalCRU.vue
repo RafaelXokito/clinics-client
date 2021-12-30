@@ -189,6 +189,7 @@ export default {
 
       toggleISelect: false,
       clone: {},
+      issuesClone: {},
 
       start_date_time: null,
       end_date_time: null,
@@ -268,6 +269,8 @@ export default {
     },
     resetBtnPressed() {
       this.form = Object.assign({}, this.clone)
+      this.issues = this.issuesClone
+      this.issues.forEach(e => console.log(e.name + " -> " +e.selected))
     },
     onReset(){
       this.$emit("onReset")
@@ -331,6 +334,7 @@ export default {
       this.issues.forEach(issue => {
         issue.selected = false
       })
+      this.issues = [...this.issues]
     },
   },
   watch: {
@@ -390,6 +394,7 @@ export default {
                         }
                       }
                     });
+                    this.issuesClone = this.issues.map(issue => {return {...issue}})
                     this.dataRows = this.issues.length
                   })
                   .catch((err) => {
@@ -423,6 +428,7 @@ export default {
             .$get('/api/biometricdataissues')
             .then(biometricdataissues => {
               this.issues = biometricdataissues;
+              this.issuesClone = this.issues.map(issue => {return {...issue}})
             })
             .catch((err) => {
               this.showErrorMessage(err);

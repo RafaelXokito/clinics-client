@@ -186,9 +186,6 @@
                   </b-btn>
                 </template>
               </b-table>
-              <p v-else-if="fieldProperties('filesTable').visible" class="mt-2 ml-1">
-                No documents.
-              </p>
             </b-form-group>
           </b-tab>
         </b-tabs>
@@ -244,6 +241,7 @@ export default {
       documents: [],
       documentsFields: ['filename', 'download', 'delete'],
       clone: {},
+      prescriptionClone: {},
     }
   },
   computed: {
@@ -252,22 +250,23 @@ export default {
     },
   },
   mounted() {
-    this.$axios
-      .$get('/api/patients')
-      .then(patients => {
-        this.selectablePEntity = patients
-        this.selectablePFields = [
-          {key: "selected", sortable: true},
-          {key: "email", sortable: true},
-          {key: "name", sortable: true},
-          {key: "gender", sortable: true},
-          {key: "healthNo", sortable: true},
-        ]
-        this.togglePSelect = true
-      })
-      .catch((err)=>{
-        this.showErrorMessage(err);
-      });
+    if (this.$auth.user.scope === 'HealthcareProfessional')
+      this.$axios
+        .$get('/api/patients')
+        .then(patients => {
+          this.selectablePEntity = patients
+          this.selectablePFields = [
+            {key: "selected", sortable: true},
+            {key: "email", sortable: true},
+            {key: "name", sortable: true},
+            {key: "gender", sortable: true},
+            {key: "healthNo", sortable: true},
+          ]
+          this.togglePSelect = true
+        })
+        .catch((err)=>{
+          this.showErrorMessage(err);
+        });
   },
   methods: {
     showErrorMessage(err) {
@@ -312,6 +311,7 @@ export default {
       if (record[0]) {
         this.form.patientName = record[0].name
         this.form.patientId = record[0].id
+        this.togglePSelect = false
       }
     },
     selectPatient(){
@@ -323,6 +323,7 @@ export default {
     },
     resetBtnPressed() {
       this.form = Object.assign({}, this.clone)
+      this.form.prescription = {...this.prescriptionClone}
     },
     onReset(){
       this.$emit("onReset")
@@ -340,8 +341,8 @@ export default {
           if (fieldName === 'id') return { visible: true, editable: false }
           if (fieldName === 'healthcareProfessionalId') return { visible: true, editable: false }
           if (fieldName === 'healthcareProfessionalName') return { visible: true, editable: false }
-          if (fieldName === 'patientId') return { visible: true, editable: false }
-          if (fieldName === 'patientName') return { visible: true, editable: false }
+          if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: false }
+          if (fieldName === 'patientName') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: false }
           if (fieldName === 'files') return { visible: true, editable: false }
           if (fieldName === 'filesTable') return { visible: true, editable: false }
           if (fieldName === 'createdAt') return { visible: true, editable: false }
@@ -355,8 +356,8 @@ export default {
           if (fieldName === 'id') return { visible: false, editable: false }
           if (fieldName === 'healthcareProfessionalId') return { visible: false, editable: false }
           if (fieldName === 'healthcareProfessionalName') return { visible: false, editable: false }
-          if (fieldName === 'patientId') return { visible: true, editable: true }
-          if (fieldName === 'patientName') return { visible: false, editable: false }
+          if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: true }
+          if (fieldName === 'patientName') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: false }
           if (fieldName === 'files') return { visible: true, editable: false }
           if (fieldName === 'filesTable') return { visible: false, editable: false }
           if (fieldName === 'createdAt') return { visible: false, editable: false }
@@ -395,13 +396,14 @@ export default {
               this.documents = observation.documents || [];
               this.form.notes = observation.notes;
               this.form.created_at = this.formatDate(observation.created_at);
+              this.show = true
               if (observation.prescription == null) return; else this.hasPrescription = true
               this.form.prescription.id = observation.prescription.id;
               this.form.prescription.start_date = observation.prescription.start_date;
               this.form.prescription.end_date = observation.prescription.end_date;
               this.form.prescription.notes = observation.prescription.notes;
               this.clone = Object.assign({}, this.form)
-              this.show = true
+              this.prescriptionClone = {...this.form.prescription}
             })
             .catch((err) => {
               this.showErrorMessage(err);
@@ -422,6 +424,7 @@ export default {
           this.form.prescription.notes = null
           this.hasPrescription = true
           this.clone = Object.assign({}, this.form)
+          this.prescriptionClone = {...this.form.prescription}
           this.show = true
         }
 

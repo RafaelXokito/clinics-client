@@ -189,6 +189,7 @@ export default {
           .catch((err) => {
             this.showErrorMessage(err);
           })
+        this.toggleTSelect = false
       }
     },
     onReset(){
