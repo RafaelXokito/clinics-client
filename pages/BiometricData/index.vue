@@ -131,6 +131,7 @@ export default {
           this.fields.push("delete")
 
           this.modalShow = false
+          this.busyTable = false
         })
         .catch((err) => {
           this.showErrorMessage(err)

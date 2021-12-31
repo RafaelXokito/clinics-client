@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="administrators" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteAdmin"></entities-table>
+    <entities-table :items="administrators" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" @modal="modalCRU" @deleteEntity="deleteAdmin" @restoreEntity="restoreAdmin"></entities-table>
   </b-container>
   <modalCRU :entity="administrator" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
 </div>
@@ -85,7 +85,7 @@ export default {
 
           this.fields.push("update")
           this.fields.push("delete")
-          
+
           this.busyTable = false
         })
         .catch((err) => {
@@ -98,6 +98,17 @@ export default {
           .then(() => {
             this.list()
             this.$toast.success('Administrator '+item.name+' deleted').goAway(3000);
+          })
+          .catch((err) => {
+            this.showErrorMessage(err);
+          })
+    },
+    restoreAdmin(item){
+      this.$axios
+        .$post('/api/administrators/'+item.id+'/restore')
+          .then(() => {
+            this.list()
+            this.$toast.success('Administrator '+item.name+' restored').goAway(3000);
           })
           .catch((err) => {
             this.showErrorMessage(err);

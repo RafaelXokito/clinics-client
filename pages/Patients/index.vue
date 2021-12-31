@@ -2,7 +2,7 @@
 <div>
   <navbar />
   <b-container>
-    <entities-table :items="patients" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteEntity" />
+    <entities-table :items="patients" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" @restoreEntity="restorePatient" @modal="modalCRU" @deleteEntity="deleteEntity" />
   </b-container>
   <modalCRU :entity="patient" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>
@@ -98,8 +98,9 @@ export default {
           this.patients=patients
 
           this.fields.push("update")
-          this.fields.push("delete")
-          
+          if (this.$auth.user.scope === 'Administrator')
+            this.fields.push("delete")
+
           this.busyTable = false
         })
         .catch((err) => {
@@ -116,6 +117,17 @@ export default {
         .catch((err) => {
           this.showErrorMessage(err);
         })
+    },
+    restorePatient(item){
+      this.$axios
+        .$post('/api/patients/'+item.id+'/restore')
+          .then(() => {
+            this.list()
+            this.$toast.success('Patient '+item.name+' restored').goAway(3000);
+          })
+          .catch((err) => {
+            this.showErrorMessage(err);
+          })
     }
   }
 }

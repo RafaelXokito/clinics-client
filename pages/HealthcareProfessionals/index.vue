@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="healthcareProfessionals" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteEntity" />
+    <entities-table :items="healthcareProfessionals" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" @restoreEntity="restoreHealthcareProfessional" @modal="modalCRU" @deleteEntity="deleteEntity" />
   </b-container>
   <modalCRU :entity="healthcareProfessional" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>
@@ -115,6 +115,17 @@ export default {
         .catch((err) => {
           this.showErrorMessage(err);
         })
+    },
+    restoreHealthcareProfessional(item){
+      this.$axios
+        .$post('/api/healthcareprofessionals/'+item.id+'/restore')
+          .then(() => {
+            this.list()
+            this.$toast.success('Healthcare Professional '+item.name+' restored').goAway(3000);
+          })
+          .catch((err) => {
+            this.showErrorMessage(err);
+          })
     }
   }
 }

@@ -15,7 +15,7 @@
       </b-input-group-prepend>
       <b-form-input v-model="searchIssue" />
     </b-input-group>
-    <b-table striped hover responsive :items="items" :fields="fields" :filter="searchIssue" :busy="busyTable">
+    <b-table striped hover responsive :items="items" :fields="fields" :filter="searchIssue" :busy="busyTable"  :tbody-tr-class="rowClass">
       <template #table-busy>
         <div class="text-center my-2">
           <b-spinner class="align-middle"></b-spinner>
@@ -73,7 +73,7 @@
           @click="showEntity(data.item, 'edit')"
           size="sm"
           class="mr-2"
-          v-if="showEdit"
+          v-if="showEdit && !(data.item.deleted_at && data.item.deleted_at !== null)"
         >
           <b-icon-pencil-fill></b-icon-pencil-fill>
         </b-button>
@@ -84,9 +84,18 @@
           @click="deleteEntity(data.item)"
           size="sm"
           class="mr-2"
-          v-if="showDelete"
+          v-if="showDelete && !(data.item.deleted_at && data.item.deleted_at !== null)"
         >
           <b-icon-trash-fill></b-icon-trash-fill>
+        </b-button>
+        <b-button
+          variant="success"
+          @click="restoreEntity(data.item)"
+          size="sm"
+          class="mr-2"
+          v-else-if="showRestore && (data.item.deleted_at && data.item.deleted_at !== null)"
+        >
+          <b-icon-shield-plus></b-icon-shield-plus>
         </b-button>
       </template>
     </b-table>
@@ -119,6 +128,10 @@ export default {
       type: Boolean,
       default: true
     },
+    showRestore: {
+      type: Boolean,
+      default: true
+    },
     showWatch: {
       type: Boolean,
       default: true
@@ -148,9 +161,17 @@ export default {
     deleteEntity(item) {
       this.$emit("deleteEntity", item);
     },
+    restoreEntity(item){
+      this.$emit("restoreEntity", item);
+    },
     resetEntity() {
       this.entity = null;
     },
+    rowClass(item, type) {
+      if (!item || type !== 'row') return
+      if (!item.deleted_at) return
+      if (item.deleted_at !== null) return 'table-danger'
+    }
   },
 };
 </script>
