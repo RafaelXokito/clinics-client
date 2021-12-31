@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-modal id="bv-entity" size="lg" :title="method.charAt(0).toUpperCase() + method.slice(1)+' Administrator'" ref="bvEntity" @hide="onReset" :hide-footer="true">
-      <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show">
+      <b-form @submit.prevent="onSubmit" @reset.prevent="resetBtnPressed" v-if="show">
         <b-form-group
           id="input-group-email"
           label="Email:"
@@ -96,6 +96,7 @@ export default {
       },
       genders: ['Male', 'Female', 'Other'],
       show: true,
+      clone: {}
     }
   },
   computed: {
@@ -147,6 +148,9 @@ export default {
     modalShow: Boolean,
   },
   methods: {
+    resetBtnPressed() {
+      this.form = Object.assign({}, this.clone)
+    },
     onReset(){
       this.$emit("onReset")
     },
@@ -169,12 +173,14 @@ export default {
           this.form.email = this.entity.email;
           this.form.name = this.entity.name;
           this.form.gender = this.entity.gender;
+          this.clone = Object.assign({}, this.form)
         }
         else {
           this.form.id = ""
           this.form.email = ""
           this.form.name = ""
           this.form.gender = "Male"
+          this.clone = Object.assign({}, this.form)
         }
 
         this.$refs.bvEntity.show()

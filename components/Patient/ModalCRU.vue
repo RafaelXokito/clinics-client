@@ -144,16 +144,71 @@
               <template #cell(Documents)="data">
                 {{data.item.nDocuments}}
               </template>
-              <template #cell(Prescription)="data">
+              <template #cell(Details)="data">
                 <b-button
                   variant="warning"
                   @click="data.toggleDetails"
                   size="sm"
                   class="mr-2"
-                  v-if="data.item.hasPrescription"
                 >
-                  <b-icon-pencil-fill></b-icon-pencil-fill>
+                  <b-icon-arrows-angle-contract v-if="data.detailsShowing"></b-icon-arrows-angle-contract>
+                  <b-icon-arrows-angle-expand v-else></b-icon-arrows-angle-expand>
                 </b-button>
+              </template>
+              <template #row-details="data">
+                <b-card>
+                  <b-form-group
+                    id="input-group-notes"
+                    label="Notes:"
+                    label-for="input-notes"
+                  >
+                    <b-form-textarea
+                      id="input-notes"
+                      :value="data.item.notes"
+                      disabled
+                      rows="3"
+                      max-rows="6"
+                    ></b-form-textarea>
+                  </b-form-group>
+                  <div v-if="data.item.prescription != null">
+                    <hr>
+                    <h5 class="text-center">Prescription</h5>
+                    <b-form-group
+                      id="input-group-start-date"
+                      label="Start Date:"
+                      label-for="input-start-date"
+                    >
+                      <b-form-input
+                        id="input-start-date"
+                        :value="formatDate(data.item.prescription.start_date)"
+                        disabled
+                      ></b-form-input>
+                    </b-form-group>
+                    <b-form-group
+                      id="input-group-end-date"
+                      label="End Date:"
+                      label-for="input-end-date"
+                    >
+                      <b-form-input
+                        id="input-end-date"
+                        :value="formatDate(data.item.prescription.end_date)"
+                        disabled
+                      ></b-form-input>
+                    </b-form-group>
+                    <b-form-group
+                      id="input-group-notes-prescription"
+                      label="Notes:"
+                      label-for="input-notes-prescription"
+                    >
+                      <b-form-input
+                        id="input-notes-prescription"
+                        :value="data.item.prescription.notes"
+                        disabled
+                      ></b-form-input>
+                    </b-form-group>
+                  </div>
+
+                </b-card>
               </template>
             </b-table>
             <b-pagination
@@ -214,7 +269,7 @@ export default {
         {key: "healthcareProfessionalName", sortable: true},
         {key: "created_at", sortable: true},
         {key: "Documents", sortable: true},
-        {key: "Prescription", sortable: true},
+        {key: "Details", sortable: true},
       ],
       genderValues: [
         { value: 'Male', text: 'Male' },
