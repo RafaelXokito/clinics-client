@@ -76,7 +76,6 @@ export default {
     },
     onSubmit(form, method){
       if (method === 'create') {
-        form.healthcareProfessionalId = 4
         form.start_date = this.getFormatedDate(form.start_date)
         form.end_date = this.getFormatedDate(form.end_date)
         this.$axios
@@ -120,7 +119,7 @@ export default {
             this.fields.push("update")
           if (this.showDelete)
             this.fields.push("delete")
-            
+
           this.busyTable = false
         })
         .catch((err) => {

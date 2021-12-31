@@ -77,7 +77,7 @@ export default {
           formData.append('file', form.file)
         }
 
-        let promisse = this.$axios.$post('/api/biometricdata/import', formData, {
+        let promisse = this.$axios.$post('/api/biometricdatas/import', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -94,7 +94,7 @@ export default {
         this.biometricData = null;
       } else if (method === 'create') {
         this.$axios
-          .$post('/api/biometricdata', form)
+          .$post('/api/biometricdatas', form)
           .then(() => {
             this.list();
             this.$toast.success('Biometric Data created').goAway(3000);
@@ -106,7 +106,7 @@ export default {
           });
       } else {
         this.$axios
-          .$put('/api/biometricdata/'+this.biometricData.id, form)
+          .$put('/api/biometricdatas/'+this.biometricData.id, form)
           .then(() => {
             this.list();
             this.$toast.success('Biometric Data updated').goAway(3000);
@@ -123,7 +123,7 @@ export default {
     },
     list() {
       this.$axios
-        .$get('/api/biometricdata')
+        .$get('/api/biometricdatas')
         .then(biometricDatas => {
           this.biometricDatas = biometricDatas
 
@@ -139,7 +139,7 @@ export default {
     },
     deleteAdmin(item){
       this.$axios
-        .$delete('/api/biometricdata/'+item.id)
+        .$delete('/api/biometricdatas/'+item.id)
           .then(() => {
             this.list()
             this.$toast.success('Biometric Data deleted').goAway(3000);

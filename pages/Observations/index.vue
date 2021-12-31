@@ -71,8 +71,6 @@ export default {
       this.method = method;
     },
     getFormatedDate(dateString) {
-      if(dateString === null || dateString.trim().length === 0)
-        return ""
       let date = new Date(dateString)
       return (date.toISOString().split('.')[0]).slice(0, -3).replace('T', ' ')
     },
