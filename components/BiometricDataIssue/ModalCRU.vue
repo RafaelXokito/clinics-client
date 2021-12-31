@@ -12,12 +12,12 @@
                 required
               ></b-form-input>
             </b-form-group>
-            <b-form-group id="input-group-min" label="Min:" label-for="input-min" label-class="font-weight-bold">
+            <b-form-group id="input-group-min" label="Min (inclusive):" label-for="input-min" label-class="font-weight-bold">
               <b-input-group :append="form.biometricDataTypeUnitName">
                 <b-form-input
                   id="input-min"
                   v-model="form.min"
-                  :placeholder="form.biometricDataTypeMin ? '≥ ' + form.biometricDataTypeMin : 'X'"
+                  :placeholder="form.biometricDataTypeMin == null ? 'X' : '≥ ' + form.biometricDataTypeMin"
                   required
                   type="number"
                   step="0.01"
@@ -25,12 +25,12 @@
                 ></b-form-input>
               </b-input-group>
             </b-form-group>
-            <b-form-group id="input-group-max" label="Max:" label-for="input-max" label-class="font-weight-bold">
+            <b-form-group id="input-group-max" label="Max (exclusive):" label-for="input-max" label-class="font-weight-bold">
               <b-input-group :append="form.biometricDataTypeUnitName">
                 <b-form-input
                   id="input-max"
                   v-model="form.max"
-                  :placeholder="form.biometricDataTypeMax ? '≤ ' + form.biometricDataTypeMax : 'X'"
+                  :placeholder="form.biometricDataTypeMax == null ? 'X' : '≤ ' + form.biometricDataTypeMax"
                   required
                   type="number"
                   step="0.01"

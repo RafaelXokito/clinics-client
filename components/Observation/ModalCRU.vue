@@ -93,33 +93,57 @@
           </b-tab>
 
           <b-tab title="Prescription" v-if="hasPrescription">
-            <b-form-group
-              id="input-group-prescriptionStartDate"
-              label="Start Date:"
-              label-for="input-prescriptionStartDate"
-              label-class="font-weight-bold"
-              v-if="fieldProperties('prescriptionStartDate').visible"
-            >
-              <b-form-datepicker
-                id="input-prescriptionStartDate"
-                v-model="form.prescription.start_date" class="mb-2"
-                :disabled="!fieldProperties('prescriptionStartDate').editable"
-              >
-              </b-form-datepicker>
+            <b-form-group id="input-group-start-date" label="Start Date:" label-for="input-start-date" label-class="font-weight-bold">
+              <div class="d-flex flex-row flex-wrap">
+                <div class="flex-grow-1 px-1 mb-2">
+                  <b-form-datepicker
+                    id="input-start-date"
+                    v-model="form.prescription.start_date"
+                    :disabled="!fieldProperties('prescriptionStartDate').editable"
+                    :state="start_dateState"
+                    aria-describedby="input-startdate-feedback"
+                    required
+                  />
+                  <b-form-invalid-feedback id="input-startdate-feedback">
+                    {{form.start_dateError}}
+                  </b-form-invalid-feedback>
+                </div>
+                <div class="flex-grow-1 px-1 mb-2">
+                  <b-form-timepicker
+                    id="timepicker-start-date"
+                    v-model="start_date_time"
+                    :disabled="!fieldProperties('prescriptionStartDate').editable"
+                    :state="start_dateState"
+                    required
+                  />
+                </div>
+              </div>
             </b-form-group>
-            <b-form-group
-              id="input-group-prescriptionEndDate"
-              label="End Date:"
-              label-for="input-prescriptionEndDate"
-              label-class="font-weight-bold"
-              v-if="fieldProperties('prescriptionEndDate').visible"
-            >
-              <b-form-datepicker
-                id="input-prescriptionEndDate"
-                v-model="form.prescription.end_date" class="mb-2"
-                :disabled="!fieldProperties('prescriptionEndDate').editable"
-              >
-              </b-form-datepicker>
+            <b-form-group id="input-group-end-date" label="End Date:" label-for="input-end-date" label-class="font-weight-bold">
+              <div class="d-flex flex-row flex-wrap">
+                <div class="flex-grow-1 px-1 mb-2">
+                  <b-form-datepicker
+                    id="input-end-date"
+                    v-model="form.prescription.end_date"
+                    :disabled="!fieldProperties('prescriptionEndDate').editable"
+                    :state="end_dateState"
+                    aria-describedby="input-enddate-feedback"
+                    required
+                  />
+                  <b-form-invalid-feedback id="input-enddate-feedback">
+                    {{form.end_dateError}}
+                  </b-form-invalid-feedback>
+                </div>
+                <div class="flex-grow-1 px-1 mb-2">
+                  <b-form-timepicker
+                    id="timepicker-end-date"
+                    v-model="end_date_time"
+                    :disabled="!fieldProperties('prescriptionEndDate').editable"
+                    :state="end_dateState"
+                    required
+                  />
+                </div>
+              </div>
             </b-form-group>
 
             <b-form-group
@@ -228,6 +252,8 @@ export default {
         },
       },
       show: false,
+      start_date_time: null,
+      end_date_time: null,
 
       perPage: 4,
 
@@ -247,6 +273,20 @@ export default {
   computed: {
     patientRows() {
       return this.selectablePEntity.length
+    },
+    start_dateState(){
+      if (this.form.prescription.start_date > this.form.prescription.end_date) {
+        this.form.start_dateError = "End date should be lower then start date"
+        return false
+      }
+      return true
+    },
+    end_dateState(){
+      if (this.form.prescription.end_date < this.form.prescription.start_date) {
+        this.form.end_dateError = "End date should be higher then start date"
+        return false
+      }
+      return true
     },
   },
   mounted() {
@@ -276,6 +316,21 @@ export default {
       else {
         this.$toast.error(err).goAway(3000);
       }
+    },
+    formatTime(dateStr) {
+      if (dateStr == null || dateStr === '') return ''
+      let date = new Date(dateStr)
+      return date.toTimeString().split(' ')[0]
+    },
+    getDateAndTimeSum(date, timeString) {
+      if (date == null || timeString == null || timeString === '') return ''
+      let timePieces = timeString.split(':');
+
+      if (timePieces.length !== 3) return ''
+
+      date.setHours(timePieces[0], timePieces[1], timePieces[2])
+
+      return date
     },
     download (fileToDownload) {
       const documentId = fileToDownload.id
@@ -329,6 +384,9 @@ export default {
       this.$emit("onReset")
     },
     onSubmit(){
+      this.form.prescription.start_date = this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time)
+      this.form.prescription.end_date = this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time)
+
       this.$emit("onSubmit", this.form, this.method)
     },
     formatDate(dateStr) {
@@ -379,6 +437,12 @@ export default {
         this.$refs.bvEntity.hide()
       }
     },
+    start_date_time(newTime) {
+      this.form.prescription.start_date = this.getDateAndTimeSum(new Date(this.form.prescription.start_date), newTime)
+    },
+    end_date_time(newTime) {
+      this.form.prescription.end_date = this.getDateAndTimeSum(new Date(this.form.prescription.end_date), newTime)
+    },
     entity(newEntity){
       if (newEntity != null) {
         this.hasPrescription = false
@@ -400,7 +464,9 @@ export default {
               if (observation.prescription == null) return; else this.hasPrescription = true
               this.form.prescription.id = observation.prescription.id;
               this.form.prescription.start_date = observation.prescription.start_date;
+              this.start_date_time = this.formatTime(observation.prescription.start_date);
               this.form.prescription.end_date = observation.prescription.end_date;
+              this.end_date_time = this.formatTime(observation.prescription.end_date);
               this.form.prescription.notes = observation.prescription.notes;
               this.clone = Object.assign({}, this.form)
               this.prescriptionClone = {...this.form.prescription}
@@ -419,7 +485,8 @@ export default {
           this.form.notes = null
           this.form.created_at = null
           this.form.prescription.id = -1
-          this.form.prescription.start_date = null
+          this.form.prescription.start_date = new Date()
+          this.start_date_time = this.formatTime(this.form.prescription.start_date);
           this.form.prescription.end_date = null
           this.form.prescription.notes = null
           this.hasPrescription = true

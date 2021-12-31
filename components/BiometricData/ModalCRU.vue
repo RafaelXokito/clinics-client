@@ -173,9 +173,6 @@
                   <b-icon variant="warning" icon="file-earmark-excel" aria-hidden="true"></b-icon>
                   Example
                 </b-button>
-                <b-button variant="outline-secondary" href="importBiometricDataModel.csv" download>
-                  <b-icon variant="warning" icon="cloud-download" aria-hidden="true"></b-icon>
-                </b-button>
               </b-button-group>
           </b-form>
           <div v-else class="d-flex align-items-center justify-content-center">
@@ -387,7 +384,7 @@ export default {
         this.show = false
         if (this.method === 'edit') {
           this.$axios
-            .$get('/api/biometricdata/' + this.entity.id)
+            .$get('/api/biometricdatas/' + this.entity.id)
             .then(biometricData => {
               this.form.id = biometricData.id;
               this.form.biometricTypeId = biometricData.biometricTypeId;
