@@ -429,6 +429,7 @@ export default {
             .then(biometricdataissues => {
               this.issues = biometricdataissues;
               this.issuesClone = this.issues.map(issue => {return {...issue}})
+              this.dataRows = this.issues.length
             })
             .catch((err) => {
               this.showErrorMessage(err);

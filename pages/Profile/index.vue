@@ -2,13 +2,12 @@
   <div>
       <navbar/>
       <b-container class="text-center pt-5">
-        <b-button @click="showEdit = !showEdit">{{showEdit ? 'Back' : 'Edit'}}</b-button>
         <div v-if="!showEdit">
           <h2>{{currentUser.name}}</h2>
           <h3>{{currentUser.email}}</h3>
           <h3>{{currentUser.gender}}</h3>
         </div>
-        <b-form @submit.prevent="onSubmit" v-else-if="showEdit">
+        <b-form @submit.prevent="onSubmit" v-else-if="showEdit" id="profileForm">
         <b-form-group
           id="input-group-1"
           label="Email address:"
@@ -41,8 +40,9 @@
           ></b-form-select>
         </b-form-group>
 
-        <b-button type="submit" variant="primary">Submit</b-button>
       </b-form>
+        <b-button for="profileForm" type="submit" variant="primary" v-if="showEdit">Submit</b-button>
+        <b-button @click="showEdit = !showEdit">{{showEdit ? 'Back' : 'Edit'}}</b-button>
       </b-container>
   </div>
 </template>
@@ -64,7 +64,7 @@ export default {
         gender: null,
       },
       genders: [{ text: 'Select One', value: null }, 'Male', 'Female'],
-      showEdit: true,
+      showEdit: false,
     }
   },
   computed: {
