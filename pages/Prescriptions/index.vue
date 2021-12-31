@@ -2,7 +2,7 @@
 <div>
   <navbar />
   <b-container>
-    <entities-table :items="prescriptions" :fields="fields" :ownModalCRU="true" :showCreate="showCreate" :showEdit="showEdit" :showDelete="showDelete" :showWatch="showWatch" @modal="modalCRU" @deleteEntity="deleteEntity" />
+    <entities-table :items="prescriptions" :fields="fields" :ownModalCRU="true" :showCreate="showCreate" :showEdit="showEdit" :showDelete="showDelete" :showWatch="showWatch" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteEntity" />
   </b-container>
   <modalCRU :entity="prescription" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>
@@ -27,6 +27,7 @@ export default {
       prescription: {},
       method: '',
       modalShow: false,
+      busyTable: false
     }
   },
   computed: {
@@ -44,6 +45,7 @@ export default {
     }
   },
   created(){
+    this.busyTable = true
     this.list();
   },
   mounted() {
@@ -118,6 +120,8 @@ export default {
             this.fields.push("update")
           if (this.showDelete)
             this.fields.push("delete")
+            
+          this.busyTable = false
         })
         .catch((err) => {
           this.showErrorMessage(err);

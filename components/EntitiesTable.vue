@@ -15,7 +15,12 @@
       </b-input-group-prepend>
       <b-form-input v-model="searchIssue" />
     </b-input-group>
-    <b-table striped hover responsive :items="items" :fields="fields" :filter="searchIssue">
+    <b-table striped hover responsive :items="items" :fields="fields" :filter="searchIssue" :busy="busyTable">
+      <template #table-busy>
+        <div class="text-center my-2">
+          <b-spinner class="align-middle"></b-spinner>
+        </div>
+      </template>
       <template #cell(created_at)="data">
         {{
           data.item.created_at != null
@@ -118,6 +123,10 @@ export default {
       type: Boolean,
       default: true
     },
+    busyTable: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {

@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="administrators" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteAdmin"></entities-table>
+    <entities-table :items="administrators" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteAdmin"></entities-table>
   </b-container>
   <modalCRU :entity="administrator" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
 </div>
@@ -27,9 +27,11 @@ export default {
       administrator: {},
       method: '',
       modalShow: false,
+      busyTable: false
     }
   },
   created(){
+    this.busyTable = true
     this.list()
   },
   mounted() {
@@ -83,6 +85,8 @@ export default {
 
           this.fields.push("update")
           this.fields.push("delete")
+          
+          this.busyTable = false
         })
         .catch((err) => {
           this.showErrorMessage(err);

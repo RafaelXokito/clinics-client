@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="biometricdatatype" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteBioDataType"></entities-table>
+    <entities-table :items="biometricdatatype" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteBioDataType"></entities-table>
   </b-container>
   <modalCRU :entity="oneBiometricdatatype" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
 </div>
@@ -25,10 +25,12 @@ export default {
       biometricdatatype: [],
       oneBiometricdatatype: {},
       method: '',
-      modalShow: false
+      modalShow: false,
+      busyTable: false
     }
   },
   created(){
+    this.busyTable = true
     this.list();
   },
   mounted() {
@@ -82,6 +84,7 @@ export default {
 
         this.fields.push("update");
         this.fields.push("delete");
+        this.busyTable = false
       })
       .catch((err)=>{
         this.showErrorMessage(err);

@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="biometricDatas" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteAdmin" />
+    <entities-table :items="biometricDatas" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteAdmin" />
   </b-container>
   <modalCRU :entity="biometricData" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow" />
 </div>
@@ -27,6 +27,7 @@ export default {
       biometricData: {},
       method: '',
       modalShow: false,
+      busyTable: false
     }
   },
   mounted() {
@@ -128,6 +129,8 @@ export default {
 
           this.fields.push("update")
           this.fields.push("delete")
+
+          this.modalShow = false
         })
         .catch((err) => {
           this.showErrorMessage(err)
@@ -146,6 +149,7 @@ export default {
     }
   },
   created(){
+    this.busyTable = true
     this.list()
   }
 }

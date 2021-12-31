@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="healthcareProfessionals" :fields="fields" :ownModalCRU="true" @modal="modalCRU" @deleteEntity="deleteEntity" />
+    <entities-table :items="healthcareProfessionals" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteEntity" />
   </b-container>
   <modalCRU :entity="healthcareProfessional" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>
@@ -27,9 +27,11 @@ export default {
       healthcareProfessional: {},
       method: '',
       modalShow: false,
+      busyTable: false
     }
   },
   created(){
+    this.busyTable = true
     this.list();
   },
   mounted() {
@@ -97,6 +99,7 @@ export default {
 
           this.fields.push("update")
           this.fields.push("delete")
+          this.busyTable = false
         })
         .catch((err) => {
           this.showErrorMessage(err);
