@@ -139,7 +139,7 @@
     </b-modal>
   </div>
   <div class="row mt-3" v-if="$auth.user.scope === 'Patient'">
-    <div class="col-xl-12">
+    <div class="col-xl-12" v-if="statistics.biometricData.id !== ''">
       <div class="card card-stats mb-4 mb-xl-0">
         <div class="card-body">
           <div class="row">
@@ -172,7 +172,7 @@
         </div>
       </div>
     </div>
-    <div class="col-xl-12 mt-5">
+    <div class="col-xl-12 mt-5" v-if="statistics.prescriptions.length > 0">
       <div class="card card-stats mb-4 mb-xl-0">
         <div class="card-body">
           <div class="row">

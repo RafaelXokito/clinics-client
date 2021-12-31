@@ -51,7 +51,6 @@
                 password: this.form.password
               }
             }).then((e) => {
-              this.$toast.success('Logged In!').goAway(3000);
               this.$router.push({ name: 'dashboard' });
               this.$axios.defaults.headers.common = { Authorization: `${e.data.type} ${e.data.token}` };
             }).catch(() => {
