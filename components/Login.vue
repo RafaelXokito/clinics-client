@@ -1,6 +1,6 @@
 <template>
     <div class="vue-tempalte">
-        <b-form @submit="onSubmit" @reset="onReset">
+        <b-form @submit="onSubmit" @reset.prevent="onReset">
 
             <div class="mb-5 text-center">
               <b-img src="https://www.sns.gov.pt/wp-content/uploads/2016/08/CHLeiria_logo.jpg" fluid alt="Responsive image"></b-img>
@@ -17,10 +17,6 @@
             </div>
 
             <button type="submit" class="btn btn-dark btn-lg btn-block">Sign In</button>
-
-            <p class="forgot-password text-right mt-2 mb-4">
-                <router-link to="/forgot-password">Forgot password ?</router-link>
-            </p>
 
         </b-form>
     </div>
@@ -66,8 +62,7 @@
             //   });
             //this.$router.push({ name: 'dashboard' })
           },
-          onReset(event) {
-            event.preventDefault()
+          onReset() {
             // Reset our form values
             this.form.email = ''
             this.form.password = ''

@@ -78,6 +78,7 @@ export default {
       if (method === 'create') {
         form.start_date = this.getFormatedDate(form.start_date)
         form.end_date = this.getFormatedDate(form.end_date)
+        form.healthcareProfessionalId = this.$auth.user.id
         this.$axios
           .$post('/api/prescriptions', form)
           .then(() => {

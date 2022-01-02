@@ -3,12 +3,6 @@
     <navbar/>
     <b-container class="text-center pt-5">
       <b-form @submit.prevent="onSubmit">
-        <p v-if="errors.length">
-          <b>Please correct the following error(s):</b>
-          <ul>
-            <li v-for="(error, index) in errors" :key="index">{{ error }}</li>
-          </ul>
-        </p>
       <b-form-group
         id="input-group-1"
         label="Current Password:"
@@ -18,9 +12,16 @@
           id="input-1"
           v-model="form.oldPassword"
           type="password"
+          name="password"
+          autocomplete="current-password"
           placeholder="****"
+          :state="oldPasswordState"
+          aria-describedby="input-old-feedback"
           required
         ></b-form-input>
+        <b-form-invalid-feedback id="input-old-feedback">
+          {{oldPasswordErr}}
+        </b-form-invalid-feedback>
       </b-form-group>
 
       <b-form-group id="input-group-2" label="New Password" label-for="input-2">
@@ -28,9 +29,16 @@
           id="input-2"
           v-model="form.newPassword"
           type="password"
+          name="password"
+          autocomplete="new-password"
           placeholder="****"
+          :state="newPasswordState"
+          aria-describedby="input-new-feedback"
           required
         ></b-form-input>
+        <b-form-invalid-feedback id="input-new-feedback">
+          {{newPasswordErr}}
+        </b-form-invalid-feedback>
       </b-form-group>
       <b-button type="submit" variant="primary">Submit</b-button>
     </b-form>
@@ -53,11 +61,36 @@ export default {
         oldPassword: '',
         newPassword: '',
       },
+      oldPasswordErr: '',
+      newPasswordErr: '',
     }
   },
   computed: {
     currentUser(){
       return this.$auth.user
+    },
+    oldPasswordState(){
+      if (this.form.oldPassword == null || this.form.oldPassword === '') {
+        return null
+      }
+      if (this.form.oldPassword.length < 4) {
+        this.oldPasswordErr = "Password need to contains at least 4 characters!"
+        return false
+      }
+      return true
+    },
+    newPasswordState(){
+      if (this.form.newPassword == null || this.form.newPassword === '') {
+        return null
+      }
+      if (this.form.newPassword.length < 4) {
+        this.newPasswordErr = "Password need to contains at least 4 characters!"
+        return false
+      }
+      return true
+    },
+    isFormValid() {
+      return this.oldPasswordState && this.newPasswordState
     }
   },
   methods: {
@@ -70,13 +103,23 @@ export default {
       }
     },
     onSubmit(){
+      if (!this.isFormValid) {
+        this.showErrorMessage("Fix the errors before submitting")
+        return;
+      }
+
       this.$axios
         .$patch('/api/auth/updatepassword', this.form)
         .then(() => {
           this.$toast.success('Password updated').goAway(3000);
+          this.form.oldPassword = ""
+          this.form.newPassword = ""
+          this.$router.back()
         })
         .catch((err)=>{
-          this.$toast.error('Password was not updated').goAway(3000);
+          this.showErrorMessage(err)
+          this.form.oldPassword = ""
+          this.form.newPassword = ""
         });
     },
   },

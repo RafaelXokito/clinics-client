@@ -42,13 +42,21 @@ export default {
       ]
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     modalCRU(item, method){
       this.modalShow = true
       this.oneBiometricdatatype = item;
       this.method = method;
     },
     onSubmit(form, method){
-      if (method == 'create') {
+      if (method === 'create') {
         this.$axios
           .$post('/api/biometricdatatypes', form)
           .then((e) => {

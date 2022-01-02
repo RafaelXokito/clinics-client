@@ -302,7 +302,7 @@ export default {
             {key: "gender", sortable: true},
             {key: "healthNo", sortable: true},
           ]
-          this.togglePSelect = true
+          this.togglePSelect = false
         })
         .catch((err)=>{
           this.showErrorMessage(err);
@@ -384,6 +384,11 @@ export default {
       this.$emit("onReset")
     },
     onSubmit(){
+      if (!this.isFormValid) {
+        this.showErrorMessage("Fix the errors before submitting")
+        return;
+      }
+
       this.form.prescription.start_date = this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time)
       this.form.prescription.end_date = this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time)
 

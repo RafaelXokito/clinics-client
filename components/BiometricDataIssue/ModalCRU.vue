@@ -10,10 +10,15 @@
                 v-model="form.name"
                 placeholder="Enter Name"
                 required
+                :state="nameState"
+                aria-describedby="input-name-feedback"
               ></b-form-input>
+              <b-form-invalid-feedback id="input-name-feedback">
+                {{nameErr}}
+              </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group id="input-group-min" label="Min (inclusive):" label-for="input-min" label-class="font-weight-bold">
-              <b-input-group :append="form.biometricDataTypeUnitName">
+              <b-input-group :prepend="form.biometricDataTypeUnitName">
                 <b-form-input
                   id="input-min"
                   v-model="form.min"
@@ -22,11 +27,16 @@
                   type="number"
                   step="0.01"
                   @change="parseFloat(form.min).toFixed(2)"
+                  :state="minState"
+                  aria-describedby="input-min-feedback"
                 ></b-form-input>
+                <b-form-invalid-feedback id="input-min-feedback">
+                  {{minErr}}
+                </b-form-invalid-feedback>
               </b-input-group>
             </b-form-group>
             <b-form-group id="input-group-max" label="Max (exclusive):" label-for="input-max" label-class="font-weight-bold">
-              <b-input-group :append="form.biometricDataTypeUnitName">
+              <b-input-group :prepend="form.biometricDataTypeUnitName">
                 <b-form-input
                   id="input-max"
                   v-model="form.max"
@@ -35,7 +45,12 @@
                   type="number"
                   step="0.01"
                   @change="parseFloat(form.max).toFixed(2)"
+                  :state="maxState"
+                  aria-describedby="input-max-feedback"
                 ></b-form-input>
+                <b-form-invalid-feedback id="input-max-feedback">
+                  {{maxErr}}
+                </b-form-invalid-feedback>
               </b-input-group>
             </b-form-group>
             <b-form-group
@@ -52,6 +67,7 @@
                       placeholder="Enter Type"
                       required
                       disabled
+                      :class="!biometricDataTypeState ? 'border border-danger text-danger' : ''"
                     ></b-form-input>
                     <b-input-group-append>
                       <b-button variant="outline-info" @click="selectBiometricType"><b-icon icon="search"></b-icon></b-button>
@@ -115,7 +131,9 @@ export default {
         max: '',
         biometricDataTypeId: '',
         biometricDataTypeName: '',
-        biometricDataTypeUnitName: ''
+        biometricDataTypeUnitName: '',
+        biometricDataTypeMax: '',
+        biometricDataTypeMin: '',
       },
       show: false,
 
@@ -125,6 +143,10 @@ export default {
       selectableTEntity: [],
       selectableTFields: [],
       toggleTSelect: false,
+
+      nameErr: '',
+      minErr: '',
+      maxErr: '',
 
       issues: [],
       issueFields: ['name', 'min', 'max'],
@@ -143,7 +165,67 @@ export default {
     },
     hasIssues() {
       return this.issues != null && this.issues.length > 0;
-    }
+    },
+    biometricDataTypeState(){
+      if ((this.form.biometricDataTypeId == null || this.form.biometricDataTypeId === '')) {
+        return false
+      }
+      return true
+    },
+    nameState() {
+      if (this.form.name == null || this.form.name.trim() === '') {
+        this.nameErr = "Name is required"
+        return false
+      }
+      return true
+    },
+    minState() {
+      if (!this.biometricDataTypeState) {
+        this.minErr = "Select a Biometric Data Type"
+        return false
+      }
+
+      if (this.form.min === '') {
+        this.minErr = "Min is required"
+        return false
+      }
+
+      if (this.form.min < this.form.biometricDataTypeMin || this.form.min > this.form.biometricDataTypeMax) {
+        this.minErr = "Min must be in bounds [" + this.form.biometricDataTypeMin + ", " + this.form.biometricDataTypeMax + "]"
+        return false
+      }
+
+      if (this.form.max !== '' && this.form.min >= this.form.max) {
+        this.minErr = "Min must be lower than max"
+        return false
+      }
+      return true
+    },
+    maxState() {
+      if (!this.biometricDataTypeState) {
+        this.maxErr = "Select a Biometric Data Type"
+        return false
+      }
+
+      if (this.form.max === '') {
+        this.maxErr = "Max is required"
+        return false
+      }
+
+      if (this.form.max < this.form.biometricDataTypeMin || this.form.max > this.form.biometricDataTypeMax) {
+        this.maxErr = "Max must be in bounds [" + this.form.biometricDataTypeMin + ", " + this.form.biometricDataTypeMax + "]"
+        return false
+      }
+
+      if (this.form.min !== '' && this.form.min >= this.form.max) {
+        this.maxErr = "Max must be higher than min"
+        return false
+      }
+      return true
+    },
+    isFormValid() {
+      return this.biometricDataTypeState && this.nameState && this.minState && this.maxState
+    },
   },
   mounted() {
     //Load Biometric Data Types
@@ -199,6 +281,12 @@ export default {
     },
     onSubmit(){
       this.toggleTSelect = false
+
+      if (!this.isFormValid) {
+        this.showErrorMessage("Fix the errors before submitting")
+        return;
+      }
+
       this.$emit("onSubmit",this.form, this.method)
     },
     selectBiometricType(){

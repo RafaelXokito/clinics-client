@@ -34,7 +34,7 @@
                 required
               ></b-form-input>
               <b-form-invalid-feedback id="input-email-feedback">
-                {{form.emailError}}
+                {{emailError}}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
@@ -49,13 +49,15 @@
                 aria-describedby="input-password-feedback"
                 v-model="form.password"
                 type="password"
+                name="password"
+                autocomplete="on"
                 :state="passwordState"
                 :disabled="!fieldProperties('password').editable"
                 trim
                 required
               ></b-form-input>
               <b-form-invalid-feedback id="input-password-feedback">
-                {{form.passwordError}}
+                {{passwordError}}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
@@ -75,7 +77,7 @@
                 required
               ></b-form-input>
               <b-form-invalid-feedback id="input-name-feedback">
-                {{form.nameError}}
+                {{nameError}}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
@@ -96,7 +98,7 @@
                 trim
               />
               <b-form-invalid-feedback id="input-gender-feedback">
-                {{form.genderError}}
+                {{genderError}}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
@@ -116,7 +118,7 @@
                 required
               ></b-form-input>
               <b-form-invalid-feedback id="input-specialty-feedback">
-                {{form.specialtyError}}
+                {{specialtyError}}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
@@ -180,19 +182,21 @@ export default {
       form: {
         id: null,
         email: null,
-        emailError: '',
         password: null,
-        passwordError: '',
         name: null,
-        nameError: '',
         gender: null,
-        genderError: '',
         specialty: null,
-        specialtyError: '',
         prescriptions: [],
         observations: [],
         created_by: null,
       },
+
+      emailError: '',
+      passwordError: '',
+      nameError: '',
+      genderError: '',
+      specialtyError: '',
+
       show: false,
       fieldsPrescriptions: [
         {key: "healthcareProfessionalName", sortable: true},
@@ -220,51 +224,56 @@ export default {
       }
       var re = /\S+@\S+\.\S+/;
       if (!re.test(this.form.email)) {
-        this.form.emailError = "Invalid email!"
+        this.emailError = "Invalid email!"
         return false
       }
       return true
     },
     nameState(){
-      if (this.form.name == "" || this.form.name == null) {
+      if (this.form.name === "" || this.form.name == null) {
         return null
       }
       if (!(this.form.name.length > 5)) {
-        this.form.nameError = "Name need to contains at least 6 characters!"
+        this.nameError = "Name need to contains at least 6 characters!"
         return false
       }
       return true
     },
     genderState(){
-      if (this.form.gender == "" || this.form.gender == null) {
+      if (this.form.gender === "" || this.form.gender == null) {
         return null
       }
       if (!(this.form.gender === 'Male' || this.form.gender === 'Female' || this.form.gender === 'Other')) {
-        this.form.genderError = "Invalid gender!"
+        this.genderError = "Invalid gender!"
         return false
       }
       return true
     },
     passwordState(){
-      if (this.form.password == "" || this.form.password == null) {
+      if (this.method === 'edit')
+        return true
+      if (this.form.password === "" || this.form.password == null) {
         return null
       }
       if (!(this.form.password.length > 3)) {
-        this.form.passwordError = "Password need to contains at least 4 characters!"
+        this.passwordError = "Password need to contains at least 4 characters!"
         return false
       }
       return true
     },
     specialtyState(){
-      if (this.form.specialty == "" || this.form.specialty == null) {
+      if (this.form.specialty === "" || this.form.specialty == null) {
         return null
       }
       if (!(this.form.specialty.length > 3)) {
-        this.form.specialtyError = "Specialty need to contains at least 4 characters!"
+        this.specialtyError = "Specialty need to contains at least 4 characters!"
         return false
       }
       return true
-    }
+    },
+    isFormValid() {
+      return this.emailState && this.nameState && this.genderState && this.passwordState && this.specialtyState
+    },
   },
   methods: {
     showErrorMessage(err) {
@@ -289,6 +298,11 @@ export default {
       this.$emit("onReset")
     },
     onSubmit(){
+      if (!this.isFormValid) {
+        this.showErrorMessage("Fix the errors before submitting")
+        return;
+      }
+
       this.$emit("onSubmit", this.form, this.method)
     },
     fieldProperties(fieldName) {
@@ -353,7 +367,7 @@ export default {
               this.show = true
             })
         } else {
-          this.form.id = ""
+          this.form.id = 0
           this.form.email = ""
           this.form.name = ""
           this.form.gender = "Male"
@@ -361,6 +375,7 @@ export default {
           this.form.prescriptions = ""
           this.form.observations = ""
           this.form.created_by = ""
+          this.form.password = ""
           this.clone = Object.assign({}, this.form)
           this.show = true
         }
