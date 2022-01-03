@@ -162,8 +162,8 @@
                 </div>
               </div>
             </b-form-group>
-              <b-button type="submit" variant="primary">Submit</b-button>
-              <b-button type="reset" variant="danger">Reset</b-button>
+              <b-button type="submit" variant="primary" v-if="method == 'create' || method == 'edit'">Submit</b-button>
+              <b-button type="reset" variant="danger" v-if="method == 'create' || method == 'edit'">Reset</b-button>
               <b-button variant="info" class="float-right" @click="openImportFile" v-if="method=='create'">
                 <b-icon icon="file-earmark-excel" aria-hidden="true"></b-icon>
                 Import
@@ -307,6 +307,15 @@ export default {
           if (fieldName === 'source') return { visible: true, editable: true }
           if (fieldName === 'biometricDataIssueId') return { visible: true, editable: false }
           break;
+        case 'watch':
+          if (fieldName === 'biometricTypeId') return { visible: true, editable: true }
+          if (fieldName === 'value') return { visible: true, editable: true }
+          if (fieldName === 'notes') return { visible: true, editable: true }
+          if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: true }
+          if (fieldName === 'created_at') return { visible: true, editable: true }
+          if (fieldName === 'source') return { visible: true, editable: true }
+          if (fieldName === 'biometricDataIssueId') return { visible: true, editable: false }
+          break;
         case 'create':
           if (fieldName === 'biometricTypeId') return { visible: true, editable: true }
           if (fieldName === 'value') return { visible: true, editable: true }
@@ -382,7 +391,7 @@ export default {
         this.togglePSelect = false;
         this.toggleTSelect = false;
         this.show = false
-        if (this.method === 'edit') {
+        if (this.method === 'edit' || this.method === 'watch') {
           this.$axios
             .$get('/api/biometricdatas/' + this.entity.id)
             .then(biometricData => {
@@ -429,7 +438,7 @@ export default {
           this.form.healthNo = '';
           this.form.biometricDataTypeName = '';
           this.form.valueUnit = '';
-          this.form.source = '';
+          this.form.source = 'Exam';
           this.form.biometricDataIssueId = '';
           this.form.biometricDataIssueName = '';
           this.form.created_at_time = this.formatTime(new Date());

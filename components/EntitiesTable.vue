@@ -100,13 +100,33 @@
           <b-icon-pencil-fill></b-icon-pencil-fill>
         </b-button>
       </template>
+      <template #cell(updateAndWatch)="data">
+        <b-button
+          variant="primary"
+          @click="showEntity(data.item, 'edit')"
+          size="sm"
+          class="mr-2"
+          v-if="showUpdateAndWatch && !(data.item.deleted_at && data.item.deleted_at !== null) && (data.item.created_by && data.item.created_by === $auth.user.id)"
+        >
+          <b-icon-pencil-fill></b-icon-pencil-fill>
+        </b-button>
+        <b-button
+          variant="primary"
+          @click="showEntity(data.item, 'watch')"
+          size="sm"
+          class="mr-2"
+          v-else-if="showUpdateAndWatch"
+        >
+          <b-icon-eyeglasses></b-icon-eyeglasses>
+        </b-button>
+      </template>
       <template #cell(delete)="data">
         <b-button
           variant="danger"
           @click="deleteEntity(data.item)"
           size="sm"
           class="mr-2"
-          v-if="showDelete && !(data.item.deleted_at && data.item.deleted_at !== null)"
+          v-if="showDelete && !(data.item.deleted_at && data.item.deleted_at !== null) && !(showUpdateAndWatch && data.item.created_by && data.item.created_by !== $auth.user.id)"
         >
           <b-icon-trash-fill></b-icon-trash-fill>
         </b-button>
@@ -155,6 +175,10 @@ export default {
       default: true
     },
     showWatch: {
+      type: Boolean,
+      default: false
+    },
+    showUpdateAndWatch: { //Means the presence of created_by
       type: Boolean,
       default: false
     },

@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="biometricDatas" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" @restoreEntity="restoreBioData" @modal="modalCRU" @deleteEntity="deleteBioData" />
+    <entities-table :items="biometricDatas" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showUpdateAndWatch="showUpdateAndWatch" :showRestore="true" :showWatch="true" @restoreEntity="restoreBioData" @modal="modalCRU" @deleteEntity="deleteBioData" />
   </b-container>
   <modalCRU :entity="biometricData" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow" />
 </div>
@@ -28,6 +28,11 @@ export default {
       method: '',
       modalShow: false,
       busyTable: false
+    }
+  },
+  computed: {
+    showUpdateAndWatch(){
+      return this.$auth.user.scope == 'Patient';
     }
   },
   mounted() {
@@ -127,9 +132,12 @@ export default {
         .then(biometricDatas => {
           this.biometricDatas = biometricDatas
 
-          if (this.$auth.user.scope == 'HealthcareProfessional')
+          if (this.$auth.user.scope == 'HealthcareProfessional'){
             this.fields.unshift({key: 'patientName', sortable: true})
-          this.fields.push("update")
+            this.fields.push("update")
+          }
+          else
+            this.fields.push("updateAndWatch")
           this.fields.push("delete")
 
           this.modalShow = false
