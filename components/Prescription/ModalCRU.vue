@@ -122,14 +122,31 @@
               <b-button variant="outline-danger" @click="unselectIssues"><b-icon icon="backspace"></b-icon></b-button>
             </b-input-group-append>
           </b-input-group>
-          <div v-show="toggleISelect" class="pt-3 mx-2">
-            <b-input-group>
-              <b-input-group-prepend is-text>
-                <b-icon icon="search"></b-icon>
-              </b-input-group-prepend>
-              <b-form-input v-model="searchIssue" />
-            </b-input-group>
-            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive :current-page="currentPage" :per-page="perPage" :filter="searchIssue" @filtered="onFiltered">
+          <b-card v-show="toggleISelect" class="mt-2 mx-2">
+            <b-form-group
+              label-for="filter-types"
+              class="mb-0"
+            >
+              <b-input-group size="sm">
+                <b-form-input
+                  id="filter-types"
+                  v-model="searchIssue"
+                  type="search"
+                  placeholder="Type to Search"
+                ></b-form-input>
+
+                <b-input-group-append>
+                  <b-button :disabled="!searchIssue" @click="searchIssue = ''">Clear</b-button>
+                </b-input-group-append>
+              </b-input-group>
+            </b-form-group>
+            <b-table id="issues-table" :items="issues" :fields="fields" small hover responsive :current-page="currentPage" :per-page="perPage" :filter="searchIssue" @filtered="onFiltered" show-empty>
+              <template #empty="scope">
+                <h6 class="text-center">{{ scope.emptyText }}</h6>
+              </template>
+              <template #emptyfiltered="scope">
+                <h6 class="text-center">{{ scope.emptyFilteredText }}</h6>
+              </template>
               <template #cell(selected)="data">
                   <b-form-checkbox @change="issueClicked(data.item)" :checked="data.item.selected" />
               </template>
@@ -142,7 +159,7 @@
               aria-controls="issues-table"
               align="center"
             ></b-pagination>
-          </div>
+          </b-card>
         </b-form-group>
         <div v-if="this.method === 'edit' || this.method === 'create'">
           <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>

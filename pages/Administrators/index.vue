@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="administrators" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" @modal="modalCRU" @deleteEntity="deleteAdmin" @restoreEntity="restoreAdmin"></entities-table>
+    <entities-table :items="administrators" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" :showEdit="true" @modal="modalCRU" @deleteEntity="deleteAdmin" @restoreEntity="restoreAdmin"></entities-table>
   </b-container>
   <modalCRU :entity="administrator" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
 </div>

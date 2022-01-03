@@ -41,8 +41,31 @@
                   <b-button variant="outline-danger" @click="unselectPatient"><b-icon icon="backspace"></b-icon></b-button>
                 </b-input-group-append>
               </b-input-group>
-              <div v-if="togglePSelect && method === 'create'" class="pt-3">
-                <b-table id="my-patients-table" :items="selectablePEntity" :fields="selectablePFields" small hover responsive selectable select-mode="single" @row-selected="selectableEntityPClicked" :current-page="currentPatientPage" :per-page="perPage">
+              <b-card v-if="togglePSelect && method === 'create'" class="mt-2">
+                <b-form-group
+                  label-for="filter-patients"
+                  class="mb-0"
+                >
+                  <b-input-group size="sm">
+                    <b-form-input
+                      id="filter-patients"
+                      v-model="filterPatient"
+                      type="search"
+                      placeholder="Type to Search"
+                    ></b-form-input>
+
+                    <b-input-group-append>
+                      <b-button :disabled="!filterPatient" @click="filterPatient = ''">Clear</b-button>
+                    </b-input-group-append>
+                  </b-input-group>
+                </b-form-group>
+                <b-table id="my-patients-table" :items="selectablePEntity" :fields="selectablePFields" small hover responsive selectable select-mode="single" @row-selected="selectableEntityPClicked" :current-page="currentPatientPage" :per-page="perPage" :filter="filterPatient" show-empty>
+                  <template #empty="scope">
+                    <h6 class="text-center">{{ scope.emptyText }}</h6>
+                  </template>
+                  <template #emptyfiltered="scope">
+                    <h6 class="text-center">{{ scope.emptyFilteredText }}</h6>
+                  </template>
                   <template #cell(selected)="data">
                     <template v-if="data.item.id == form.patientId">
                       <span aria-hidden="true">&check;</span>
@@ -61,7 +84,7 @@
                   aria-controls="my-patients-table"
                   align="center"
                 ></b-pagination>
-              </div>
+              </b-card>
             </b-form-group>
             <b-form-group
               id="input-group-notes"
@@ -286,7 +309,9 @@ export default {
       documentsFields: ['filename', 'download', 'delete'],
       clone: {},
       prescriptionClone: {},
-      submitting: false
+      submitting: false,
+
+      filterPatient: null
     }
   },
   computed: {

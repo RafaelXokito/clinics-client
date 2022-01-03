@@ -25,7 +25,7 @@
       </b-input-group-prepend>
       <b-form-input v-model="searchIssue" />
     </b-input-group>
-    <b-table id="entityTable" striped hover responsive :items="items" :fields="fields" :filter="searchIssue" :busy="busyTable"  :tbody-tr-class="rowClass" show-empty>
+    <b-table id="entityTable" striped hover responsive :items="items" :fields="fields" :filter="searchIssue" :busy="busyTable"  :tbody-tr-class="rowClass" show-empty :current-page="currentPage" :per-page="perPage">
       <template #table-busy>
         <div class="text-center my-2">
           <b-spinner class="align-middle"></b-spinner>
@@ -141,6 +141,39 @@
         </b-button>
       </template>
     </b-table>
+    <div class="row">
+      <b-col md="4" class="my-1">
+        <b-form-group
+          label="Per page"
+          label-for="per-page-select"
+          label-cols-sm="6"
+          label-cols-md="4"
+          label-cols-lg="3"
+          label-align-sm="right"
+          label-size="sm"
+          class="mb-0"
+        >
+          <b-form-select
+            id="per-page-select"
+            v-model="perPage"
+            :options="pageOptions"
+            size="sm"
+          ></b-form-select>
+        </b-form-group>
+      </b-col>
+      <b-col md="4" class="my-1">
+      <b-pagination
+        v-model="currentPage"
+        :total-rows="totalRows"
+        :per-page="perPage"
+        align="center"
+        class="my-0"
+        ></b-pagination>
+      </b-col>
+      <b-col md="4" class="my-1 text-right">
+        <h6>Total Rows: {{totalRows}}</h6>
+      </b-col>
+      </div>
     <modalCru :entity="entity" :method="method" @resetModal="resetEntity" />
   </div>
 </template>
@@ -164,7 +197,7 @@ export default {
     },
     showEdit: {
       type: Boolean,
-      default: true
+      default: false
     },
     showDelete: {
       type: Boolean,
@@ -192,8 +225,17 @@ export default {
       entity: {},
       method: "create",
 
-      searchIssue: ''
+      searchIssue: '',
+
+      currentPage: 1,
+      perPage: 15,
+      pageOptions: [15, 30, 50, { value: 100, text: "Show a lot" }]
     };
+  },
+  computed: {
+    totalRows(){
+      return this.items.length
+    }
   },
   methods: {
     showEntity(item, method = "create") {
@@ -222,7 +264,7 @@ export default {
       // Select rows from table_id
       var rows = document.querySelectorAll('table#' + table_id + ' tr');
 
-      let sumIgnoredLastColumns = this.showDelete + this.showWatch + this.showEdit;
+      let sumIgnoredLastColumns = this.showDelete + this.showWatch + this.showEdit
       // Construct csv
       var csv = [];
       for (var i = 0; i < rows.length; i++) {

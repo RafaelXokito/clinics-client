@@ -2,7 +2,7 @@
 <div>
   <navbar />
   <b-container>
-    <entities-table :items="patients" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" @restoreEntity="restorePatient" @modal="modalCRU" @deleteEntity="deleteEntity" />
+    <entities-table :items="patients" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" :showEdit="showEdit" @restoreEntity="restorePatient" @modal="modalCRU" @deleteEntity="deleteEntity" />
   </b-container>
   <modalCRU :entity="patient" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>
@@ -29,6 +29,11 @@ export default {
       modalShow: false,
       busyTable: false
     }
+  },
+  computed: {
+    showEdit(){
+      return this.$auth.user.scope == 'Administrator' || this.$auth.user.scope == 'HealthcareProfessional'
+    },
   },
   created(){
     this.busyTable = true
