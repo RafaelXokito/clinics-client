@@ -48,7 +48,7 @@
 
                   </b-form>
                   <b-button @click="onSubmit" type="submit" v-if="showEdit" variant="primary">Save</b-button>
-                  <b-button @click="showEdit = !showEdit" variant="outline-primary">{{showEdit ? 'Back' : 'Edit'}}</b-button>
+                  <b-button @click="changeView" variant="outline-primary">{{showEdit ? 'Back' : 'Edit'}}</b-button>
                 </div>
               </div>
             </div>
@@ -96,6 +96,12 @@ export default {
       else {
         this.$toast.error(err).goAway(3000);
       }
+    },
+    changeView(){
+      this.showEdit = !this.showEdit
+      this.form.email = this.currentUser.email
+      this.form.name = this.currentUser.name
+      this.form.gender = this.currentUser.gender
     },
     onSubmit(){
       this.$axios
