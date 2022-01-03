@@ -8,6 +8,16 @@
         >Create
         {{ this.$route.name.replace(/([A-Z])/g, " $1").trim() }}</b-button
       >
+      <b-button
+        v-if="true"
+        variant="warning"
+        @click="download_table_as_csv('entityTable')"
+        class="float-right"
+        >
+        <b-icon-download scale="0.75"></b-icon-download>
+        Download table
+        </b-button
+      >
     </b-form-group>
     <b-input-group>
       <b-input-group-prepend is-text>
@@ -15,11 +25,17 @@
       </b-input-group-prepend>
       <b-form-input v-model="searchIssue" />
     </b-input-group>
-    <b-table striped hover responsive :items="items" :fields="fields" :filter="searchIssue" :busy="busyTable"  :tbody-tr-class="rowClass">
+    <b-table id="entityTable" striped hover responsive :items="items" :fields="fields" :filter="searchIssue" :busy="busyTable"  :tbody-tr-class="rowClass" show-empty>
       <template #table-busy>
         <div class="text-center my-2">
           <b-spinner class="align-middle"></b-spinner>
         </div>
+      </template>
+      <template #empty="scope">
+        <h6 class="text-center">{{ scope.emptyText }}</h6>
+      </template>
+      <template #emptyfiltered="scope">
+        <h6 class="text-center">{{ scope.emptyFilteredText }}</h6>
       </template>
       <template #cell(created_at)="data">
         {{
@@ -55,6 +71,12 @@
             ? new Date(data.item.end_date).toLocaleDateString("pt-PT")
             : "No End"
         }}
+      </template>
+      <template #cell(isGlobal)="data">
+        <div class="text-center">
+          <b-icon-people-fill v-if="data.item.isGlobal" scale="1.75"></b-icon-people-fill>
+          <b-icon-person-fill v-else scale="1.75"></b-icon-person-fill>
+        </div>
       </template>
       <template #cell(watch)="data">
         <b-button
@@ -134,7 +156,7 @@ export default {
     },
     showWatch: {
       type: Boolean,
-      default: true
+      default: false
     },
     busyTable: {
       type: Boolean,
@@ -171,7 +193,38 @@ export default {
       if (!item || type !== 'row') return
       if (!item.deleted_at) return
       if (item.deleted_at !== null) return 'table-danger'
-    }
+    },
+    download_table_as_csv(table_id, separator = ';') {
+      // Select rows from table_id
+      var rows = document.querySelectorAll('table#' + table_id + ' tr');
+
+      let sumIgnoredLastColumns = this.showDelete + this.showWatch + this.showEdit;
+      // Construct csv
+      var csv = [];
+      for (var i = 0; i < rows.length; i++) {
+          var row = [], cols = rows[i].querySelectorAll('td, th');
+          for (var j = 0; j < cols.length - sumIgnoredLastColumns; j++) {
+            // Clean innertext to remove multiple spaces and jumpline (break csv)
+            var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
+            // Escape double-quote with double-double-quote (see https://stackoverflow.com/questions/17808511/properly-escape-a-double-quote-in-csv)
+            data = data.replace(/"/g, '""');
+            // Push escaped string
+            row.push('"' + data + '"');
+          }
+          csv.push(row.join(separator));
+      }
+      var csv_string = csv.join('\n');
+      // Download it
+      var filename = 'export_' + this.$nuxt.$route.name + '_' + new Date().toLocaleDateString() + '.csv';
+      var link = document.createElement('a');
+      link.style.display = 'none';
+      link.setAttribute('target', '_blank');
+      link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv_string));
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  }
   },
 };
 </script>

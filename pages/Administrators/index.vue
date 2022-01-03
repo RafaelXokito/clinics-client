@@ -43,6 +43,14 @@ export default {
       ]
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     modalCRU(item, method){
       this.modalShow = true
       this.administrator = item;

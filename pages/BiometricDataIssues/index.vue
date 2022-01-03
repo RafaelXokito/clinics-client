@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="biometricDataIssues" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteBioDataIssue"></entities-table>
+    <entities-table :items="biometricDataIssues" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" @modal="modalCRU" @deleteEntity="deleteBioDataIssue" @restoreEntity="restoreBioDataIssue"></entities-table>
   </b-container>
   <modalCRU :entity="biometricDataIssue" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
 </div>
@@ -86,7 +86,7 @@ export default {
     },
     list() {
       this.$axios
-      .$get('/api/biometricdataissues')
+      .$get('/api/biometricdataissues?trashed=true')
       .then(biometricDataIssues => {
         this.biometricDataIssues = biometricDataIssues
 
@@ -104,6 +104,17 @@ export default {
           .then(() => {
             this.list()
             this.$toast.success('Biometric Data Issue "'+item.name+'" deleted').goAway(3000);
+          })
+          .catch((err) => {
+            this.showErrorMessage(err);
+          })
+    },
+    restoreBioDataIssue(item){
+      this.$axios
+        .$post('/api/biometricdataissues/'+item.id+'/restore')
+          .then(() => {
+            this.list()
+            this.$toast.success('Biometric Data Issue restored').goAway(3000);
           })
           .catch((err) => {
             this.showErrorMessage(err);

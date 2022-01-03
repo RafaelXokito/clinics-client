@@ -2,7 +2,7 @@
 <div>
   <navbar />
   <b-container>
-    <entities-table :items="prescriptions" :fields="fields" :ownModalCRU="true" :showCreate="showCreate" :showEdit="showEdit" :showDelete="showDelete" :showWatch="showWatch" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteEntity" />
+    <entities-table :items="prescriptions" :fields="fields" :ownModalCRU="true" :showCreate="showCreate" :showEdit="showEdit" :showDelete="showDelete" :showRestore="true" :showWatch="showWatch" :busyTable="busyTable" @modal="modalCRU" @restoreEntity="restorePrescription" @deleteEntity="deleteEntity" />
   </b-container>
   <modalCRU :entity="prescription" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>
@@ -54,6 +54,7 @@ export default {
         {key: "healthcareProfessionalName", sortable: true},
         {key: "start_date", sortable: true},
         {key: "end_date", sortable: true},
+        {key: "isGlobal", sortable: true}
       ]
   },
   methods: {
@@ -136,6 +137,17 @@ export default {
         .catch((err) => {
           this.showErrorMessage(err);
         })
+    },
+    restorePrescription(item){
+      this.$axios
+        .$post('/api/prescriptions/'+item.id+'/restore')
+          .then(() => {
+            this.list()
+            this.$toast.success('Prescription restored').goAway(3000);
+          })
+          .catch((err) => {
+            this.showErrorMessage(err);
+          })
     }
   }
 }

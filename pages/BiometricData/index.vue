@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="biometricDatas" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteAdmin" />
+    <entities-table :items="biometricDatas" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" @restoreEntity="restoreBioData" @modal="modalCRU" @deleteEntity="deleteBioData" />
   </b-container>
   <modalCRU :entity="biometricData" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow" />
 </div>
@@ -127,6 +127,8 @@ export default {
         .then(biometricDatas => {
           this.biometricDatas = biometricDatas
 
+          if (this.$auth.user.scope == 'HealthcareProfessional')
+            this.fields.unshift({key: 'patientName', sortable: true})
           this.fields.push("update")
           this.fields.push("delete")
 
@@ -137,7 +139,7 @@ export default {
           this.showErrorMessage(err)
         })
     },
-    deleteAdmin(item){
+    deleteBioData(item){
       this.$axios
         .$delete('/api/biometricdatas/'+item.id)
           .then(() => {
@@ -146,6 +148,18 @@ export default {
           })
           .catch((err) => {
             this.showErrorMessage(err)
+          })
+    },
+    restoreBioData(item){
+      console.log(item)
+      this.$axios
+        .$post('/api/biometricdatas/'+item.id+'/restore')
+          .then(() => {
+            this.list()
+            this.$toast.success('Biometric Data restored').goAway(3000);
+          })
+          .catch((err) => {
+            this.showErrorMessage(err);
           })
     }
   },

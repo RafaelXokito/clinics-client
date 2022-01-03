@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="biometricdatatype" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteBioDataType"></entities-table>
+    <entities-table :items="biometricdatatype" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" @modal="modalCRU" @deleteEntity="deleteBioDataType" @restoreEntity="restoreBioDataType"></entities-table>
   </b-container>
   <modalCRU :entity="oneBiometricdatatype" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
 </div>
@@ -42,6 +42,14 @@ export default {
       ]
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     modalCRU(item, method){
       this.modalShow = true
       this.oneBiometricdatatype = item;
@@ -96,6 +104,17 @@ export default {
           .then(() => {
             this.list()
             this.$toast.success('Biometric Data Type '+item.name+' deleted').goAway(3000);
+          })
+          .catch((err) => {
+            this.showErrorMessage(err);
+          })
+    },
+    restoreBioDataType(item){
+      this.$axios
+        .$post('/api/biometricdatatypes/'+item.id+'/restore')
+          .then(() => {
+            this.list()
+            this.$toast.success('Biometric Data '+item.name+' restored').goAway(3000);
           })
           .catch((err) => {
             this.showErrorMessage(err);

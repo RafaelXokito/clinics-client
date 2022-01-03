@@ -139,7 +139,7 @@
     </b-modal>
   </div>
   <div class="row mt-3" v-if="$auth.user.scope === 'Patient'">
-    <div class="col-xl-12" v-if="statistics.biometricData.id !== ''">
+    <div class="col-xl-12" v-if="statistics.biometricData.id > 0">
       <div class="card card-stats mb-4 mb-xl-0">
         <div class="card-body">
           <div class="row">
@@ -232,7 +232,7 @@ export default {
           totalBiometricDataTypes: 0
         },
         biometricData: {
-          id: '',
+          id: -1,
           biometricTypeId: '',
           value: '',
           notes: '',

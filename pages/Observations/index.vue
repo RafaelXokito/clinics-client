@@ -2,7 +2,7 @@
 <div>
   <navbar />
   <b-container>
-    <entities-table :items="observations" :fields="fields" :ownModalCRU="true" :showCreate="showCreate" :showEdit="showEdit" :showDelete="showDelete" :showWatch="showWatch" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteEntity" />
+    <entities-table :items="observations" :fields="fields" :ownModalCRU="true" :showCreate="showCreate" :showEdit="showEdit" :showDelete="showDelete" :showRestore="true" :showWatch="showWatch" :busyTable="busyTable" @modal="modalCRU" @deleteEntity="deleteEntity" @restoreEntity="restoreObservation" />
   </b-container>
   <modalCRU :entity="observation" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>
@@ -180,6 +180,17 @@ export default {
         .catch((err) => {
           this.showErrorMessage(err);
         })
+    },
+    restoreObservation(item){
+      this.$axios
+        .$post('/api/observations/'+item.id+'/restore')
+          .then(() => {
+            this.list()
+            this.$toast.success('Observation restored').goAway(3000);
+          })
+          .catch((err) => {
+            this.showErrorMessage(err);
+          })
     }
   }
 }
