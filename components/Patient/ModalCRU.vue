@@ -31,10 +31,9 @@
                 :state="emailState"
                 :disabled="!fieldProperties('email').editable"
                 trim
-                required
               ></b-form-input>
               <b-form-invalid-feedback id="input-email-feedback">
-                {{form.emailError}}
+                {{emailError}}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
@@ -54,10 +53,9 @@
                 :state="passwordState"
                 :disabled="!fieldProperties('password').editable"
                 trim
-                required
               ></b-form-input>
               <b-form-invalid-feedback id="input-password-feedback">
-                {{form.passwordError}}
+                {{passwordError}}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
@@ -74,10 +72,9 @@
                 :state="nameState"
                 :disabled="!fieldProperties('name').editable"
                 trim
-                required
               ></b-form-input>
               <b-form-invalid-feedback id="input-name-feedback">
-                {{form.nameError}}
+                {{nameError}}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
@@ -94,10 +91,28 @@
                 :state="genderState"
                 :disabled="!fieldProperties('gender').editable"
                 :options="genderValues"
-                required
               />
               <b-form-invalid-feedback id="input-gender-feedback">
-                {{form.genderError}}
+                {{genderError}}
+              </b-form-invalid-feedback>
+            </b-form-group>
+            <b-form-group
+              id="input-group-birthdate"
+              label="Date of Birth:"
+              label-for="input-birthdate"
+              label-class="font-weight-bold"
+            >
+              <b-form-datepicker
+                id="input-birthdate"
+                v-model="form.birthDate"
+                :disabled="!fieldProperties('birthdate').editable"
+                :state="birthdateState"
+                show-decade-nav
+                hide-header
+                aria-describedby="input-birthdate-feedback"
+              />
+              <b-form-invalid-feedback id="input-healthNo-feedback">
+                {{birthdateErr}}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
@@ -114,10 +129,9 @@
                 :state="healthNoState"
                 :disabled="!fieldProperties('healthNo').editable"
                 trim
-                required
               ></b-form-input>
               <b-form-invalid-feedback id="input-healthNo-feedback">
-                {{form.healthNoError}}
+                {{healthNoError}}
               </b-form-invalid-feedback>
             </b-form-group>
           </b-tab>
@@ -247,19 +261,24 @@ export default {
       form: {
         id: null,
         email: null,
-        emailError: '',
         password: null,
-        passwordError: '',
         name: null,
-        nameError: '',
         gender: null,
-        genderError: '',
         biometricDatas: [],
         observations: [],
         created_by: null,
         healthNo: null,
-        healthNoError: '',
+        birthDate: null
       },
+      isSubmitting: false,
+
+      healthNoError: '',
+      genderError: '',
+      nameError: '',
+      passwordError: '',
+      emailError: '',
+      birthdateErr: '',
+
       show: false,
       fieldsBiometricData: [
         {key: "value", sortable: true},
@@ -293,32 +312,35 @@ export default {
       return this.form.observations
     },
     emailState(){
-      if (this.form.email == "" || this.form.email == null) {
-        return null
+      if (this.form.email === "" || this.form.email == null) {
+        this.emailError = "Email is required"
+        return this.isSubmitting ? false : null
       }
       var re = /\S+@\S+\.\S+/;
       if (!re.test(this.form.email)) {
-        this.form.emailError = "Invalid email!"
+        this.emailError = "Invalid email!"
         return false
       }
       return true
     },
     nameState(){
-      if (this.form.name == "" || this.form.name == null) {
-        return null
+      if (this.form.name === "" || this.form.name == null) {
+        this.nameError = "Name is required"
+        return this.isSubmitting ? false : null
       }
       if (!(this.form.name.length > 5)) {
-        this.form.nameError = "Name need to contains at least 6 characters!"
+        this.nameError = "Name need to contains at least 6 characters!"
         return false
       }
       return true
     },
     genderState(){
       if (this.form.gender === "" || this.form.gender == null) {
-        return null
+        this.genderError = "Gender is required"
+        return this.isSubmitting ? false : null
       }
       if (!(this.form.gender === 'Male' || this.form.gender === 'Female' || this.form.gender === 'Other')) {
-        this.form.genderError = "Invalid gender!"
+        this.genderError = "Invalid gender!"
         return false
       }
       return true
@@ -327,26 +349,39 @@ export default {
       if (this.method === 'edit')
         return true
       if (this.form.password === "" || this.form.password == null) {
-        return null
+        this.passwordError = "Password is required"
+        return this.isSubmitting ? false : null
       }
       if (this.form.password.length < 4) {
-        this.form.passwordError = "Password need to contains at least 4 characters!"
+        this.passwordError = "Password need to contains at least 4 characters!"
         return false
       }
       return true
     },
     healthNoState(){
       if (this.form.healthNo === "" || this.form.healthNo == null) {
-        return null
+        this.healthNoError = "Health number is required"
+        return this.isSubmitting ? false : null
       }
       if (!(this.form.healthNo.length === 9)) {
-        this.form.healthNoError = "Health number need to contains 9 numbers!"
+        this.healthNoError = "Health number need to contains 9 numbers!"
+        return false
+      }
+      return true
+    },
+    birthdateState() {
+      if (this.form.birthDate == null) {
+        this.birthdateErr = "Day of Birth is required"
+        return this.isSubmitting ? false : null
+      }
+      if (new Date(this.form.birthDate) > new Date()) {
+        this.birthdateErr = "Day of Birth should be lower than current day"
         return false
       }
       return true
     },
     isFormValid() {
-      return this.emailState && this.nameState && this.genderState && this.passwordState && this.healthNoState
+      return this.emailState && this.nameState && this.genderState && this.passwordState && this.healthNoState && this.birthdateState
     },
   },
   methods: {
@@ -363,16 +398,19 @@ export default {
       return date.toLocaleString('pt-PT')
     },
     resetBtnPressed() {
+      this.isSubmitting = false
       this.form = Object.assign({}, this.clone)
     },
     onReset() {
       this.$emit("onReset")
     },
     onSubmit() {
+      this.isSubmitting = true
       if (!this.isFormValid) {
         this.showErrorMessage("Fix the errors before submitting")
         return;
       }
+      this.form.birthDate = new Date(this.form.birthDate)
 
       this.$emit("onSubmit", this.form, this.method)
     },
@@ -388,6 +426,7 @@ export default {
           if (fieldName === 'observations') return { visible: true, editable: false }
           if (fieldName === 'createdBy') return { visible: true, editable: false }
           if (fieldName === 'healthNo') return { visible: true, editable: true }
+          if (fieldName === 'birthdate') return { visible: true, editable: true }
           break;
         case 'create':
           if (fieldName === 'id') return { visible: false, editable: false }
@@ -399,6 +438,7 @@ export default {
           if (fieldName === 'observations') return { visible: false, editable: false }
           if (fieldName === 'createdBy') return { visible: false, editable: false }
           if (fieldName === 'healthNo') return { visible: true, editable: true }
+          if (fieldName === 'birthdate') return { visible: true, editable: true }
           break;
         default: return { visible: true, editable: true }
       }
@@ -414,6 +454,7 @@ export default {
     },
     entity(newEntity) {
       if (newEntity != null) {
+        this.isSubmitting = false
         this.show = false
         if (this.method === 'edit') {
           this.$axios
@@ -427,6 +468,7 @@ export default {
               this.form.observations = patient.observations;
               this.form.created_by = patient.created_by;
               this.form.healthNo = patient.healthNo+"";
+              this.form.birthDate = patient.birthDate;
               this.clone = Object.assign({}, this.form)
               this.show = true
             })
@@ -439,13 +481,14 @@ export default {
           this.form.id = 0
           this.form.email = ""
           this.form.name = ""
-          this.form.gender = "Male"
+          this.form.gender = ""
           this.form.password = ""
           this.form.biometricDatas = ""
           this.form.observations = ""
           this.form.created_by = 0
           this.form.healthNo = ""
           this.form.password = ""
+          this.form.birthDate = null
           this.clone = Object.assign({}, this.form)
           this.show = true
         }

@@ -31,7 +31,6 @@
                 :state="emailState"
                 :disabled="!fieldProperties('email').editable"
                 trim
-                required
               ></b-form-input>
               <b-form-invalid-feedback id="input-email-feedback">
                 {{emailError}}
@@ -54,7 +53,6 @@
                 :state="passwordState"
                 :disabled="!fieldProperties('password').editable"
                 trim
-                required
               ></b-form-input>
               <b-form-invalid-feedback id="input-password-feedback">
                 {{passwordError}}
@@ -74,7 +72,6 @@
                 :state="nameState"
                 :disabled="!fieldProperties('name').editable"
                 trim
-                required
               ></b-form-input>
               <b-form-invalid-feedback id="input-name-feedback">
                 {{nameError}}
@@ -94,11 +91,28 @@
                 :state="genderState"
                 :disabled="!fieldProperties('gender').editable"
                 :options="genderValues"
-                required
                 trim
               />
               <b-form-invalid-feedback id="input-gender-feedback">
                 {{genderError}}
+              </b-form-invalid-feedback>
+            </b-form-group>
+            <b-form-group
+              id="input-group-birthdate"
+              label="Date of Birth:"
+              label-for="input-birthdate"
+              label-class="font-weight-bold"
+            >
+              <b-form-datepicker
+                id="input-birthdate"
+                v-model="form.birthDate"
+                :state="birthdateState"
+                show-decade-nav
+                hide-header
+                aria-describedby="input-birthdate-feedback"
+              />
+              <b-form-invalid-feedback id="input-healthNo-feedback">
+                {{birthdateErr}}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
@@ -115,7 +129,6 @@
                 :state="specialtyState"
                 :disabled="!fieldProperties('specialty').editable"
                 trim
-                required
               ></b-form-input>
               <b-form-invalid-feedback id="input-specialty-feedback">
                 {{specialtyError}}
@@ -189,6 +202,7 @@ export default {
         prescriptions: [],
         observations: [],
         created_by: null,
+        birthDate: null
       },
 
       emailError: '',
@@ -196,6 +210,9 @@ export default {
       nameError: '',
       genderError: '',
       specialtyError: '',
+      birthdateErr: '',
+
+      isSubmitting: false,
 
       show: false,
       fieldsPrescriptions: [
@@ -219,8 +236,9 @@ export default {
   },
   computed: {
     emailState(){
-      if (this.form.email == "" || this.form.email == null) {
-        return null
+      if (this.form.email === "" || this.form.email == null) {
+        this.emailError = "Email is required"
+        return this.isSubmitting ? false : null
       }
       var re = /\S+@\S+\.\S+/;
       if (!re.test(this.form.email)) {
@@ -231,7 +249,8 @@ export default {
     },
     nameState(){
       if (this.form.name === "" || this.form.name == null) {
-        return null
+        this.nameError = "Name is required"
+        return this.isSubmitting ? false : null
       }
       if (!(this.form.name.length > 5)) {
         this.nameError = "Name need to contains at least 6 characters!"
@@ -241,7 +260,8 @@ export default {
     },
     genderState(){
       if (this.form.gender === "" || this.form.gender == null) {
-        return null
+        this.genderError = "Gender is required"
+        return this.isSubmitting ? false : null
       }
       if (!(this.form.gender === 'Male' || this.form.gender === 'Female' || this.form.gender === 'Other')) {
         this.genderError = "Invalid gender!"
@@ -253,7 +273,8 @@ export default {
       if (this.method === 'edit')
         return true
       if (this.form.password === "" || this.form.password == null) {
-        return null
+        this.passwordError = "Password is required"
+        return this.isSubmitting ? false : null
       }
       if (!(this.form.password.length > 3)) {
         this.passwordError = "Password need to contains at least 4 characters!"
@@ -263,7 +284,8 @@ export default {
     },
     specialtyState(){
       if (this.form.specialty === "" || this.form.specialty == null) {
-        return null
+        this.specialtyError = "Specialty is required"
+        return this.isSubmitting ? false : null
       }
       if (!(this.form.specialty.length > 3)) {
         this.specialtyError = "Specialty need to contains at least 4 characters!"
@@ -271,8 +293,19 @@ export default {
       }
       return true
     },
+    birthdateState() {
+      if (this.form.birthDate == null) {
+        this.birthdateErr = "Day of Birth is required"
+        return this.isSubmitting ? false : null
+      }
+      if (new Date(this.form.birthDate) > new Date()) {
+        this.birthdateErr = "Day of Birth should be lower than current day"
+        return false
+      }
+      return true
+    },
     isFormValid() {
-      return this.emailState && this.nameState && this.genderState && this.passwordState && this.specialtyState
+      return this.emailState && this.nameState && this.genderState && this.passwordState && this.specialtyState && this.birthdateState
     },
   },
   methods: {
@@ -285,6 +318,7 @@ export default {
       }
     },
     resetBtnPressed() {
+      this.isSubmitting = false
       this.form = Object.assign({}, this.clone)
     },
     formatDate(dateStr, isFull) {
@@ -298,10 +332,12 @@ export default {
       this.$emit("onReset")
     },
     onSubmit(){
+      this.isSubmitting = true
       if (!this.isFormValid) {
         this.showErrorMessage("Fix the errors before submitting")
         return;
       }
+      this.form.birthDate = new Date(this.form.birthDate)
 
       this.$emit("onSubmit", this.form, this.method)
     },
@@ -318,6 +354,7 @@ export default {
           if (fieldName === 'observations') return { visible: true, editable: false }
           if (fieldName === 'patients') return { visible: true, editable: false }
           if (fieldName === 'createdBy') return { visible: false, editable: false }
+          if (fieldName === 'birthdate') return { visible: true, editable: true }
           break;
         case 'create':
           if (fieldName === 'id') return { visible: false, editable: false }
@@ -330,6 +367,7 @@ export default {
           if (fieldName === 'observations') return { visible: false, editable: false }
           if (fieldName === 'patients') return { visible: false, editable: false }
           if (fieldName === 'createdBy') return { visible: false, editable: false }
+          if (fieldName === 'birthdate') return { visible: true, editable: true }
           break;
         default: return { visible: true, editable: true }
       }
@@ -346,6 +384,7 @@ export default {
     entity(newEntity){
       if (newEntity != null) {
         this.show = false
+        this.isSubmitting = false
         if (this.method === 'edit') {
           this.$axios
             .$get('/api/healthcareprofessionals/' + this.entity.id)
@@ -358,6 +397,7 @@ export default {
               this.form.prescriptions = healthcareProfessional.prescriptions;
               this.form.observations = healthcareProfessional.observations;
               this.form.created_by = healthcareProfessional.created_by;
+              this.form.birthDate = healthcareProfessional.birthDate;
               this.clone = Object.assign({}, this.form)
               this.show = true
             })
@@ -370,12 +410,13 @@ export default {
           this.form.id = 0
           this.form.email = ""
           this.form.name = ""
-          this.form.gender = "Male"
+          this.form.gender = ""
           this.form.specialty = ""
           this.form.prescriptions = ""
           this.form.observations = ""
           this.form.created_by = ""
           this.form.password = ""
+          this.form.birthDate = null
           this.clone = Object.assign({}, this.form)
           this.show = true
         }

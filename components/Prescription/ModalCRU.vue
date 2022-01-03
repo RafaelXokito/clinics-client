@@ -36,8 +36,8 @@
                 v-model="form.start_date"
                 :disabled="!fieldProperties('startDate').editable"
                 :state="start_dateState"
+                hide-header
                 aria-describedby="input-startdate-feedback"
-                required
               />
               <b-form-invalid-feedback id="input-startdate-feedback">
                 {{start_dateError}}
@@ -49,7 +49,6 @@
                 v-model="start_date_time"
                 :disabled="!fieldProperties('startDate').editable"
                 :state="start_dateState"
-                required
               />
             </div>
           </div>
@@ -62,8 +61,8 @@
                 v-model="form.end_date"
                 :disabled="!fieldProperties('endDate').editable"
                 :state="end_dateState"
+                hide-header
                 aria-describedby="input-enddate-feedback"
-                required
               />
               <b-form-invalid-feedback id="input-enddate-feedback">
                 {{end_dateError}}
@@ -75,7 +74,6 @@
                 v-model="end_date_time"
                 :disabled="!fieldProperties('endDate').editable"
                 :state="end_dateState"
-                required
               />
             </div>
           </div>
@@ -92,10 +90,14 @@
             v-model="form.notes"
             placeholder="Enter notes"
             :disabled="!fieldProperties('notes').editable"
+            :state="notesState"
+            aria-describedby="input-notes-feedback"
             rows="3"
             max-rows="6"
-            required
           ></b-form-textarea>
+          <b-form-invalid-feedback id="input-notes-feedback">
+            {{notesErr}}
+          </b-form-invalid-feedback>
         </b-form-group>
 
         <b-form-group
@@ -109,10 +111,9 @@
             <b-form-input
               id="input-issues"
               :value="issuesSelectedString"
-              :class="issuesSelectedString === '' ? 'border border-danger text-danger' : ''"
+              :class="isSubmitting && issuesSelectedString === '' ? 'border border-danger text-danger' : ''"
               type="text"
               placeholder="Select at least one item"
-              required
               disabled
             ></b-form-input>
             <b-input-group-append>
@@ -178,10 +179,12 @@ export default {
         notes: '',
         isGlobal: false
       },
+      isSubmitting: false,
 
       issuesError: '',
       start_dateError: '',
       end_dateError: '',
+      notesErr: '',
 
       issues: [],
       show: false,
@@ -212,6 +215,10 @@ export default {
       return str.slice(2);
     },
     start_dateState(){
+      if (this.form.start_date == null || this.form.start_date === '') {
+        this.start_dateError = "Start Date is required"
+        return this.isSubmitting ? false : null
+      }
       if (this.getDateAndTimeSum(new Date(this.form.start_date), this.start_date_time) >= this.getDateAndTimeSum(new Date(this.form.end_date), this.end_date_time)) {
         this.start_dateError = "Start date should be lower then end date"
         return false
@@ -219,6 +226,10 @@ export default {
       return true
     },
     end_dateState(){
+      if (this.form.end_date == null || this.form.end_date === '') {
+        this.end_dateError = "End Date is required"
+        return this.isSubmitting ? false : null
+      }
       if (this.getDateAndTimeSum(new Date(this.form.end_date), this.end_date_time) <= this.getDateAndTimeSum(new Date(this.form.start_date), this.start_date_time)) {
         this.end_dateError = "End date should be higher then start date"
         return false
@@ -227,8 +238,15 @@ export default {
     },
     issuesState(){
       if ((this.form.issues == null || this.form.issues.length === 0)) {
-        this.issuesError = "Issues is required"
-        return false
+        this.issuesError = "Issues are required"
+        return this.isSubmitting ? false : null
+      }
+      return true
+    },
+    notesState() {
+      if (this.form.notes == null || this.form.notes.trim() === '') {
+        this.notesErr = "Notes are required"
+        return this.isSubmitting ? false : null
       }
       return true
     },
@@ -238,7 +256,7 @@ export default {
       return this.form.patients[0].name
     },
     isFormValid() {
-        return this.issuesState && this.start_dateState && this.end_dateState
+        return this.issuesState && this.start_dateState && this.end_dateState && this.notesState
     }
   },
   methods: {
@@ -274,6 +292,7 @@ export default {
       this.issues = [...this.issues]
     },
     resetBtnPressed() {
+      this.isSubmitting = false
       this.form = Object.assign({}, this.clone)
       this.issues = this.issuesClone
       this.start_date_time = this.formatTime(this.form.start_date);
@@ -285,6 +304,7 @@ export default {
       this.$emit("onReset")
     },
     onSubmit(){
+      this.isSubmitting = true
       this.form.issues = this.issues.filter(issue => issue.selected)
 
       if (!this.isFormValid) {
@@ -347,6 +367,7 @@ export default {
     },
     entity(newEntity){
       if (newEntity != null) {
+        this.isSubmitting = false
         this.toggleISelect = false;
         this.show = false
         this.currentPage = 1

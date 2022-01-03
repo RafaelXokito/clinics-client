@@ -29,10 +29,9 @@
                   id="input-patient"
                   v-model="form.patientName"
                   type="text"
-                  placeholder="Enter Patient"
+                  placeholder="Select a patient"
                   disabled
-                  required
-                  :class="!patientState ? 'border border-danger text-danger' : ''"
+                  :class="submitting && !patientState ? 'border border-danger text-danger' : ''"
                 ></b-form-input>
                 <b-input-group-append v-if="method === 'create'">
                   <b-button variant="outline-info" @click="selectPatient"><b-icon icon="search"></b-icon></b-button>
@@ -108,8 +107,8 @@
                     v-model="form.prescription.start_date"
                     :disabled="!fieldProperties('prescriptionStartDate').editable"
                     :state="start_dateState"
+                    hide-header
                     aria-describedby="input-startdate-feedback"
-                    required
                   />
                   <b-form-invalid-feedback id="input-startdate-feedback">
                     {{startDateErr}}
@@ -121,7 +120,6 @@
                     v-model="start_date_time"
                     :disabled="!fieldProperties('prescriptionStartDate').editable"
                     :state="start_dateState"
-                    required
                   />
                 </div>
               </div>
@@ -134,8 +132,8 @@
                     v-model="form.prescription.end_date"
                     :disabled="!fieldProperties('prescriptionEndDate').editable"
                     :state="end_dateState"
+                    hide-header
                     aria-describedby="input-enddate-feedback"
-                    required
                   />
                   <b-form-invalid-feedback id="input-enddate-feedback">
                     {{endDateErr}}
@@ -147,7 +145,6 @@
                     v-model="end_date_time"
                     :disabled="!fieldProperties('prescriptionEndDate').editable"
                     :state="end_dateState"
-                    required
                   />
                 </div>
               </div>
@@ -296,7 +293,19 @@ export default {
     isPrescriptionFilled() {
       return this.form.prescription != null && this.form.prescription.notes != null && this.form.prescription.notes.trim().length > 0;
     },
+    prescriptionNotesState() {
+      if (this.method === 'create') return null
+      if (this.form.prescription.notes == null || this.form.prescription.notes.trim().length === 0) {
+        this.prescriptionNotesErr = "Prescription notes are required"
+        return this.submitting ? false : null
+      }
+      return true
+    },
     start_dateState(){
+      if (this.isPrescriptionFilled && (this.form.prescription.start_date == null || this.form.prescription.start_date === '')) {
+        this.startDateErr = "Start Date is required"
+        return this.submitting ? false : null
+      }
       if (this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time) >= this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time)) {
         this.startDateErr = "Start date should be lower then end date"
         return false
@@ -304,22 +313,19 @@ export default {
       return true
     },
     end_dateState(){
+      if (this.isPrescriptionFilled && (this.form.prescription.end_date == null || this.form.prescription.end_date === '')) {
+        this.startDateErr = "End Date is required"
+        return this.submitting ? false : null
+      }
       if (this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time) <= this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time)) {
         this.endDateErr = "End date should be higher then start date"
         return false
       }
       return true
     },
-    prescriptionNotesState() {
-      if (this.form.prescription.notes == null || this.form.prescription.notes.trim().length === 0) {
-        this.prescriptionNotesErr = "Prescription notes are required"
-        return null
-      }
-      return true
-    },
     observationNotesState() {
       if (this.form.notes == null || this.form.notes.trim().length === 0) {
-        this.prescriptionNotesErr = "Observation notes are required"
+        this.observationNotesErr = "Observation notes are required"
         return this.submitting ? false : null
       }
       return true
@@ -329,7 +335,7 @@ export default {
     },
     isFormValid() {
       if (this.isPrescriptionFilled)
-        return this.start_dateState && this.end_dateState && this.patientState && this.prescriptionNotesState && this.observationNotesState
+        return this.start_dateState && this.end_dateState && this.patientState && this.observationNotesState
       return this.patientState && this.observationNotesState
     }
   },
@@ -421,6 +427,7 @@ export default {
       this.form.patientId = null
     },
     resetBtnPressed() {
+      this.submitting = false
       this.form = Object.assign({}, this.clone)
       this.form.prescription = {...this.prescriptionClone}
     },

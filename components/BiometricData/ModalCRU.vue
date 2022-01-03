@@ -17,9 +17,8 @@
                   :value="form.patientName"
                   type="text"
                   placeholder="Select the Patient"
-                  required
                   disabled
-                  :class="!patientState ? 'border border-danger text-danger' : ''"
+                  :class="isSubmitting && !patientState ? 'border border-danger text-danger' : ''"
                 ></b-form-input>
                 <b-input-group-append>
                   <b-button variant="outline-info" @click="selectPatient"><b-icon icon="search"></b-icon></b-button>
@@ -62,9 +61,8 @@
                   :value="form.biometricDataTypeName"
                   type="text"
                   placeholder="Select the Biometric Data Type"
-                  required
                   disabled
-                  :class="!biometricDataTypeState ? 'border border-danger text-danger' : ''"
+                  :class="isSubmitting && !biometricDataTypeState ? 'border border-danger text-danger' : ''"
                 ></b-form-input>
                 <b-input-group-append>
                   <b-button variant="outline-info" @click="selectBiometricType"><b-icon icon="search"></b-icon></b-button>
@@ -103,7 +101,6 @@
                       id="input-value"
                       v-model="form.value"
                       placeholder="X"
-                      required
                       type="number"
                       step="0.01"
                       @change="parseFloat(form.value).toFixed(2)"
@@ -148,7 +145,6 @@
                 v-model="form.source"
                 :disabled="!fieldProperties('source').editable"
                 :options="sourceValues"
-                required
                 :state="sourceState"
                 aria-describedby="input-source-feedback"
               />
@@ -164,6 +160,7 @@
                     v-model="form.created_at"
                     :disabled="!fieldProperties('created_at').editable"
                     :state="createdAtState"
+                    hide-header
                     aria-describedby="input-created-at-feedback"
                   />
                   <b-form-invalid-feedback id="input-created-at-feedback">
@@ -245,6 +242,8 @@ export default {
 
       clone: {},
 
+      isSubmitting: false,
+
       sourceValues: [
         { value: 'Exam', text: 'Exam' },
         { value: 'Sensor', text: 'Sensor' },
@@ -266,19 +265,20 @@ export default {
       if (this.$auth.user.scope === "Patient")
         return true
       if ((this.form.patientId == null || this.form.patientId === '')) {
-        return false
+        return this.isSubmitting ? false : null
       }
       return true
     },
     biometricDataTypeState(){
       if ((this.form.biometricTypeId == null || this.form.biometricTypeId === '')) {
-        return false
+        return this.isSubmitting ? false : null
       }
       return true
     },
     valueState() {
       if ((this.form.value == null || this.form.value === '')) {
-        return null
+        this.valueErr = "Value is required"
+        return this.isSubmitting ? false : null
       }
       if (!this.biometricDataTypeState) {
         this.valueErr = "Select a Biometric Data Type"
@@ -296,7 +296,8 @@ export default {
     },
     sourceState() {
       if (this.form.source == null || this.form.source === '') {
-        return null
+        this.sourceErr = "Source is required"
+        return this.isSubmitting ? false : null
       }
       if (this.form.source !== 'Exam' && this.form.source !== 'Sensor' && this.form.source !== 'Wearable') {
         this.sourceErr = "Source must be \"Exam\" or \"Sensor\" or \"Wearable\""
@@ -306,7 +307,8 @@ export default {
     },
     createdAtState() {
       if (this.form.created_at == null || this.form.created_at === '') {
-        return null
+        this.createdAtErr = "Created At is required"
+        return this.isSubmitting ? false : null
       }
       if (this.getDateAndTimeSum(new Date(this.form.created_at), this.form.created_at_time) >= new Date()) {
         this.createdAtErr = "Created At date must be lower than the present date"
@@ -381,9 +383,11 @@ export default {
       this.$emit("onReset")
     },
     resetBtnPressed() {
+      this.isSubmitting = false
       this.form = Object.assign({}, this.clone)
     },
     onSubmit(){
+      this.isSubmitting = true
       if (!this.isFormValid) {
         this.showErrorMessage("Fix the errors before submitting")
         return;
@@ -482,6 +486,7 @@ export default {
     },
     entity(newEntity){
       if (newEntity != null) {
+        this.isSubmitting = false
         this.togglePSelect = false;
         this.toggleTSelect = false;
         this.show = false
@@ -534,7 +539,7 @@ export default {
           this.form.healthNo = '';
           this.form.biometricDataTypeName = '';
           this.form.valueUnit = '';
-          this.form.source = 'Exam';
+          this.form.source = '';
           this.form.biometricDataIssueId = '';
           this.form.biometricDataIssueName = '';
           this.form.created_at_time = this.formatTime(new Date());
