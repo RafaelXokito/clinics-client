@@ -276,8 +276,7 @@ export default {
     },
     valueState() {
       if ((this.form.value == null || this.form.value === '')) {
-        this.valueErr = "Value is required"
-        return false
+        return null
       }
       if (!this.biometricDataTypeState) {
         this.valueErr = "Select a Biometric Data Type"
@@ -295,8 +294,7 @@ export default {
     },
     sourceState() {
       if (this.form.source == null || this.form.source === '') {
-        this.sourceErr = "Source is required"
-        return false
+        return null
       }
       if (this.form.source !== 'Exam' && this.form.source !== 'Sensor' && this.form.source !== 'Wearable') {
         this.sourceErr = "Source must be \"Exam\" or \"Sensor\" or \"Wearable\""
@@ -306,8 +304,7 @@ export default {
     },
     createdAtState() {
       if (this.form.created_at == null || this.form.created_at === '') {
-        this.createdAtErr = "Created At date is required"
-        return false
+        return null
       }
       if (this.getDateAndTimeSum(new Date(this.form.created_at), this.form.created_at_time) >= new Date()) {
         this.createdAtErr = "Created At date must be lower than the present date"

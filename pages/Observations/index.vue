@@ -76,8 +76,6 @@ export default {
     },
     onSubmit(form, method){
       if (method === 'create') {
-        form.prescription.start_date = this.getFormatedDate(form.prescription.start_date)
-        form.prescription.end_date = this.getFormatedDate(form.prescription.end_date)
         this.$axios
           .$post('/api/observations', form)
           .then((e) => {
@@ -111,8 +109,6 @@ export default {
             this.showErrorMessage(err);
           });
       } else {
-        form.prescription.start_date = this.getFormatedDate(form.prescription.start_date)
-        form.prescription.end_date = this.getFormatedDate(form.prescription.end_date)
         this.$axios
           .$put('/api/observations/'+form.id, form)
           .then((e) => {

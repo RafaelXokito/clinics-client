@@ -32,6 +32,7 @@
                   placeholder="Enter Patient"
                   disabled
                   required
+                  :class="!patientState ? 'border border-danger text-danger' : ''"
                 ></b-form-input>
                 <b-input-group-append v-if="method === 'create'">
                   <b-button variant="outline-info" @click="selectPatient"><b-icon icon="search"></b-icon></b-button>
@@ -75,6 +76,7 @@
                 :disabled="!fieldProperties('notes').editable"
                 rows="3"
                 max-rows="6"
+                required
               ></b-form-textarea>
             </b-form-group>
             <b-form-group
@@ -251,6 +253,10 @@ export default {
           notes: null
         },
       },
+
+      startDateErr: '',
+      endDateErr: '',
+
       show: false,
       start_date_time: null,
       end_date_time: null,
@@ -274,20 +280,31 @@ export default {
     patientRows() {
       return this.selectablePEntity.length
     },
+    hasPrescriptionCalc() {
+      return this.form.prescription != null && this.form.prescription.notes != null && this.form.prescription.notes.trim().length > 0;
+    },
     start_dateState(){
-      if (this.form.prescription.start_date > this.form.prescription.end_date) {
-        this.form.start_dateError = "End date should be lower then start date"
+      if (this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time) >= this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time)) {
+        this.startDateErr = "Start date should be lower then end date"
         return false
       }
       return true
     },
     end_dateState(){
-      if (this.form.prescription.end_date < this.form.prescription.start_date) {
-        this.form.end_dateError = "End date should be higher then start date"
+      if (this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time) <= this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time)) {
+        this.endDateErr = "End date should be higher then start date"
         return false
       }
       return true
     },
+    patientState() {
+      return this.form.patientId != null
+    },
+    isFormValid() {
+      if (this.hasPrescriptionCalc)
+        return this.start_dateState && this.end_dateState && this.patientState
+      return this.patientState
+    }
   },
   mounted() {
     if (this.$auth.user.scope === 'HealthcareProfessional')
@@ -323,7 +340,7 @@ export default {
       return date.toTimeString().split(' ')[0]
     },
     getDateAndTimeSum(date, timeString) {
-      if (date == null || timeString == null || timeString === '') return ''
+      if (date == null || timeString == null || timeString === '' || date === '') return ''
       let timePieces = timeString.split(':');
 
       if (timePieces.length !== 3) return ''
@@ -388,9 +405,13 @@ export default {
         this.showErrorMessage("Fix the errors before submitting")
         return;
       }
-
-      this.form.prescription.start_date = this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time)
-      this.form.prescription.end_date = this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time)
+      if (this.hasPrescriptionCalc || this.hasPrescription) {
+        this.form.prescription.start_date = this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time)
+        this.form.prescription.end_date = this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time)
+      }
+      else {
+        this.form.prescription = null
+      }
 
       this.$emit("onSubmit", this.form, this.method)
     },
@@ -466,7 +487,12 @@ export default {
               this.form.notes = observation.notes;
               this.form.created_at = this.formatDate(observation.created_at);
               this.show = true
-              if (observation.prescription == null) return; else this.hasPrescription = true
+              this.clone = Object.assign({}, this.form)
+
+              if (observation.prescription == null)
+                return;
+
+              this.hasPrescription = true
               this.form.prescription.id = observation.prescription.id;
               this.form.prescription.start_date = observation.prescription.start_date;
               this.start_date_time = this.formatTime(observation.prescription.start_date);
@@ -482,18 +508,20 @@ export default {
               this.show = true
             })
         } else {
-          this.form.id = -1
-          this.form.healthcareProfessionalId = -1
+          this.form.id = 0
+          this.form.healthcareProfessionalId = 0
           this.form.healthcareProfessionalName = null
           this.form.patientId = null
           this.form.patientName = null
           this.form.notes = null
           this.form.created_at = null
-          this.form.prescription.id = -1
+          this.form.prescription.id = 0
           this.form.prescription.start_date = new Date()
           this.start_date_time = this.formatTime(this.form.prescription.start_date);
-          this.form.prescription.end_date = null
+          this.form.prescription.end_date = new Date()
+          this.form.prescription.end_date.setDate(this.form.prescription.end_date.getDate() + 1)
           this.form.prescription.notes = null
+          this.end_date_time = this.formatTime(this.form.prescription.end_date)
           this.hasPrescription = true
           this.clone = Object.assign({}, this.form)
           this.prescriptionClone = {...this.form.prescription}
