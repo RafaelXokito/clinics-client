@@ -14,11 +14,12 @@
               <b-input-group>
                 <b-form-input
                   id="input-patient"
-                  v-model="form.patientName"
+                  :value="form.patientName"
                   type="text"
                   placeholder="Select the Patient"
                   required
                   disabled
+                  :class="!patientState ? 'border border-danger text-danger' : ''"
                 ></b-form-input>
                 <b-input-group-append>
                   <b-button variant="outline-info" @click="selectPatient"><b-icon icon="search"></b-icon></b-button>
@@ -58,11 +59,12 @@
               <b-input-group>
                 <b-form-input
                   id="input-biometricdatatype"
-                  v-model="form.biometricDataTypeName"
+                  :value="form.biometricDataTypeName"
                   type="text"
                   placeholder="Select the Biometric Data Type"
                   required
                   disabled
+                  :class="!biometricDataTypeState ? 'border border-danger text-danger' : ''"
                 ></b-form-input>
                 <b-input-group-append>
                   <b-button variant="outline-info" @click="selectBiometricType"><b-icon icon="search"></b-icon></b-button>
@@ -96,7 +98,7 @@
             <div class="d-flex flex-row flex-wrap">
               <div v-if="fieldProperties('value').visible" class="flex-grow-1 px-1">
                 <b-form-group id="input-group-value" label="Value:" label-for="input-value" label-class="font-weight-bold">
-                  <b-input-group :append="form.valueUnit">
+                  <b-input-group :prepend="form.valueUnit">
                     <b-form-input
                       id="input-value"
                       v-model="form.value"
@@ -106,7 +108,12 @@
                       step="0.01"
                       @change="parseFloat(form.value).toFixed(2)"
                       :disabled="!fieldProperties('value').editable"
+                      :state="valueState"
+                      aria-describedby="input-value-feedback"
                     ></b-form-input>
+                    <b-form-invalid-feedback id="input-value-feedback">
+                      {{valueErr}}
+                    </b-form-invalid-feedback>
                   </b-input-group>
                 </b-form-group>
               </div>
@@ -142,7 +149,12 @@
                 :disabled="!fieldProperties('source').editable"
                 :options="sourceValues"
                 required
+                :state="sourceState"
+                aria-describedby="input-source-feedback"
               />
+              <b-form-invalid-feedback id="input-source-feedback">
+                {{sourceErr}}
+              </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group id="input-group-createdAt" label="Created At:" label-for="input-createdAt" label-class="font-weight-bold" class="">
               <div class="d-flex flex-row flex-wrap">
@@ -151,13 +163,19 @@
                     id="input-createdAt"
                     v-model="form.created_at"
                     :disabled="!fieldProperties('created_at').editable"
+                    :state="createdAtState"
+                    aria-describedby="input-created-at-feedback"
                   />
+                  <b-form-invalid-feedback id="input-created-at-feedback">
+                    {{createdAtErr}}
+                  </b-form-invalid-feedback>
                 </div>
                 <div class="flex-grow-1 px-1 mb-2">
                   <b-form-timepicker
                     id="timepicker-createdAt"
                     v-model="form.created_at_time"
                     :disabled="!fieldProperties('created_at').editable"
+                    :state="createdAtState"
                   />
                 </div>
               </div>
@@ -201,6 +219,8 @@ export default {
         patientName: '',
         healthNo: '',
         biometricDataTypeName: '',
+        min: '',
+        max: '',
         valueUnit: '',
         source: '',
         biometricDataIssueId: '',
@@ -208,8 +228,11 @@ export default {
       },
       show: false,
 
-      perPage: 4,
+      valueErr: '',
+      sourceErr: '',
+      createdAtErr: '',
 
+      perPage: 4,
       currentPatientPage: 1,
       selectablePEntity: [],
       selectablePFields: [],
@@ -239,6 +262,61 @@ export default {
     bioDataRows() {
       return this.selectableTEntity.length
     },
+    patientState(){
+      if (this.$auth.user.scope === "Patient")
+        return true
+      if ((this.form.patientId == null || this.form.patientId === '')) {
+        return false
+      }
+      return true
+    },
+    biometricDataTypeState(){
+      if ((this.form.biometricTypeId == null || this.form.biometricTypeId === '')) {
+        return false
+      }
+      return true
+    },
+    valueState() {
+      if ((this.form.value == null || this.form.value === '')) {
+        return null
+      }
+      if (!this.biometricDataTypeState) {
+        this.valueErr = "Select a Biometric Data Type"
+        return false
+      }
+      if (this.form.value < this.form.min) {
+        this.valueErr = "Value must be higher or equal then " + this.form.min;
+        return false
+      }
+      if (this.form.value >= this.form.max) {
+        this.valueErr = "Value must be lower then " + this.form.max;
+        return false
+      }
+      return true
+    },
+    sourceState() {
+      if (this.form.source == null || this.form.source === '') {
+        return null
+      }
+      if (this.form.source !== 'Exam' && this.form.source !== 'Sensor' && this.form.source !== 'Wearable') {
+        this.sourceErr = "Source must be \"Exam\" or \"Sensor\" or \"Wearable\""
+        return false
+      }
+      return true
+    },
+    createdAtState() {
+      if (this.form.created_at == null || this.form.created_at === '') {
+        return null
+      }
+      if (this.getDateAndTimeSum(new Date(this.form.created_at), this.form.created_at_time) >= new Date()) {
+        this.createdAtErr = "Created At date must be lower than the present date"
+        return false
+      }
+      return true
+    },
+    isFormValid() {
+      return this.patientState && this.biometricDataTypeState && this.valueState && this.sourceState && this.createdAtState
+    }
   },
   props:{
     entity:Object,
@@ -246,6 +324,16 @@ export default {
     modalShow: Boolean,
   },
   methods: {
+    getDateAndTimeSum(date, timeString) {
+      if (date == null || timeString == null || timeString === '') return ''
+      let timePieces = timeString.split(':');
+
+      if (timePieces.length !== 3) return ''
+
+      date.setHours(timePieces[0], timePieces[1], timePieces[2])
+
+      return date
+    },
     openImportFile(){
       document.getElementById('importFileInput').click()
     },
@@ -269,6 +357,8 @@ export default {
         this.form.biometricTypeId = record[0].id
         this.form.biometricDataTypeName = record[0].name
         this.form.valueUnit = record[0].unit_name
+        this.form.max = record[0].max
+        this.form.min = record[0].min
         this.toggleTSelect = false
       }
     },
@@ -294,6 +384,10 @@ export default {
       this.form = Object.assign({}, this.clone)
     },
     onSubmit(){
+      if (!this.isFormValid) {
+        this.showErrorMessage("Fix the errors before submitting")
+        return;
+      }
       this.$emit("onSubmit",this.form, this.method)
     },
     fieldProperties(fieldName) {
@@ -406,6 +500,8 @@ export default {
               this.form.patientName = biometricData.patientName;
               this.form.healthNo = biometricData.healthNo;
               this.form.biometricDataTypeName = biometricData.biometricDataTypeName;
+              this.form.max = biometricData.biometricDataTypeMax;
+              this.form.min = biometricData.biometricDataTypeMin;
               this.form.valueUnit = biometricData.valueUnit;
               this.form.source = biometricData.source;
               this.form.biometricDataIssueId = biometricData.biometricDataIssueId;

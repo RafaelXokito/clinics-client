@@ -33,6 +33,8 @@
             id="input-password"
             v-model.lazy="form.password"
             type="password"
+            name="password"
+            autocomplete="on"
             :state="passwordState"
             aria-describedby="input-password-feedback"
             placeholder="Enter password"
@@ -132,6 +134,8 @@ export default {
       return true
     },
     passwordState(){
+      if (this.method === 'edit')
+        return true
       if (this.form.password === "") {
         return null
       }
@@ -140,6 +144,9 @@ export default {
         return false
       }
       return true
+    },
+    isFormValid() {
+      return this.emailState && this.nameState && this.genderState && this.passwordState
     }
   },
   props:{
@@ -148,6 +155,14 @@ export default {
     modalShow: Boolean,
   },
   methods: {
+    showErrorMessage(err) {
+      if (err.response) {
+        this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
+      }
+      else {
+        this.$toast.error(err).goAway(3000);
+      }
+    },
     resetBtnPressed() {
       this.form = Object.assign({}, this.clone)
     },
@@ -155,6 +170,11 @@ export default {
       this.$emit("onReset")
     },
     onSubmit(){
+      if (!this.isFormValid) {
+        this.showErrorMessage("Fix the errors before submitting")
+        return;
+      }
+
       this.$emit("onSubmit",this.form, this.method)
     },
   },
@@ -180,6 +200,7 @@ export default {
           this.form.email = ""
           this.form.name = ""
           this.form.gender = "Male"
+          this.form.password = ""
           this.clone = Object.assign({}, this.form)
         }
 

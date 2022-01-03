@@ -49,6 +49,8 @@
                 aria-describedby="input-password-feedback"
                 v-model="form.password"
                 type="password"
+                name="password"
+                autocomplete="on"
                 :state="passwordState"
                 :disabled="!fieldProperties('password').editable"
                 trim
@@ -312,7 +314,7 @@ export default {
       return true
     },
     genderState(){
-      if (this.form.gender == "" || this.form.gender == null) {
+      if (this.form.gender === "" || this.form.gender == null) {
         return null
       }
       if (!(this.form.gender === 'Male' || this.form.gender === 'Female' || this.form.gender === 'Other')) {
@@ -322,17 +324,19 @@ export default {
       return true
     },
     passwordState(){
-      if (this.form.password == "" || this.form.password == null) {
+      if (this.method === 'edit')
+        return true
+      if (this.form.password === "" || this.form.password == null) {
         return null
       }
-      if (!(this.form.password.length > 3)) {
+      if (this.form.password.length < 4) {
         this.form.passwordError = "Password need to contains at least 4 characters!"
         return false
       }
       return true
     },
     healthNoState(){
-      if (this.form.healthNo == "" || this.form.healthNo == null) {
+      if (this.form.healthNo === "" || this.form.healthNo == null) {
         return null
       }
       if (!(this.form.healthNo.length === 9)) {
@@ -340,7 +344,10 @@ export default {
         return false
       }
       return true
-    }
+    },
+    isFormValid() {
+      return this.emailState && this.nameState && this.genderState && this.passwordState && this.healthNoState
+    },
   },
   methods: {
     showErrorMessage(err) {
@@ -362,12 +369,17 @@ export default {
       this.$emit("onReset")
     },
     onSubmit() {
+      if (!this.isFormValid) {
+        this.showErrorMessage("Fix the errors before submitting")
+        return;
+      }
+
       this.$emit("onSubmit", this.form, this.method)
     },
     fieldProperties(fieldName) {
       switch (this.method) {
         case 'edit':
-          if (fieldName === 'id') return { visible: true, editable: false }
+          if (fieldName === 'id') return { visible: false, editable: false }
           if (fieldName === 'email') return { visible: true, editable: true }
           if (fieldName === 'password') return { visible: false, editable: false }
           if (fieldName === 'name') return { visible: true, editable: true }
@@ -424,15 +436,16 @@ export default {
               this.show = true
             })
         } else {
-          this.form.id = ""
+          this.form.id = 0
           this.form.email = ""
           this.form.name = ""
           this.form.gender = "Male"
           this.form.password = ""
           this.form.biometricDatas = ""
           this.form.observations = ""
-          this.form.created_by = ""
+          this.form.created_by = 0
           this.form.healthNo = ""
+          this.form.password = ""
           this.clone = Object.assign({}, this.form)
           this.show = true
         }

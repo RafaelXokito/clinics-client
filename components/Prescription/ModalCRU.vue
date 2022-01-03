@@ -40,7 +40,7 @@
                 required
               />
               <b-form-invalid-feedback id="input-startdate-feedback">
-                {{form.start_dateError}}
+                {{start_dateError}}
               </b-form-invalid-feedback>
             </div>
             <div class="flex-grow-1 px-1 mb-2">
@@ -66,7 +66,7 @@
                 required
               />
               <b-form-invalid-feedback id="input-enddate-feedback">
-                {{form.end_dateError}}
+                {{end_dateError}}
               </b-form-invalid-feedback>
             </div>
             <div class="flex-grow-1 px-1 mb-2">
@@ -94,6 +94,7 @@
             :disabled="!fieldProperties('notes').editable"
             rows="3"
             max-rows="6"
+            required
           ></b-form-textarea>
         </b-form-group>
 
@@ -168,18 +169,20 @@ export default {
       form: {
         id: null,
         issues: null,
-        issuesError: '',
         issuesState: false,
         healthcareProfessionalId: null,
         healthcareProfessionalName: null,
         patients: [],
         start_date: null,
-        start_dateError: '',
         end_date: null,
-        end_dateError: '',
         notes: '',
         isGlobal: false
       },
+
+      issuesError: '',
+      start_dateError: '',
+      end_dateError: '',
+
       issues: [],
       show: false,
       fields: [{key: 'selected', label: 'Selected',sortable: true}, {key: 'name', label: 'Name',sortable: true}, {key: 'biometricDataTypeName', label: 'Biometric Data Type',sortable: true}],
@@ -209,30 +212,33 @@ export default {
       return str.slice(2);
     },
     start_dateState(){
-      if (this.form.start_date > this.form.end_date) {
-        this.form.start_dateError = "End date should be lower then start date"
+      if (this.getDateAndTimeSum(new Date(this.form.start_date), this.start_date_time) >= this.getDateAndTimeSum(new Date(this.form.end_date), this.end_date_time)) {
+        this.start_dateError = "Start date should be lower then end date"
         return false
       }
       return true
     },
     end_dateState(){
-      if (this.form.end_date < this.form.start_date) {
-        this.form.end_dateError = "End date should be higher then start date"
+      if (this.getDateAndTimeSum(new Date(this.form.end_date), this.end_date_time) <= this.getDateAndTimeSum(new Date(this.form.start_date), this.start_date_time)) {
+        this.end_dateError = "End date should be higher then start date"
         return false
       }
       return true
     },
     issuesState(){
-      if ((this.form.issues == null || this.form.issues.length == 0)) {
-        this.form.issuesError = "Issues is required"
-        return true
+      if ((this.form.issues == null || this.form.issues.length === 0)) {
+        this.issuesError = "Issues is required"
+        return false
       }
-      return false
+      return true
     },
     patientName() {
       if (this.form.patients == null || this.form.patients.length === 0) return ''
 
       return this.form.patients[0].name
+    },
+    isFormValid() {
+        return this.issuesState && this.start_dateState && this.end_dateState
     }
   },
   methods: {
@@ -270,26 +276,20 @@ export default {
     resetBtnPressed() {
       this.form = Object.assign({}, this.clone)
       this.issues = this.issuesClone
-      this.issues.forEach(e => console.log(e.name + " -> " +e.selected))
+      this.start_date_time = this.formatTime(this.form.start_date);
+      this.end_date_time = this.formatTime(this.form.end_date);
+      this.form = {...this.form}
+      this.issues = this.issuesClone.map(issue => {return {...issue}})
     },
     onReset(){
       this.$emit("onReset")
     },
     onSubmit(){
-      if (!this.start_dateState) {
-        this.showErrorMessage("Check start date errors!")
-        return
-      }
-      if (!this.end_dateState) {
-        this.showErrorMessage("Check end date errors!")
-        return
-      }
-      if (this.issues == null)
-        return;
-
       this.form.issues = this.issues.filter(issue => issue.selected)
-      if (this.form.issues == null) {
-        return
+
+      if (!this.isFormValid) {
+        this.showErrorMessage("Fix the errors before submitting")
+        return;
       }
 
       this.form.start_date = this.getDateAndTimeSum(new Date(this.form.start_date), this.start_date_time)
@@ -338,12 +338,6 @@ export default {
     },
   },
   watch: {
-    start_date_time(newTime) {
-      this.form.start_date = this.getDateAndTimeSum(new Date(this.form.start_date), newTime)
-    },
-    end_date_time(newTime) {
-      this.form.end_date = this.getDateAndTimeSum(new Date(this.form.end_date), newTime)
-    },
     modalShow(newVal){
       if (newVal === true) {
         this.$refs.bvEntity.show()
@@ -416,10 +410,14 @@ export default {
           this.form.healthcareProfessionalName = ""
           this.form.patientId = ""
           this.form.patientName = ""
-          this.form.start_date = new Date().toISOString().slice(0,10)
-          this.form.end_date = new Date().toISOString().slice(0,10)
+          this.form.start_date = new Date()
+          this.form.end_date = new Date()
+          this.form.end_date.setDate(this.form.end_date.getDate() + 1)
           this.form.notes = ""
           this.form.isGlobal = true
+
+          this.start_date_time = this.formatTime(this.form.start_date);
+          this.end_date_time = this.formatTime(this.form.end_date);
 
           this.show = true
 

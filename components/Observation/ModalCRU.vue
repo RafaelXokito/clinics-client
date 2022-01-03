@@ -32,6 +32,7 @@
                   placeholder="Enter Patient"
                   disabled
                   required
+                  :class="!patientState ? 'border border-danger text-danger' : ''"
                 ></b-form-input>
                 <b-input-group-append v-if="method === 'create'">
                   <b-button variant="outline-info" @click="selectPatient"><b-icon icon="search"></b-icon></b-button>
@@ -75,7 +76,13 @@
                 :disabled="!fieldProperties('notes').editable"
                 rows="3"
                 max-rows="6"
+                :state="observationNotesState"
+                aria-describedby="input-ob-notes-feedback"
+                placeholder="Enter notes"
               ></b-form-textarea>
+              <b-form-invalid-feedback id="input-ob-notes-feedback">
+                {{observationNotesErr}}
+              </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
               id="input-group-createdAt"
@@ -105,7 +112,7 @@
                     required
                   />
                   <b-form-invalid-feedback id="input-startdate-feedback">
-                    {{form.start_dateError}}
+                    {{startDateErr}}
                   </b-form-invalid-feedback>
                 </div>
                 <div class="flex-grow-1 px-1 mb-2">
@@ -131,7 +138,7 @@
                     required
                   />
                   <b-form-invalid-feedback id="input-enddate-feedback">
-                    {{form.end_dateError}}
+                    {{endDateErr}}
                   </b-form-invalid-feedback>
                 </div>
                 <div class="flex-grow-1 px-1 mb-2">
@@ -158,9 +165,14 @@
                 v-model="form.prescription.notes"
                 placeholder="Enter notes"
                 :disabled="!fieldProperties('prescriptionNotes').editable"
+                :state="prescriptionNotesState"
+                aria-describedby="input-presc-notes-feedback"
                 rows="3"
                 max-rows="6"
               ></b-form-textarea>
+              <b-form-invalid-feedback id="input-presc-notes-feedback">
+                {{prescriptionNotesErr}}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-tab>
 
@@ -251,6 +263,12 @@ export default {
           notes: null
         },
       },
+
+      startDateErr: '',
+      endDateErr: '',
+      prescriptionNotesErr: '',
+      observationNotesErr: '',
+
       show: false,
       start_date_time: null,
       end_date_time: null,
@@ -268,26 +286,52 @@ export default {
       documentsFields: ['filename', 'download', 'delete'],
       clone: {},
       prescriptionClone: {},
+      submitting: false
     }
   },
   computed: {
     patientRows() {
       return this.selectablePEntity.length
     },
+    isPrescriptionFilled() {
+      return this.form.prescription != null && this.form.prescription.notes != null && this.form.prescription.notes.trim().length > 0;
+    },
     start_dateState(){
-      if (this.form.prescription.start_date > this.form.prescription.end_date) {
-        this.form.start_dateError = "End date should be lower then start date"
+      if (this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time) >= this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time)) {
+        this.startDateErr = "Start date should be lower then end date"
         return false
       }
       return true
     },
     end_dateState(){
-      if (this.form.prescription.end_date < this.form.prescription.start_date) {
-        this.form.end_dateError = "End date should be higher then start date"
+      if (this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time) <= this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time)) {
+        this.endDateErr = "End date should be higher then start date"
         return false
       }
       return true
     },
+    prescriptionNotesState() {
+      if (this.form.prescription.notes == null || this.form.prescription.notes.trim().length === 0) {
+        this.prescriptionNotesErr = "Prescription notes are required"
+        return null
+      }
+      return true
+    },
+    observationNotesState() {
+      if (this.form.notes == null || this.form.notes.trim().length === 0) {
+        this.prescriptionNotesErr = "Observation notes are required"
+        return this.submitting ? false : null
+      }
+      return true
+    },
+    patientState() {
+      return this.form.patientId != null
+    },
+    isFormValid() {
+      if (this.isPrescriptionFilled)
+        return this.start_dateState && this.end_dateState && this.patientState && this.prescriptionNotesState && this.observationNotesState
+      return this.patientState && this.observationNotesState
+    }
   },
   mounted() {
     if (this.$auth.user.scope === 'HealthcareProfessional')
@@ -302,7 +346,7 @@ export default {
             {key: "gender", sortable: true},
             {key: "healthNo", sortable: true},
           ]
-          this.togglePSelect = true
+          this.togglePSelect = false
         })
         .catch((err)=>{
           this.showErrorMessage(err);
@@ -323,7 +367,7 @@ export default {
       return date.toTimeString().split(' ')[0]
     },
     getDateAndTimeSum(date, timeString) {
-      if (date == null || timeString == null || timeString === '') return ''
+      if (date == null || timeString == null || timeString === '' || date === '') return ''
       let timePieces = timeString.split(':');
 
       if (timePieces.length !== 3) return ''
@@ -384,8 +428,16 @@ export default {
       this.$emit("onReset")
     },
     onSubmit(){
-      this.form.prescription.start_date = this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time)
-      this.form.prescription.end_date = this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time)
+      this.submitting = true
+      if (!this.isFormValid) {
+        this.showErrorMessage("Fix the errors before submitting")
+        return;
+      }
+
+      if (this.isPrescriptionFilled) {
+        this.form.prescription.start_date = this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time)
+        this.form.prescription.end_date = this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time)
+      }
 
       this.$emit("onSubmit", this.form, this.method)
     },
@@ -445,6 +497,7 @@ export default {
     },
     entity(newEntity){
       if (newEntity != null) {
+        this.submitting = false
         this.hasPrescription = false
         this.form.documents = []
         this.show = false
@@ -461,7 +514,12 @@ export default {
               this.form.notes = observation.notes;
               this.form.created_at = this.formatDate(observation.created_at);
               this.show = true
-              if (observation.prescription == null) return; else this.hasPrescription = true
+              this.clone = Object.assign({}, this.form)
+
+              if (observation.prescription == null)
+                return;
+
+              this.hasPrescription = true
               this.form.prescription.id = observation.prescription.id;
               this.form.prescription.start_date = observation.prescription.start_date;
               this.start_date_time = this.formatTime(observation.prescription.start_date);
@@ -477,18 +535,20 @@ export default {
               this.show = true
             })
         } else {
-          this.form.id = -1
-          this.form.healthcareProfessionalId = -1
+          this.form.id = 0
+          this.form.healthcareProfessionalId = 0
           this.form.healthcareProfessionalName = null
           this.form.patientId = null
           this.form.patientName = null
           this.form.notes = null
           this.form.created_at = null
-          this.form.prescription.id = -1
+          this.form.prescription.id = 0
           this.form.prescription.start_date = new Date()
           this.start_date_time = this.formatTime(this.form.prescription.start_date);
-          this.form.prescription.end_date = null
+          this.form.prescription.end_date = new Date()
+          this.form.prescription.end_date.setDate(this.form.prescription.end_date.getDate() + 1)
           this.form.prescription.notes = null
+          this.end_date_time = this.formatTime(this.form.prescription.end_date)
           this.hasPrescription = true
           this.clone = Object.assign({}, this.form)
           this.prescriptionClone = {...this.form.prescription}

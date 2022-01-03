@@ -14,44 +14,47 @@
             type="text"
             placeholder="Enter name"
             :state="nameState"
+            aria-describedby="input-name-feedback"
             required
             trim
           ></b-form-input>
           <b-form-invalid-feedback id="input-name-feedback">
-            {{form.nameError}}
+            {{nameError}}
           </b-form-invalid-feedback>
         </b-form-group>
         <b-form-group id="input-group-min" label="Min:" label-for="input-min" label-class="font-weight-bold">
-          <b-input-group :append="form.unit_name">
+          <b-input-group :prepend="form.unit_name">
             <b-form-input
               id="input-min"
               v-model="form.min"
               placeholder="X"
               :state="minState"
+              aria-describedby="input-min-feedback"
               required
               type="number"
               step="0.01"
               @change="parseFloat(form.min).toFixed(2)"
             ></b-form-input>
             <b-form-invalid-feedback id="input-min-feedback">
-              {{form.minError}}
+              {{minError}}
             </b-form-invalid-feedback>
           </b-input-group>
         </b-form-group>
         <b-form-group id="input-group-max" label="Max:" label-for="input-max" label-class="font-weight-bold">
-          <b-input-group :append="form.unit_name">
+          <b-input-group :prepend="form.unit_name">
             <b-form-input
               id="input-max"
               v-model="form.max"
               placeholder="X"
               :state="maxState"
+              aria-describedby="input-max-feedback"
               required
               type="number"
               step="0.01"
               @change="parseFloat(form.max).toFixed(2)"
             ></b-form-input>
             <b-form-invalid-feedback id="input-max-feedback">
-              {{form.maxError}}
+              {{maxError}}
             </b-form-invalid-feedback>
           </b-input-group>
         </b-form-group>
@@ -61,10 +64,11 @@
             v-model="form.unit"
             placeholder="Enter unit"
             :state="unitState"
+            aria-describedby="input-unit-feedback"
             required
           ></b-form-input>
           <b-form-invalid-feedback id="input-unit-feedback">
-            {{form.unitError}}
+            {{unitError}}
           </b-form-invalid-feedback>
         </b-form-group>
         <b-form-group id="input-group-unit-name" label="Unit Name:" label-for="input-unit-name" label-class="font-weight-bold">
@@ -73,10 +77,11 @@
             v-model="form.unit_name"
             placeholder="Enter unit name"
             :state="unit_nameState"
+            aria-describedby="input-unit_name-feedback"
             required
           ></b-form-input>
           <b-form-invalid-feedback id="input-unit_name-feedback">
-            {{form.unit_nameError}}
+            {{unit_nameError}}
           </b-form-invalid-feedback>
         </b-form-group>
         <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
@@ -93,16 +98,18 @@ export default {
       form: {
         id: '',
         name: '',
-        nameError: '',
         min: '',
-        minError: '',
         max: '',
-        maxError: '',
         unit: '',
-        unitError: '',
         unit_name: '',
-        unit_nameError: '',
       },
+
+      nameError: '',
+      minError: '',
+      maxError: '',
+      unitError: '',
+      unit_nameError: '',
+
       show: true,
       clone: {},
     }
@@ -115,54 +122,62 @@ export default {
   computed: {
     nameState(){
       if (this.form.name === "" || this.form.name == null) {
-        return null
+        this.nameError = "Name is required"
+        return false
       }
-      if (!(this.form.name.length >= 2)) {
-        this.form.nameError = "Name need to contains at least 2 characters!"
+      if (this.form.name.length < 2) {
+        this.nameError = "Name need to contains at least 2 characters!"
         return false
       }
       return true
     },
     minState(){
-      if (this.form.min === "" || this.form.min == null) {
-        return null
+      if (this.form.min == null || this.form.min === "") {
+        this.minError = "Min is required"
+        return false
       }
-      if (!(this.form.min < this.form.max)) {
-        this.form.minError = "Invalid minimum! Minimum should be lower than maximum."
+      if ((this.form.max !== "") && Number(this.form.min) >= Number(this.form.max)) {
+        this.minError = "Invalid minimum! Minimum should be lower than maximum."
         return false
       }
       return true
     },
     maxState(){
-      if (this.form.max === "" || this.form.max == null) {
-        return null
+      if (this.form.max == null || this.form.max === "") {
+        this.maxError = "Max is required"
+        return false
       }
-      if (!(this.form.max > this.form.min)) {
-        this.form.maxError = "Invalid maximum! Maximum should be higher than minimum."
+      if ((this.form.min !== "") && Number(this.form.max) <= Number(this.form.min)) {
+        this.maxError = "Invalid maximum! Maximum should be higher than minimum."
         return false
       }
       return true
     },
     unitState(){
       if (this.form.unit === "" || this.form.unit == null) {
-        return null
+        this.unitError = "Unit is required"
+        return false
       }
-      if (!(this.form.unit.length >= 1)) {
-        this.form.nameError = "Unit need to contains at least 1 characters!"
+      if (this.form.unit.length === 0) {
+        this.nameError = "Unit need to contains at least 1 characters!"
         return false
       }
       return true
     },
     unit_nameState(){
       if (this.form.unit_name === "" || this.form.unit_name == null) {
-        return null
+        this.unit_nameError = "Unit name is required"
+        return false
       }
-      if (!(this.form.unit_name.length >= 2)) {
-        this.form.unit_nameError = "Unit name need to contains at least 2 characters!"
+      if (this.form.unit_name.length < 2) {
+        this.unit_nameError = "Unit name need to contains at least 2 characters!"
         return false
       }
       return true
-    }
+    },
+    isFormValid() {
+      return this.nameState && this.minState && this.maxState && this.unit_nameState && this.unitState
+    },
   },
   methods: {
     showErrorMessage(err) {
@@ -180,6 +195,11 @@ export default {
       this.$emit("onReset")
     },
     onSubmit(){
+      if (!this.isFormValid) {
+        this.showErrorMessage("Fix the errors before submitting")
+        return;
+      }
+
       this.$emit("onSubmit",this.form, this.method)
     },
   },
@@ -203,15 +223,14 @@ export default {
           this.clone = Object.assign({}, this.form)
         }
         else {
-          this.form = {}
+          this.form.id = 0
+          this.form.name = "";
+          this.form.min = "";
+          this.form.max = "";
+          this.form.unit = "";
+          this.form.unit_name = "";
           this.clone = Object.assign({}, this.form)
         }
-
-        // if (newEntity["name"] != undefined) {
-        //   this.name = newEntity["name"];
-        // }else{
-        //   this.name = this.$route.name.replace(/([A-Z])/g, ' $1').trim()
-        // }
 
         this.$refs.bvEntity.show()
       }

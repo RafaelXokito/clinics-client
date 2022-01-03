@@ -56,7 +56,7 @@ export default {
       this.method = method;
     },
     onSubmit(form, method){
-      if (method == 'create') {
+      if (method === 'create') {
         this.$axios
           .$post('/api/biometricdatatypes', form)
           .then((e) => {
