@@ -76,8 +76,13 @@
                 :disabled="!fieldProperties('notes').editable"
                 rows="3"
                 max-rows="6"
-                required
+                :state="observationNotesState"
+                aria-describedby="input-ob-notes-feedback"
+                placeholder="Enter notes"
               ></b-form-textarea>
+              <b-form-invalid-feedback id="input-ob-notes-feedback">
+                {{observationNotesErr}}
+              </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
               id="input-group-createdAt"
@@ -107,7 +112,7 @@
                     required
                   />
                   <b-form-invalid-feedback id="input-startdate-feedback">
-                    {{form.start_dateError}}
+                    {{startDateErr}}
                   </b-form-invalid-feedback>
                 </div>
                 <div class="flex-grow-1 px-1 mb-2">
@@ -133,7 +138,7 @@
                     required
                   />
                   <b-form-invalid-feedback id="input-enddate-feedback">
-                    {{form.end_dateError}}
+                    {{endDateErr}}
                   </b-form-invalid-feedback>
                 </div>
                 <div class="flex-grow-1 px-1 mb-2">
@@ -160,9 +165,14 @@
                 v-model="form.prescription.notes"
                 placeholder="Enter notes"
                 :disabled="!fieldProperties('prescriptionNotes').editable"
+                :state="prescriptionNotesState"
+                aria-describedby="input-presc-notes-feedback"
                 rows="3"
                 max-rows="6"
               ></b-form-textarea>
+              <b-form-invalid-feedback id="input-presc-notes-feedback">
+                {{prescriptionNotesErr}}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-tab>
 
@@ -256,6 +266,8 @@ export default {
 
       startDateErr: '',
       endDateErr: '',
+      prescriptionNotesErr: '',
+      observationNotesErr: '',
 
       show: false,
       start_date_time: null,
@@ -274,13 +286,14 @@ export default {
       documentsFields: ['filename', 'download', 'delete'],
       clone: {},
       prescriptionClone: {},
+      submitting: false
     }
   },
   computed: {
     patientRows() {
       return this.selectablePEntity.length
     },
-    hasPrescriptionCalc() {
+    isPrescriptionFilled() {
       return this.form.prescription != null && this.form.prescription.notes != null && this.form.prescription.notes.trim().length > 0;
     },
     start_dateState(){
@@ -297,13 +310,27 @@ export default {
       }
       return true
     },
+    prescriptionNotesState() {
+      if (this.form.prescription.notes == null || this.form.prescription.notes.trim().length === 0) {
+        this.prescriptionNotesErr = "Prescription notes are required"
+        return null
+      }
+      return true
+    },
+    observationNotesState() {
+      if (this.form.notes == null || this.form.notes.trim().length === 0) {
+        this.prescriptionNotesErr = "Observation notes are required"
+        return this.submitting ? false : null
+      }
+      return true
+    },
     patientState() {
       return this.form.patientId != null
     },
     isFormValid() {
-      if (this.hasPrescriptionCalc)
-        return this.start_dateState && this.end_dateState && this.patientState
-      return this.patientState
+      if (this.isPrescriptionFilled)
+        return this.start_dateState && this.end_dateState && this.patientState && this.prescriptionNotesState && this.observationNotesState
+      return this.patientState && this.observationNotesState
     }
   },
   mounted() {
@@ -401,16 +428,15 @@ export default {
       this.$emit("onReset")
     },
     onSubmit(){
+      this.submitting = true
       if (!this.isFormValid) {
         this.showErrorMessage("Fix the errors before submitting")
         return;
       }
-      if (this.hasPrescriptionCalc || this.hasPrescription) {
+
+      if (this.isPrescriptionFilled) {
         this.form.prescription.start_date = this.getDateAndTimeSum(new Date(this.form.prescription.start_date), this.start_date_time)
         this.form.prescription.end_date = this.getDateAndTimeSum(new Date(this.form.prescription.end_date), this.end_date_time)
-      }
-      else {
-        this.form.prescription = null
       }
 
       this.$emit("onSubmit", this.form, this.method)
@@ -471,6 +497,7 @@ export default {
     },
     entity(newEntity){
       if (newEntity != null) {
+        this.submitting = false
         this.hasPrescription = false
         this.form.documents = []
         this.show = false

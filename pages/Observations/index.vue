@@ -76,6 +76,13 @@ export default {
     },
     onSubmit(form, method){
       if (method === 'create') {
+        if (form.prescription != null && form.prescription.start_date != null && form.prescription.end_date != null) {
+          form.prescription.start_date = this.getFormatedDate(form.prescription.start_date)
+          form.prescription.end_date = this.getFormatedDate(form.prescription.end_date)
+        }
+        else {
+          form.prescription = null
+        }
         this.$axios
           .$post('/api/observations', form)
           .then((e) => {
@@ -109,6 +116,13 @@ export default {
             this.showErrorMessage(err);
           });
       } else {
+        if (form.prescription != null && form.prescription.start_date != null && form.prescription.end_date != null) {
+          form.prescription.start_date = this.getFormatedDate(form.prescription.start_date)
+          form.prescription.end_date = this.getFormatedDate(form.prescription.end_date)
+        }
+        else {
+          form.prescription = null
+        }
         this.$axios
           .$put('/api/observations/'+form.id, form)
           .then((e) => {

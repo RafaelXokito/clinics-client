@@ -263,6 +263,8 @@ export default {
       return this.selectableTEntity.length
     },
     patientState(){
+      if (this.$auth.user.scope === "Patient")
+        return true
       if ((this.form.patientId == null || this.form.patientId === '')) {
         return false
       }
