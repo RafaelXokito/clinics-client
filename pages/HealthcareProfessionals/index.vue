@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="healthcareProfessionals" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" @restoreEntity="restoreHealthcareProfessional" @modal="modalCRU" @deleteEntity="deleteEntity" />
+    <entities-table :items="healthcareProfessionals" :fields="fields" :ownModalCRU="true" :showEdit="true"  :busyTable="busyTable" :showRestore="true" @restoreEntity="restoreHealthcareProfessional" @modal="modalCRU" @deleteEntity="deleteEntity" />
   </b-container>
   <modalCRU :entity="healthcareProfessional" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>

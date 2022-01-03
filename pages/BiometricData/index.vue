@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="biometricDatas" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showUpdateAndWatch="showUpdateAndWatch" :showRestore="true" :showWatch="true" @restoreEntity="restoreBioData" @modal="modalCRU" @deleteEntity="deleteBioData" />
+    <entities-table :items="biometricDatas" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showUpdateAndWatch="showUpdateAndWatch" :showWatch="showWatch" :showEdit="showEdit" :showRestore="true" :showDelete="showDelete" @restoreEntity="restoreBioData" @modal="modalCRU" @deleteEntity="deleteBioData" />
   </b-container>
   <modalCRU :entity="biometricData" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow" />
 </div>
@@ -33,6 +33,15 @@ export default {
   computed: {
     showUpdateAndWatch(){
       return this.$auth.user.scope == 'Patient';
+    },
+    showEdit(){
+      return this.$auth.user.scope == 'HealthcareProfessional'
+    },
+    showWatch(){
+      return this.$auth.user.scope == 'Patient'
+    },
+    showDelete(){
+      return this.$auth.user.scope == 'HealthcareProfessional' || this.$auth.user.scope == 'Patient'
     }
   },
   mounted() {

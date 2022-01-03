@@ -72,8 +72,31 @@
                       <b-button variant="outline-danger" @click="unselectBiometricType"><b-icon icon="backspace"></b-icon></b-button>
                     </b-input-group-append>
                   </b-input-group>
-                  <div v-if="toggleTSelect" class="pt-3">
-                      <b-table  id="my-bioData-table" :items="selectableTEntity" :fields="selectableTFields" small hover responsive selectable select-mode="single" @row-selected="selectableEntityTClicked" :current-page="currentBioDataPage" :per-page="perPage">
+                  <b-card v-if="toggleTSelect" class="mt-2">
+                      <b-form-group
+                        label-for="filter-types"
+                        class="mb-0"
+                      >
+                        <b-input-group size="sm">
+                          <b-form-input
+                            id="filter-types"
+                            v-model="filterTypes"
+                            type="search"
+                            placeholder="Type to Search"
+                          ></b-form-input>
+
+                          <b-input-group-append>
+                            <b-button :disabled="!filterTypes" @click="filterTypes = ''">Clear</b-button>
+                          </b-input-group-append>
+                        </b-input-group>
+                      </b-form-group>
+                      <b-table  id="my-bioData-table" :items="selectableTEntity" :fields="selectableTFields" small hover responsive selectable select-mode="single" @row-selected="selectableEntityTClicked" :current-page="currentBioDataPage" :per-page="perPage" :filter="filterTypes" show-empty>
+                        <template #empty="scope">
+                          <h6 class="text-center">{{ scope.emptyText }}</h6>
+                        </template>
+                        <template #emptyfiltered="scope">
+                          <h6 class="text-center">{{ scope.emptyFilteredText }}</h6>
+                        </template>
                         <template #cell(selected)="data">
                           <template v-if="data.item.id == form.biometricDataTypeId">
                             <span aria-hidden="true">&check;</span>
@@ -92,7 +115,7 @@
                         aria-controls="my-patients-table"
                         align="center"
                       ></b-pagination>
-                    </div>
+                    </b-card>
             </b-form-group>
           </b-tab>
           <b-tab v-if="hasIssues" :title="form.biometricDataTypeName">
@@ -149,6 +172,8 @@ export default {
       issueFields: ['name', 'min', 'max'],
 
       clone: {},
+
+      filterTypes: null
     }
   },
   props:{

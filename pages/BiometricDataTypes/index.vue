@@ -2,7 +2,7 @@
 <div>
   <navbar/>
   <b-container>
-    <entities-table :items="biometricdatatype" :fields="fields" :ownModalCRU="true" :busyTable="busyTable" :showRestore="true" @modal="modalCRU" @deleteEntity="deleteBioDataType" @restoreEntity="restoreBioDataType"></entities-table>
+    <entities-table :items="biometricdatatype" :fields="fields" :ownModalCRU="true" :showEdit="true"  :busyTable="busyTable" :showRestore="true" @modal="modalCRU" @deleteEntity="deleteBioDataType" @restoreEntity="restoreBioDataType"></entities-table>
   </b-container>
   <modalCRU :entity="oneBiometricdatatype" :method="method" @onReset="resetEntity" @onSubmit="onSubmit" :modalShow="modalShow"/>
 </div>
