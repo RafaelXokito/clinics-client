@@ -266,7 +266,7 @@ export default {
         },
         biometricData: {
           id: -1,
-          biometricTypeId: '',
+          biometricDataTypeId: '',
           value: '',
           notes: '',
           patientId: '',

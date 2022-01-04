@@ -87,10 +87,10 @@
                   disabled
                   :class="isSubmitting && !biometricDataTypeState ? 'border border-danger text-danger' : ''"
                 ></b-form-input>
-                <b-input-group-append v-if="fieldProperties('biometricTypeId').editable">
+                <b-input-group-append v-if="fieldProperties('biometricDataTypeId').editable">
                   <b-button variant="outline-info" @click="selectBiometricType"><b-icon icon="search"></b-icon></b-button>
                 </b-input-group-append>
-                <b-input-group-append v-if="fieldProperties('biometricTypeId').editable">
+                <b-input-group-append v-if="fieldProperties('biometricDataTypeId').editable">
                   <b-button variant="outline-danger" @click="unselectBiometricType"><b-icon icon="backspace"></b-icon></b-button>
                 </b-input-group-append>
               </b-input-group>
@@ -120,7 +120,7 @@
                     <h6 class="text-center">{{ scope.emptyFilteredText }}</h6>
                   </template>
                   <template #cell(selected)="data">
-                    <template v-if="data.item.id === form.biometricTypeId">
+                    <template v-if="data.item.id === form.biometricDataTypeId">
                       <span aria-hidden="true">&check;</span>
                       <span class="sr-only">Selected</span>
                     </template>
@@ -253,7 +253,7 @@ export default {
     return {
       form: {
         id: '',
-        biometricTypeId: '',
+        biometricDataTypeId: '',
         value: '',
         notes: '',
         patientId: '',
@@ -321,7 +321,7 @@ export default {
       return true
     },
     biometricDataTypeState(){
-      if ((this.form.biometricTypeId == null || this.form.biometricTypeId === '')) {
+      if ((this.form.biometricDataTypeId == null || this.form.biometricDataTypeId === '')) {
         return this.isSubmitting ? false : null
       }
       return true
@@ -410,7 +410,7 @@ export default {
     },
     selectableEntityTClicked(record){
       if (record[0]) {
-        this.form.biometricTypeId = record[0].id
+        this.form.biometricDataTypeId = record[0].id
         this.form.biometricDataTypeName = record[0].name
         this.form.valueUnit = record[0].unit_name
         this.form.max = record[0].max
@@ -429,7 +429,7 @@ export default {
       this.toggleTSelect = !this.toggleTSelect;
     },
     unselectBiometricType(){
-      this.form.biometricTypeId = ""
+      this.form.biometricDataTypeId = ""
       this.form.biometricDataTypeName = ""
       this.form.valueUnit = ""
     },
@@ -451,7 +451,7 @@ export default {
     fieldProperties(fieldName) {
       switch (this.method) {
         case 'edit':
-          if (fieldName === 'biometricTypeId') return { visible: true, editable: true }
+          if (fieldName === 'biometricDataTypeId') return { visible: true, editable: true }
           if (fieldName === 'value') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
           if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: true }
@@ -460,7 +460,7 @@ export default {
           if (fieldName === 'biometricDataIssueId') return { visible: true, editable: false }
           break;
         case 'watch':
-          if (fieldName === 'biometricTypeId') return { visible: true, editable: false }
+          if (fieldName === 'biometricDataTypeId') return { visible: true, editable: false }
           if (fieldName === 'value') return { visible: true, editable: false }
           if (fieldName === 'notes') return { visible: true, editable: false }
           if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: false }
@@ -469,7 +469,7 @@ export default {
           if (fieldName === 'biometricDataIssueId') return { visible: true, editable: false }
           break;
         case 'create':
-          if (fieldName === 'biometricTypeId') return { visible: true, editable: true }
+          if (fieldName === 'biometricDataTypeId') return { visible: true, editable: true }
           if (fieldName === 'value') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
           if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: true }
@@ -549,7 +549,7 @@ export default {
             .$get('/api/biometricdatas/' + this.entity.id)
             .then(biometricData => {
               this.form.id = biometricData.id;
-              this.form.biometricTypeId = biometricData.biometricTypeId;
+              this.form.biometricDataTypeId = biometricData.biometricDataTypeId;
               this.form.value =  biometricData.value;
               this.form.notes = biometricData.notes;
               this.form.patientId = biometricData.patientId;
@@ -566,7 +566,7 @@ export default {
               this.form.biometricDataIssueId = biometricData.biometricDataIssueId;
               this.form.biometricDataIssueName = biometricData.biometricDataIssueName;
 
-              let types = this.selectableTEntity.filter((e) => e.id === biometricData.biometricTypeId)
+              let types = this.selectableTEntity.filter((e) => e.id === biometricData.biometricDataTypeId)
               if (types != null && types.length > 0) {
                 let biometricType = types[0];
                 this.form.biometricTypeUnit = biometricType.unit_name;
@@ -583,7 +583,7 @@ export default {
         }
         else {
           this.form.id = '';
-          this.form.biometricTypeId = '';
+          this.form.biometricDataTypeId = '';
           this.form.value = '';
           this.form.notes = '';
           this.form.patientId = '';
