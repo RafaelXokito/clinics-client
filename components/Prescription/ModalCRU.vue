@@ -232,6 +232,7 @@ export default {
       return str.slice(2);
     },
     start_dateState(){
+      if (!this.fieldProperties('startDate').editable) return null
       if (this.form.start_date == null || this.form.start_date === '') {
         this.start_dateError = "Start Date is required"
         return this.isSubmitting ? false : null
@@ -243,6 +244,7 @@ export default {
       return true
     },
     end_dateState(){
+      if (!this.fieldProperties('endDate').editable) return null
       if (this.form.end_date == null || this.form.end_date === '') {
         this.end_dateError = "End Date is required"
         return this.isSubmitting ? false : null
@@ -254,6 +256,7 @@ export default {
       return true
     },
     issuesState(){
+      if (!this.fieldProperties('issues').editable) return null
       if ((this.form.issues == null || this.form.issues.length === 0)) {
         this.issuesError = "Issues are required"
         return this.isSubmitting ? false : null
@@ -261,6 +264,7 @@ export default {
       return true
     },
     notesState() {
+      if (!this.fieldProperties('notes').editable) return null
       if (this.form.notes == null || this.form.notes.trim() === '') {
         this.notesErr = "Notes are required"
         return this.isSubmitting ? false : null

@@ -593,7 +593,7 @@ export default {
           this.form.healthNo = '';
           this.form.biometricDataTypeName = '';
           this.form.valueUnit = '';
-          this.form.source = '';
+          this.form.source = 'Exam';
           this.form.biometricDataIssueId = '';
           this.form.biometricDataIssueName = '';
           this.form.created_at_time = this.formatTime(new Date());

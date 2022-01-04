@@ -195,30 +195,36 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-tab>
-
-          <b-tab title="Documents">
+          <b-tab title="Documents" v-if="fieldProperties('files').visible">
             <b-form-group
               id="input-group-files"
               label-for="input-files"
               label-class="font-weight-bold"
-              v-if="fieldProperties('files').visible"
             >
-              <b-form-file multiple v-model="form.documents">
-              <template slot="file-name" slot-scope="{ names }">
-                  <b-badge variant="dark">{{ names[0] }}</b-badge>
-                  <b-badge v-if="names.length > 1" variant="dark" class="ml-1">
-                    + {{ names.length - 1 }} More files
-                  </b-badge>
-              </template>
+              <b-form-file multiple v-model="form.documents" v-if="fieldProperties('files').editable">
+                <template slot="file-name" slot-scope="{ names }">
+                    <b-badge variant="dark">{{ names[0] }}</b-badge>
+                    <b-badge v-if="names.length > 1" variant="dark" class="ml-1">
+                      + {{ names.length - 1 }} More files
+                    </b-badge>
+                </template>
               </b-form-file>
               <b-table
                 v-if="documents.length && fieldProperties('filesTable').visible"
                 striped
                 over
+                responsive
                 :items="documents"
                 :fields="documentsFields"
                 class="mt-3"
+                show-empty
               >
+                <template #empty="scope">
+                  <h6 class="text-center">{{ scope.emptyText }}</h6>
+                </template>
+                <template #emptyfiltered="scope">
+                  <h6 class="text-center">{{ scope.emptyFilteredText }}</h6>
+                </template>
                 <template #cell(download)="row">
                   <b-btn
                     class="btn btn-outline-info"
@@ -245,9 +251,10 @@
             </b-form-group>
           </b-tab>
         </b-tabs>
-
-        <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
-        <b-button type="reset" variant="danger">Reset</b-button>
+        <div v-if="this.method === 'edit' || this.method === 'create'">
+          <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
+          <b-button type="reset" variant="danger">Reset</b-button>
+        </div>
       </b-form>
       <div v-else class="d-flex align-items-center justify-content-center">
         <b-spinner class="m-5" style="width: 3rem; height: 3rem;" label="Loading" />
@@ -319,6 +326,7 @@ export default {
       return this.form.prescription != null && this.form.prescription.notes != null && this.form.prescription.notes.trim().length > 0;
     },
     prescriptionNotesState() {
+      if (!this.fieldProperties('prescriptionNotes').editable) return null
       if (this.method === 'create') return null
       if (this.form.prescription.notes == null || this.form.prescription.notes.trim().length === 0) {
         this.prescriptionNotesErr = "Prescription notes are required"
@@ -327,6 +335,7 @@ export default {
       return true
     },
     start_dateState(){
+      if (!this.fieldProperties('prescriptionStartDate').editable) return null
       if (this.isPrescriptionFilled && (this.form.prescription.start_date == null || this.form.prescription.start_date === '')) {
         this.startDateErr = "Start Date is required"
         return this.submitting ? false : null
@@ -338,6 +347,7 @@ export default {
       return true
     },
     end_dateState(){
+      if (!this.fieldProperties('prescriptionEndDate').editable) return null
       if (this.isPrescriptionFilled && (this.form.prescription.end_date == null || this.form.prescription.end_date === '')) {
         this.startDateErr = "End Date is required"
         return this.submitting ? false : null
@@ -349,6 +359,7 @@ export default {
       return true
     },
     observationNotesState() {
+      if (!this.fieldProperties('notes').editable) return null
       if (this.form.notes == null || this.form.notes.trim().length === 0) {
         this.observationNotesErr = "Observation notes are required"
         return this.submitting ? false : null
@@ -356,6 +367,7 @@ export default {
       return true
     },
     patientState() {
+      if (!this.fieldProperties('patientId').editable) return null
       return this.form.patientId != null
     },
     isFormValid() {
@@ -485,7 +497,7 @@ export default {
           if (fieldName === 'healthcareProfessionalName') return { visible: true, editable: false }
           if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: false }
           if (fieldName === 'patientName') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: false }
-          if (fieldName === 'files') return { visible: true, editable: false }
+          if (fieldName === 'files') return { visible: true, editable: true }
           if (fieldName === 'filesTable') return { visible: true, editable: false }
           if (fieldName === 'createdAt') return { visible: true, editable: false }
           if (fieldName === 'prescriptionId') return { visible: true, editable: false }
@@ -493,6 +505,21 @@ export default {
           if (fieldName === 'prescriptionEndDate') return { visible: true, editable: true }
           if (fieldName === 'prescriptionNotes') return { visible: true, editable: true }
           if (fieldName === 'notes') return { visible: true, editable: true }
+          break;
+        case 'watch':
+          if (fieldName === 'id') return { visible: true, editable: false }
+          if (fieldName === 'healthcareProfessionalId') return { visible: true, editable: false }
+          if (fieldName === 'healthcareProfessionalName') return { visible: true, editable: false }
+          if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: false }
+          if (fieldName === 'patientName') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: false }
+          if (fieldName === 'files') return { visible: true, editable: false }
+          if (fieldName === 'filesTable') return { visible: true, editable: false }
+          if (fieldName === 'createdAt') return { visible: true, editable: false }
+          if (fieldName === 'prescriptionId') return { visible: true, editable: false }
+          if (fieldName === 'prescriptionStartDate') return { visible: true, editable: false }
+          if (fieldName === 'prescriptionEndDate') return { visible: true, editable: false }
+          if (fieldName === 'prescriptionNotes') return { visible: true, editable: false }
+          if (fieldName === 'notes') return { visible: true, editable: false }
           break;
         case 'create':
           if (fieldName === 'id') return { visible: false, editable: false }
@@ -532,8 +559,11 @@ export default {
         this.submitting = false
         this.hasPrescription = false
         this.form.documents = []
+        if (this.method === 'watch') {
+          this.documentsFields = ['filename', 'download']
+        }
         this.show = false
-        if (this.method === 'edit') {
+        if (this.method === 'edit' || this.method === 'watch') {
           this.$axios
             .$get('/api/observations/' + this.entity.id)
             .then(observation => {

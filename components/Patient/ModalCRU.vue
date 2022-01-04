@@ -137,7 +137,26 @@
           </b-tab>
 
           <b-tab id="biometric-datas-table" v-if="form.biometricDatas && form.biometricDatas.length > 0" title="Biometric Data">
-            <b-table striped hover responsive :items="form.biometricDatas" :fields="fieldsBiometricData">
+            <b-form-group label-for="filter-bio-datas" class="mb-0">
+              <b-input-group size="sm">
+                <b-form-input
+                  id="filter-bio-datas"
+                  v-model="filterBioData"
+                  type="search"
+                  placeholder="Type to Search"
+                ></b-form-input>
+                <b-input-group-append>
+                  <b-button :disabled="!filterBioData" @click="filterBioData = ''">Clear</b-button>
+                </b-input-group-append>
+              </b-input-group>
+            </b-form-group>
+            <b-table striped hover responsive :items="form.biometricDatas" :fields="fieldsBiometricData" :filter="filterBioData" show-empty>
+              <template #empty="scope">
+                <h6 class="text-center">{{ scope.emptyText }}</h6>
+              </template>
+              <template #emptyfiltered="scope">
+                <h6 class="text-center">{{ scope.emptyFilteredText }}</h6>
+              </template>
               <template #cell(created_at)="data">
                 {{formatDate(data.item.created_at)}}
               </template>
@@ -153,7 +172,26 @@
           </b-tab>
 
           <b-tab id="observations-table" title="Observations" v-if="form.observations && form.observations.length > 0">
-            <b-table striped hover responsive :items="form.observations" :fields="fieldsObservations">
+            <b-form-group label-for="filter-observations" class="mb-0">
+              <b-input-group size="sm">
+                <b-form-input
+                  id="filter-observations"
+                  v-model="filterObservations"
+                  type="search"
+                  placeholder="Type to Search"
+                ></b-form-input>
+                <b-input-group-append>
+                  <b-button :disabled="!filterObservations" @click="filterObservations = ''">Clear</b-button>
+                </b-input-group-append>
+              </b-input-group>
+            </b-form-group>
+            <b-table striped hover responsive :items="form.observations" :fields="fieldsObservations" :filter="filterObservations" show-empty>
+              <template #empty="scope">
+                <h6 class="text-center">{{ scope.emptyText }}</h6>
+              </template>
+              <template #emptyfiltered="scope">
+                <h6 class="text-center">{{ scope.emptyFilteredText }}</h6>
+              </template>
               <template #cell(created_at)="data">
                 {{formatDate(data.item.created_at)}}
               </template>
@@ -302,6 +340,9 @@ export default {
       currentPageObservations: 1,
       perPage: 4,
       clone: {},
+
+      filterObservations: null,
+      filterBioData: null
     }
   },
   computed: {

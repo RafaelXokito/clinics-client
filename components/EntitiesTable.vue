@@ -74,8 +74,8 @@
       </template>
       <template #cell(isGlobal)="data">
         <div class="text-center">
-          <b-icon-people-fill v-if="data.item.isGlobal" scale="1.75"></b-icon-people-fill>
-          <b-icon-person-fill v-else scale="1.75"></b-icon-person-fill>
+          <b-icon-people-fill v-if="data.item.isGlobal" scale="1.75" title="Yes"></b-icon-people-fill>
+          <b-icon-person-fill v-else scale="1.75" title="No"></b-icon-person-fill>
         </div>
       </template>
       <template #cell(watch)="data">
@@ -135,7 +135,7 @@
           @click="restoreEntity(data.item)"
           size="sm"
           class="mr-2"
-          v-else-if="showRestore && (data.item.deleted_at && data.item.deleted_at !== null)"
+          v-else-if="showRestore && (data.item.deleted_at && data.item.deleted_at !== null) && !(showUpdateAndWatch && data.item.created_by && data.item.created_by !== $auth.user.id)"
         >
           <b-icon-shield-plus></b-icon-shield-plus>
         </b-button>
