@@ -211,7 +211,44 @@
               </template>
             </b-table>
           </b-tab>
+          <b-tab title="Patients" v-if="fieldProperties('patients').editable">
+            <b-form-group
+              label-for="filter-types"
+              class="mb-0"
+            >
+              <b-input-group size="sm">
+                <b-form-input
+                  id="filter-types"
+                  v-model="filterPatient"
+                  type="search"
+                  placeholder="Type to Search"
+                ></b-form-input>
 
+                <b-input-group-append>
+                  <b-button :disabled="!filterPatient" @click="filterPatient = ''">Clear</b-button>
+                </b-input-group-append>
+              </b-input-group>
+            </b-form-group>
+            <b-table id="patients-table" :items="patients" :fields="fieldsPatients" small hover responsive :current-page="currentPage" :per-page="perPage" :filter="filterPatient" @filtered="onFiltered" show-empty>
+              <template #empty="scope">
+                <h6 class="text-center">{{ scope.emptyText }}</h6>
+              </template>
+              <template #emptyfiltered="scope">
+                <h6 class="text-center">{{ scope.emptyFilteredText }}</h6>
+              </template>
+              <template #cell(selected)="data">
+                  <b-form-checkbox @change="patientClicked(data.item)" :checked="data.item.selected" />
+              </template>
+            </b-table>
+            <b-pagination
+              v-if="patients.length > perPage"
+              v-model="currentPage"
+              :total-rows="dataRows"
+              :per-page="perPage"
+              aria-controls="patients-table"
+              align="center"
+            ></b-pagination>
+          </b-tab>
         </b-tabs>
         <b-button type="submit" variant="primary">{{this.method === 'create' ? 'Create' : 'Save'}}</b-button>
         <b-button type="reset" variant="danger">Reset</b-button>
@@ -240,6 +277,7 @@ export default {
         name: null,
         gender: null,
         specialty: null,
+        patients: [],
         prescriptions: [],
         observations: [],
         created_by: null,
@@ -275,7 +313,20 @@ export default {
       clone: {},
 
       filterObservations: null,
-      filterPrescriptions: null
+      filterPrescriptions: null,
+      filterPatient: null,
+
+      fieldsPatients: [
+            {key: "selected", sortable: true},
+            {key: "email", sortable: true},
+            {key: "name", sortable: true},
+            {key: "gender", sortable: true},
+            {key: "healthNo", sortable: true},
+          ],
+      patients: [],
+      dataRows: 0,
+      currentPage: 1,
+      perPage: 4,
     }
   },
   computed: {
@@ -352,7 +403,31 @@ export default {
       return this.emailState && this.nameState && this.genderState && this.passwordState && this.specialtyState && this.birthdateState
     },
   },
+  mounted() {
+    this.$axios
+        .$get('/api/patients')
+        .then(patients => {
+          this.patients = patients
+          this.dataRows = this.patients.length
+        })
+        .catch((err)=>{
+          this.showErrorMessage(err);
+        });
+  },
   methods: {
+    async patientClicked(item){
+      item.selected = !item.selected
+      await this.$axios
+        .$patch('/api/healthcareprofessionals/' +this.form.id+'/patients/'+item.id+'/'+(item.selected ? 'associate' : 'desassociate'))
+        .catch((err) => {
+          this.showErrorMessage(err);
+          this.show = true
+        })
+    },
+    onFiltered(filteredItems) {
+      this.dataRows = filteredItems.length
+      this.currentPage = 1
+    },
     showErrorMessage(err) {
       if (err.response) {
         this.$toast.error('ERROR: ' + err.response.data).goAway(3000);
@@ -396,7 +471,7 @@ export default {
           if (fieldName === 'specialty') return { visible: true, editable: true }
           if (fieldName === 'prescriptions') return { visible: true, editable: false }
           if (fieldName === 'observations') return { visible: true, editable: false }
-          if (fieldName === 'patients') return { visible: true, editable: false }
+          if (fieldName === 'patients') return { visible: true, editable: true }
           if (fieldName === 'createdBy') return { visible: false, editable: false }
           if (fieldName === 'birthdate') return { visible: true, editable: true }
           break;
@@ -442,8 +517,20 @@ export default {
               this.form.observations = healthcareProfessional.observations;
               this.form.created_by = healthcareProfessional.created_by;
               this.form.birthDate = healthcareProfessional.birthDate;
+              this.form.patients = healthcareProfessional.patients;
               this.clone = Object.assign({}, this.form)
               this.show = true
+
+              this.patients.forEach(patient => {
+                patient.selected = false;
+
+                for (let i = 0; i < this.form.patients.length; i++) {
+                  if (this.form.patients[i].id === patient.id) {
+                    patient.selected = true;
+                    break;
+                  }
+                }
+              })
             })
             .catch((err) => {
               this.showErrorMessage(err);
