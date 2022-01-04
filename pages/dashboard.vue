@@ -141,34 +141,39 @@
   <div class="row mt-3" v-if="$auth.user.scope === 'Patient'">
     <div class="col-xl-12" v-if="statistics.biometricData.id > 0">
       <div class="card card-stats mb-4 mb-xl-0">
-        <div class="card-body">
-          <div class="row">
-            <div class="col">
-              <h5 class="card-title text-uppercase text-muted mb-0">Last Biometric Data</h5>
-              <span class="h3 font-weight-bold mb-0"><b-icon icon="tag"></b-icon> {{statistics.biometricData.biometricDataTypeName}}</span>
+        <div class="card-body row">
+          <div class="col-xl-6">
+            <div class="row">
+              <div class="col">
+                <h5 class="card-title text-uppercase text-muted mb-0">Last Biometric Data</h5>
+                <span class="h3 font-weight-bold mb-0"><b-icon icon="tag"></b-icon> {{statistics.biometricData.biometricDataTypeName}}</span>
+              </div>
             </div>
-          </div>
-          <p class="mt-3 text-right">
-            {{formatDate(statistics.biometricData.created_at)}}
-          </p>
-          <p class="mt-3 text-left mb-0">
-            <span style="color: lightgrey">Value / Classification:</span>
-          </p>
-          <div class="row p-3" style="padding-top: 0px !important;">
-            <div class="col-6 mt-3 mb-0 text-muted text-sm border rounded-left p-3 text-center" style="background-color: rgb(251, 251, 251);">
-              <p class="mb-0">{{statistics.biometricData.value}} {{statistics.biometricData.valueUnit}}</p>
+            <p class="mt-3 text-right">
+              {{formatDate(statistics.biometricData.created_at)}}
+            </p>
+            <p class="mt-3 text-left mb-0">
+              <span style="color: lightgrey">Value / Classification:</span>
+            </p>
+            <div class="row p-3" style="padding-top: 0px !important;">
+              <div class="col-6 mt-3 mb-0 text-muted text-sm border rounded-left p-3 text-center" style="background-color: rgb(251, 251, 251);">
+                <p class="mb-0">{{statistics.biometricData.value}} {{statistics.biometricData.valueUnit}}</p>
+              </div>
+              <div class="col-6 mt-3 mb-0 text-muted text-sm border rounded-right p-3 text-center" style="background-color: rgb(251, 251, 251);">
+                <p class="mb-0">{{statistics.biometricData.biometricDataIssueName != null ? statistics.biometricData.biometricDataIssueName : 'N/A'}}</p>
+              </div>
             </div>
-            <div class="col-6 mt-3 mb-0 text-muted text-sm border rounded-right p-3 text-center" style="background-color: rgb(251, 251, 251);">
-              <p class="mb-0">{{statistics.biometricData.biometricDataIssueName != null ? statistics.biometricData.biometricDataIssueName : 'N/A'}}</p>
+            <div class="mt-3 mb-0 text-muted text-sm border rounded p-3" style="background-color: rgb(251, 251, 251);">
+              <span class="text-success mr-2"><b-icon icon="book" /></span>
+              <p class="mb-0">{{statistics.biometricData.notes}}</p>
             </div>
+            <p class="mt-3 text-right">
+              <span style="color: lightgrey">Source:</span> {{statistics.biometricData.source}}
+            </p>
           </div>
-          <div class="mt-3 mb-0 text-muted text-sm border rounded p-3" style="background-color: rgb(251, 251, 251);">
-            <span class="text-success mr-2"><b-icon icon="book" /></span>
-            <p class="mb-0">{{statistics.biometricData.notes}}</p>
+          <div class="col-xl-5">
+            <line-chart :data="chartData" :options="options"></line-chart>
           </div>
-          <p class="mt-3 text-right">
-            <span style="color: lightgrey">Source:</span> {{statistics.biometricData.source}}
-          </p>
         </div>
       </div>
     </div>
@@ -277,6 +282,25 @@ export default {
         healthcareProfessionals: []
       },
       documentsFields: ['filename', 'download', 'delete'],
+
+      chartData: {
+        datasets: [{
+          label: 'Title',
+          data: [45, 55, 48, 35, 12]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Chart.js Line Chart'
+          }
+        }
+      },
     }
   },
   mounted(){
@@ -292,9 +316,25 @@ export default {
           this.statistics.totals = e;
         }
         if (this.$auth.user.scope === 'Patient') {
+
           this.statistics.biometricData = e.biometricData
+          this.chartData.datasets = []
+
           this.statistics.prescriptions = e.prescriptions
           this.statistics.healthcareProfessionals = e.healthcareProfessionals
+
+          let auxBioDataArray = e.biometricDatas.filter((aux) => aux.biometricDataTypeName == e.biometricData.biometricDataTypeName)
+          let auxData = auxBioDataArray.map(function (obj) {
+                    return obj.value;
+                  })
+          this.chartData.labels = auxBioDataArray.map(function (obj) {
+                    return new Date(obj.created_at).toLocaleString('pt-PT')
+                  })
+          this.chartData.datasets.push({
+            borderColor: 'rgb(75, 192, 192)',
+            label: e.biometricData.biometricDataTypeName,
+            data: auxData
+          })
         }
       })
       .catch(()=>{
