@@ -241,6 +241,10 @@ export default {
         this.start_dateError = "Start date should be lower then end date"
         return false
       }
+      if (this.method == 'create' && new Date(this.form.start_date) <= new Date().setMinutes(new Date().getMinutes - 1)) {
+        this.start_dateError = "Start date should be higher then current date"
+        return false
+      }
       return true
     },
     end_dateState(){

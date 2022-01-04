@@ -2,7 +2,7 @@
 <div>
   <navbar />
   <b-container>
-    <entities-table :items="prescriptions" :fields="fields" :ownModalCRU="true" :showCreate="showCreate" :showEdit="showEdit" :showDelete="showDelete" :showRestore="true" :showWatch="showWatch" :busyTable="busyTable" @modal="modalCRU" @restoreEntity="restorePrescription" @deleteEntity="deleteEntity" />
+    <entities-table :items="prescriptions" :fields="fields" :ownModalCRU="true" :showCreate="showCreate" :showUpdateAndWatch="showUpdateAndWatch" :showDelete="showDelete" :showRestore="true" :showWatch="showWatch" :busyTable="busyTable" @modal="modalCRU" @restoreEntity="restorePrescription" @deleteEntity="deleteEntity" />
   </b-container>
   <modalCRU :entity="prescription" :method="method" :modalShow="modalShow" @onReset="resetEntity" @onSubmit="onSubmit" />
 </div>
@@ -34,7 +34,7 @@ export default {
     showCreate(){
       return this.$auth.user.scope == 'HealthcareProfessional'
     },
-    showEdit(){
+    showUpdateAndWatch(){
       return this.$auth.user.scope == 'HealthcareProfessional'
     },
     showWatch(){
@@ -117,8 +117,8 @@ export default {
 
           if (this.showWatch)
             this.fields.push("watch")
-          if (this.showEdit)
-            this.fields.push("update")
+          if (this.showUpdateAndWatch)
+            this.fields.push("actions")
           if (this.showDelete)
             this.fields.push("delete")
 

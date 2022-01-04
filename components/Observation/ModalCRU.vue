@@ -344,6 +344,10 @@ export default {
         this.startDateErr = "Start date should be lower then end date"
         return false
       }
+      if (this.method == 'create' && new Date(this.form.start_date) <= new Date().setMinutes(new Date().getMinutes - 1)) {
+        this.start_dateError = "Start date should be higher then current date"
+        return false
+      }
       return true
     },
     end_dateState(){
@@ -367,7 +371,6 @@ export default {
       return true
     },
     patientState() {
-      if (!this.fieldProperties('patientId').editable) return null
       return this.form.patientId != null
     },
     isFormValid() {

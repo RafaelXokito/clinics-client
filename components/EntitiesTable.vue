@@ -8,16 +8,27 @@
         >Create
         {{ this.$route.name.replace(/([A-Z])/g, " $1").trim() }}</b-button
       >
-      <b-button
-        v-if="true"
-        variant="warning"
-        @click="download_table_as_csv('entityTable')"
-        class="float-right"
-        >
-        <b-icon-download scale="0.75"></b-icon-download>
-        Download table
-        </b-button
-      >
+      <b-button-group class="float-right" v-if="true">
+        <b-button
+          variant="danger"
+          :disabled="true"
+          >
+          <b-icon-download scale="0.75"></b-icon-download>
+          Download
+        </b-button>
+        <b-button
+          variant="outline-danger"
+          @click="download_table_as_csv('entityTable')"
+          >
+          Table
+        </b-button>
+        <b-button
+          variant="outline-danger"
+          @click="download_entity_as_csv()"
+          >
+          Entity
+        </b-button>
+      </b-button-group>
     </b-form-group>
     <b-input-group>
       <b-input-group-prepend is-text>
@@ -107,6 +118,15 @@
           size="sm"
           class="mr-2"
           v-if="showUpdateAndWatch && !(data.item.deleted_at && data.item.deleted_at !== null) && (data.item.created_by && data.item.created_by === $auth.user.id)"
+        >
+          <b-icon-pencil-fill></b-icon-pencil-fill>
+        </b-button>
+        <b-button
+          variant="primary"
+          @click="showEntity(data.item, 'edit')"
+          size="sm"
+          class="mr-2"
+          v-else-if="showUpdateAndWatch && !(data.item.deleted_at && data.item.deleted_at !== null) && (data.item.end_date && new Date(data.item.end_date) > new Date())"
         >
           <b-icon-pencil-fill></b-icon-pencil-fill>
         </b-button>
@@ -303,7 +323,47 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  }
+    },
+    download_entity_as_csv(separator = ';') {
+      // Construct csv
+      if (this.items.length == 0) {
+        this.$toast.error("Error, theres no rows to export!")
+        return;
+      }
+      let csv = [];
+      let headers = Object.keys(this.items[0]);
+
+      //Set headers
+      let row = []
+      for (let j = 0; j < headers.length; j++) {
+        let data = headers[j]
+        // Push escaped string
+        row.push('"' + data + '"');
+      }
+      csv.push(row.join(separator));
+
+      //Set content
+      for (let i = 0; i < this.items.length; i++) {
+          let row = [], cols = Object.values(this.items[i]);
+          for (let j = 0; j < cols.length; j++) {
+            let data = cols[j]
+            // Push escaped string
+            row.push('"' + data + '"');
+          }
+          csv.push(row.join(separator));
+      }
+      let csv_string = csv.join('\n');
+      // Download it
+      let filename = 'export_' + this.$nuxt.$route.name + '_' + new Date().toLocaleDateString() + '.csv';
+      let link = document.createElement('a');
+      link.style.display = 'none';
+      link.setAttribute('target', '_blank');
+      link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv_string));
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   },
 };
 </script>

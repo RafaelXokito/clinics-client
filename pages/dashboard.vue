@@ -231,9 +231,12 @@
 
 <script>
 import navbar from '~/components/NavBar.vue'
+import lineChart from '~/components/Charts/LineChart.vue'
+
 export default {
   components: {
-    navbar
+    navbar,
+    lineChart
   },
   data() {
     return {
