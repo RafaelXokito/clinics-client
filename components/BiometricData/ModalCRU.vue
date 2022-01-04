@@ -87,10 +87,10 @@
                   disabled
                   :class="isSubmitting && !biometricDataTypeState ? 'border border-danger text-danger' : ''"
                 ></b-form-input>
-                <b-input-group-append>
+                <b-input-group-append v-if="fieldProperties('biometricTypeId').editable">
                   <b-button variant="outline-info" @click="selectBiometricType"><b-icon icon="search"></b-icon></b-button>
                 </b-input-group-append>
-                <b-input-group-append>
+                <b-input-group-append v-if="fieldProperties('biometricTypeId').editable">
                   <b-button variant="outline-danger" @click="unselectBiometricType"><b-icon icon="backspace"></b-icon></b-button>
                 </b-input-group-append>
               </b-input-group>
@@ -177,6 +177,7 @@
                 placeholder="Enter something..."
                 rows="3"
                 max-rows="6"
+                :disabled="!fieldProperties('notes').editable"
               ></b-form-textarea>
             </b-form-group>
             <b-form-group
@@ -311,6 +312,7 @@ export default {
       return this.selectableTEntity.length
     },
     patientState(){
+      if (!this.fieldProperties('patientId').editable) return null
       if (this.$auth.user.scope === "Patient")
         return true
       if ((this.form.patientId == null || this.form.patientId === '')) {
@@ -325,6 +327,7 @@ export default {
       return true
     },
     valueState() {
+      if (!this.fieldProperties('value').editable) return null
       if ((this.form.value == null || this.form.value === '')) {
         this.valueErr = "Value is required"
         return this.isSubmitting ? false : null
@@ -344,6 +347,7 @@ export default {
       return true
     },
     sourceState() {
+      if (!this.fieldProperties('source').editable) return null
       if (this.form.source == null || this.form.source === '') {
         this.sourceErr = "Source is required"
         return this.isSubmitting ? false : null
@@ -355,6 +359,7 @@ export default {
       return true
     },
     createdAtState() {
+      if (!this.fieldProperties('created_at').editable) return null
       if (this.form.created_at == null || this.form.created_at === '') {
         this.createdAtErr = "Created At is required"
         return this.isSubmitting ? false : null
@@ -455,12 +460,12 @@ export default {
           if (fieldName === 'biometricDataIssueId') return { visible: true, editable: false }
           break;
         case 'watch':
-          if (fieldName === 'biometricTypeId') return { visible: true, editable: true }
-          if (fieldName === 'value') return { visible: true, editable: true }
-          if (fieldName === 'notes') return { visible: true, editable: true }
-          if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: true }
-          if (fieldName === 'created_at') return { visible: true, editable: true }
-          if (fieldName === 'source') return { visible: true, editable: true }
+          if (fieldName === 'biometricTypeId') return { visible: true, editable: false }
+          if (fieldName === 'value') return { visible: true, editable: false }
+          if (fieldName === 'notes') return { visible: true, editable: false }
+          if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: false }
+          if (fieldName === 'created_at') return { visible: true, editable: false }
+          if (fieldName === 'source') return { visible: true, editable: false }
           if (fieldName === 'biometricDataIssueId') return { visible: true, editable: false }
           break;
         case 'create':
@@ -588,7 +593,7 @@ export default {
           this.form.healthNo = '';
           this.form.biometricDataTypeName = '';
           this.form.valueUnit = '';
-          this.form.source = '';
+          this.form.source = 'Exam';
           this.form.biometricDataIssueId = '';
           this.form.biometricDataIssueName = '';
           this.form.created_at_time = this.formatTime(new Date());

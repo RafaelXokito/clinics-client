@@ -257,7 +257,6 @@ export default {
     this.$axios
       .$get('/api/statistics')
       .then((e) => {
-        console.log(e)
         if (this.$auth.user.scope === 'HealthcareProfessional') {
           this.statistics.observation = e.observation
           this.statistics.observation.hasPrescription = e.observation.prescription.id > 0

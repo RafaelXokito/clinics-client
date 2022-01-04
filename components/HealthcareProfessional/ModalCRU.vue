@@ -150,7 +150,26 @@
           </b-tab>
 
           <b-tab v-if="form.prescriptions && form.prescriptions.length > 0" title="Prescriptions">
-            <b-table striped hover responsive :items="form.prescriptions" :fields="fieldsPrescriptions">
+            <b-form-group label-for="filter-prescriptions" class="mb-0">
+              <b-input-group size="sm">
+                <b-form-input
+                  id="filter-prescriptions"
+                  v-model="filterPrescriptions"
+                  type="search"
+                  placeholder="Type to Search"
+                ></b-form-input>
+                <b-input-group-append>
+                  <b-button :disabled="!filterPrescriptions" @click="filterPrescriptions = ''">Clear</b-button>
+                </b-input-group-append>
+              </b-input-group>
+            </b-form-group>
+            <b-table striped hover responsive :items="form.prescriptions" :fields="fieldsPrescriptions" :filter="filterPrescriptions" show-empty>
+              <template #empty="scope">
+                <h6 class="text-center">{{ scope.emptyText }}</h6>
+              </template>
+              <template #emptyfiltered="scope">
+                <h6 class="text-center">{{ scope.emptyFilteredText }}</h6>
+              </template>
               <template #cell(start_date)="data">
                 {{formatDate(data.item.start_date, false)}}
               </template>
@@ -158,13 +177,35 @@
                 {{formatDate(data.item.end_date, false)}}
               </template>
               <template #cell(isGlobal)="data">
-                {{data.item.patientId === 0 ? 'Yes' : 'No'}}
+                <div class="text-center">
+                  <b-icon-people-fill v-if="data.item.isGlobal" scale="1.75" title="Yes"></b-icon-people-fill>
+                  <b-icon-person-fill v-else scale="1.75" title="No"></b-icon-person-fill>
+                </div>
               </template>
             </b-table>
           </b-tab>
 
           <b-tab v-if="form.observations && form.observations.length > 0" title="Observations">
-            <b-table striped hover responsive :items="form.observations" :fields="fieldsObservations">
+            <b-form-group label-for="filter-observations" class="mb-0">
+              <b-input-group size="sm">
+                <b-form-input
+                  id="filter-observations"
+                  v-model="filterObservations"
+                  type="search"
+                  placeholder="Type to Search"
+                ></b-form-input>
+                <b-input-group-append>
+                  <b-button :disabled="!filterObservations" @click="filterObservations = ''">Clear</b-button>
+                </b-input-group-append>
+              </b-input-group>
+            </b-form-group>
+            <b-table striped hover responsive :items="form.observations" :fields="fieldsObservations" :filter="filterObservations" show-empty>
+              <template #empty="scope">
+                <h6 class="text-center">{{ scope.emptyText }}</h6>
+              </template>
+              <template #emptyfiltered="scope">
+                <h6 class="text-center">{{ scope.emptyFilteredText }}</h6>
+              </template>
               <template #cell(created_at)="data">
                 {{formatDate(data.item.created_at, true)}}
               </template>
@@ -232,6 +273,9 @@ export default {
         { value: 'Other', text: 'Other' }
       ],
       clone: {},
+
+      filterObservations: null,
+      filterPrescriptions: null
     }
   },
   computed: {
