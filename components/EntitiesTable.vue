@@ -115,7 +115,7 @@
           @click="showEntity(data.item, 'watch')"
           size="sm"
           class="mr-2"
-          v-else-if="showUpdateAndWatch"
+          v-else-if="showUpdateAndWatch && !(data.item.deleted_at && data.item.deleted_at !== null)"
         >
           <b-icon-eyeglasses></b-icon-eyeglasses>
         </b-button>
