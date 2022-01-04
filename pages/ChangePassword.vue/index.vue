@@ -52,7 +52,7 @@
           <a href="https://www.linkedin.com/in/danielcarreira/">Daniel Carreira</a>,
         </p>
       </div>
-    </footer>
+    </footer> 
   </div>
 </template>
 
