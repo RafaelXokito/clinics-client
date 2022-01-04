@@ -194,6 +194,21 @@
         </div>
       </div>
     </div>
+    <div class="col-xl-12 mt-5" v-if="statistics.healthcareProfessionals.length > 0">
+      <div class="card card-stats mb-4 mb-xl-0">
+        <div class="card-body">
+          <div class="row">
+            <div class="col">
+              <h5 class="card-title text-uppercase text-muted mb-0">Your Healthcare Professionals</h5>
+            </div>
+          </div>
+          <div class="mt-3 mb-0 text-muted text-sm border rounded p-3" v-for="healthcareProfessional in statistics.healthcareProfessionals" :key="healthcareProfessional.id" style="background-color: rgb(251, 251, 251);">
+            <span><b-icon icon="shield-plus" class="text-success mr-2"></b-icon>Dr/Dra {{healthcareProfessional.name}}</span>
+            <span class="float-right"><a :href="'mailto:'+healthcareProfessional.email">{{healthcareProfessional.email}}</a></span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </b-container>
 <footer style="height: 150px">
@@ -258,7 +273,8 @@ export default {
           biometricDataIssueId: '',
           biometricDataIssueName: '',
         },
-        prescriptions: []
+        prescriptions: [],
+        healthcareProfessionals: []
       },
       documentsFields: ['filename', 'download', 'delete'],
     }
@@ -278,6 +294,7 @@ export default {
         if (this.$auth.user.scope === 'Patient') {
           this.statistics.biometricData = e.biometricData
           this.statistics.prescriptions = e.prescriptions
+          this.statistics.healthcareProfessionals = e.healthcareProfessionals
         }
       })
       .catch(()=>{
