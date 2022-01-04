@@ -184,12 +184,9 @@ body{
     box-shadow: none!important;
 }
 
-.footer {
-    position: fixed;
-    height: 50px;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-    margin-bottom: 0px;
+footer {
+  flex-shrink: 0;
+	height: 50px;
+  text-align: center;
 }
 </style>

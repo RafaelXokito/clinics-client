@@ -43,6 +43,16 @@
       <b-button type="submit" variant="primary">Submit</b-button>
     </b-form>
     </b-container>
+    <footer class="footer" style="height: 150px">
+      <div class="mt-5 text-center">
+        <p class="align-middle">Clinics designed and developed for school propose</p>
+        <p class="align-middle">
+          <a href="https://www.linkedin.com/in/rafaelmendespereira/">Rafael Pereira</a>,
+          <a href="https://www.linkedin.com/in/bruna-leit%C3%A3o-13891a217/">Bruna Leitão</a>,
+          <a href="https://www.linkedin.com/in/danielcarreira/">Daniel Carreira</a>,
+        </p>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -127,5 +137,9 @@ export default {
 </script>
 
 <style>
-
+footer {
+  flex-shrink: 0;
+	height: 50px;
+  text-align: center;
+}
 </style>

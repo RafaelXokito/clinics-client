@@ -175,7 +175,7 @@
       </b-col>
       </div>
     <modalCru :entity="entity" :method="method" @resetModal="resetEntity" />
-    <footer class="footer" style="height: 150px">
+    <footer class="myFooter" style="height: 150px">
       <div class="mt-5 text-center">
         <p class="align-middle">Clinics designed and developed for school propose</p>
         <p class="align-middle">
@@ -309,12 +309,9 @@ export default {
 </script>
 
 <style>
-.footer {
-    position: fixed;
-    height: 50px;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-    margin-bottom: 0px;
+footer {
+  flex-shrink: 0;
+	height: 50px;
+  text-align: center;
 }
 </style>
