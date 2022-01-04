@@ -323,7 +323,7 @@ export default {
       return this.selectablePEntity.length
     },
     isPrescriptionFilled() {
-      return this.form.prescription != null && this.form.prescription.notes != null && this.form.prescription.notes.trim().length > 0;
+      return this.form.prescription != null && this.form.prescription.notes != null && this.form.prescription.notes != '' && this.form.prescription.notes.trim().length > 0;
     },
     prescriptionNotesState() {
       if (!this.fieldProperties('prescriptionNotes').editable) return null
