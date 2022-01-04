@@ -15,7 +15,6 @@
             placeholder="Enter name"
             :state="nameState"
             aria-describedby="input-name-feedback"
-            required
             trim
           ></b-form-input>
           <b-form-invalid-feedback id="input-name-feedback">
@@ -30,7 +29,6 @@
               placeholder="X"
               :state="minState"
               aria-describedby="input-min-feedback"
-              required
               type="number"
               step="0.01"
               @change="parseFloat(form.min).toFixed(2)"
@@ -48,7 +46,6 @@
               placeholder="X"
               :state="maxState"
               aria-describedby="input-max-feedback"
-              required
               type="number"
               step="0.01"
               @change="parseFloat(form.max).toFixed(2)"
@@ -65,7 +62,6 @@
             placeholder="Enter unit"
             :state="unitState"
             aria-describedby="input-unit-feedback"
-            required
           ></b-form-input>
           <b-form-invalid-feedback id="input-unit-feedback">
             {{unitError}}
@@ -78,7 +74,6 @@
             placeholder="Enter unit name"
             :state="unit_nameState"
             aria-describedby="input-unit_name-feedback"
-            required
           ></b-form-input>
           <b-form-invalid-feedback id="input-unit_name-feedback">
             {{unit_nameError}}
@@ -110,6 +105,8 @@ export default {
       unitError: '',
       unit_nameError: '',
 
+      isSubmitting: false,
+
       show: true,
       clone: {},
     }
@@ -123,7 +120,7 @@ export default {
     nameState(){
       if (this.form.name === "" || this.form.name == null) {
         this.nameError = "Name is required"
-        return false
+        return this.isSubmitting ? false : null
       }
       if (this.form.name.length < 2) {
         this.nameError = "Name need to contains at least 2 characters!"
@@ -134,7 +131,7 @@ export default {
     minState(){
       if (this.form.min == null || this.form.min === "") {
         this.minError = "Min is required"
-        return false
+        return this.isSubmitting ? false : null
       }
       if ((this.form.max !== "") && Number(this.form.min) >= Number(this.form.max)) {
         this.minError = "Invalid minimum! Minimum should be lower than maximum."
@@ -145,7 +142,7 @@ export default {
     maxState(){
       if (this.form.max == null || this.form.max === "") {
         this.maxError = "Max is required"
-        return false
+        return this.isSubmitting ? false : null
       }
       if ((this.form.min !== "") && Number(this.form.max) <= Number(this.form.min)) {
         this.maxError = "Invalid maximum! Maximum should be higher than minimum."
@@ -156,7 +153,7 @@ export default {
     unitState(){
       if (this.form.unit === "" || this.form.unit == null) {
         this.unitError = "Unit is required"
-        return false
+        return this.isSubmitting ? false : null
       }
       if (this.form.unit.length === 0) {
         this.nameError = "Unit need to contains at least 1 characters!"
@@ -167,7 +164,7 @@ export default {
     unit_nameState(){
       if (this.form.unit_name === "" || this.form.unit_name == null) {
         this.unit_nameError = "Unit name is required"
-        return false
+        return this.isSubmitting ? false : null
       }
       if (this.form.unit_name.length < 2) {
         this.unit_nameError = "Unit name need to contains at least 2 characters!"
@@ -189,12 +186,14 @@ export default {
       }
     },
     resetBtnPressed() {
+      this.isSubmitting = false
       this.form = Object.assign({}, this.clone)
     },
     onReset(){
       this.$emit("onReset")
     },
     onSubmit(){
+      this.isSubmitting = true
       if (!this.isFormValid) {
         this.showErrorMessage("Fix the errors before submitting")
         return;
@@ -213,6 +212,7 @@ export default {
     },
     entity(newEntity){
       if (newEntity != null) {
+        this.isSubmitting = false
         if (this.method === 'edit') {
           this.form.id = this.entity.id;
           this.form.name = this.entity.name;

@@ -15,11 +15,10 @@
             :state="emailState"
             placeholder="Enter email"
             aria-describedby="input-email-feedback"
-            required
             trim
           ></b-form-input>
           <b-form-invalid-feedback id="input-email-feedback">
-            {{form.emailError}}
+            {{emailError}}
           </b-form-invalid-feedback>
         </b-form-group>
           <b-form-group
@@ -38,11 +37,10 @@
             :state="passwordState"
             aria-describedby="input-password-feedback"
             placeholder="Enter password"
-            required
             trim
           ></b-form-input>
           <b-form-invalid-feedback id="input-password-feedback">
-            {{form.passwordError}}
+            {{passwordError}}
           </b-form-invalid-feedback>
         </b-form-group>
         <b-form-group id="input-group-name" label="Name:" label-for="input-name" label-class="font-weight-bold">
@@ -52,11 +50,10 @@
             :state="nameState"
             aria-describedby="input-name-feedback"
             placeholder="Enter name"
-            required
             trim
           ></b-form-input>
           <b-form-invalid-feedback id="input-name-feedback">
-            {{form.nameError}}
+            {{nameError}}
           </b-form-invalid-feedback>
         </b-form-group>
         <b-form-group id="input-group-gender" label="Gender:" label-for="input-gender" label-class="font-weight-bold">
@@ -66,10 +63,27 @@
             v-model="form.gender"
             aria-describedby="input-gender-feedback"
             :options="genders"
-            required
           ></b-form-select>
           <b-form-invalid-feedback id="input-gender-feedback">
-            {{form.genderError}}
+            {{genderError}}
+          </b-form-invalid-feedback>
+        </b-form-group>
+        <b-form-group
+          id="input-group-birthdate"
+          label="Date of Birth:"
+          label-for="input-birthdate"
+          label-class="font-weight-bold"
+        >
+          <b-form-datepicker
+            id="input-birthdate"
+            v-model="form.birthDate"
+            :state="birthdateState"
+            show-decade-nav
+            hide-header
+            aria-describedby="input-birthdate-feedback"
+          />
+          <b-form-invalid-feedback id="input-birthdate-feedback">
+            {{birthdateErr}}
           </b-form-invalid-feedback>
         </b-form-group>
 
@@ -88,14 +102,19 @@ export default {
       form: {
         id: '',
         email: '',
-        emailError: '',
         name: '',
-        nameError: null,
         gender: null,
-        genderError: null,
         password: '',
-        passwordError: null,
+        birthDate: null
       },
+
+      emailError: '',
+      nameError: '',
+      genderError: '',
+      passwordError: '',
+      birthdateErr: '',
+      isSubmitting: false,
+
       genders: ['Male', 'Female', 'Other'],
       show: true,
       clone: {}
@@ -104,31 +123,34 @@ export default {
   computed: {
     emailState(){
       if (this.form.email === "") {
-        return null
+        this.emailError = "Email is required"
+        return this.isSubmitting ? false : null
       }
       var re = /\S+@\S+\.\S+/;
       if (!re.test(this.form.email)) {
-        this.form.emailError = "Invalid email!"
+        this.emailError = "Invalid email!"
         return false
       }
       return true
     },
     nameState(){
       if (this.form.name === "") {
-        return null
+        this.nameError = "Name is required"
+        return this.isSubmitting ? false : null
       }
       if (!(this.form.name.length > 5)) {
-        this.form.nameError = "Name need to contains at least 6 characters!"
+        this.nameError = "Name need to contains at least 6 characters!"
         return false
       }
       return true
     },
     genderState(){
       if (this.form.gender === "") {
-        return null
+        this.genderError = "Gender is required"
+        return this.isSubmitting ? false : null
       }
       if (!(this.form.gender === 'Male' || this.form.gender === 'Female' || this.form.gender === 'Other')) {
-        this.form.genderError = "Invalid gender!"
+        this.genderError = "Invalid gender!"
         return false
       }
       return true
@@ -137,16 +159,28 @@ export default {
       if (this.method === 'edit')
         return true
       if (this.form.password === "") {
-        return null
+        this.passwordError = "Password is required"
+        return this.isSubmitting ? false : null
       }
       if (!(this.form.password.length > 3)) {
-        this.form.passwordError = "Password need to contains at least 4 characters!"
+        this.passwordError = "Password need to contains at least 4 characters!"
+        return false
+      }
+      return true
+    },
+    birthdateState() {
+      if (this.form.birthDate == null) {
+        this.birthdateErr = "Day of Birth is required"
+        return this.isSubmitting ? false : null
+      }
+      if (new Date(this.form.birthDate) > new Date()) {
+        this.birthdateErr = "Day of Birth should be lower than current day"
         return false
       }
       return true
     },
     isFormValid() {
-      return this.emailState && this.nameState && this.genderState && this.passwordState
+      return this.emailState && this.nameState && this.genderState && this.passwordState && this.birthdateState
     }
   },
   props:{
@@ -164,16 +198,19 @@ export default {
       }
     },
     resetBtnPressed() {
+      this.isSubmitting = false
       this.form = Object.assign({}, this.clone)
     },
     onReset(){
       this.$emit("onReset")
     },
     onSubmit(){
+      this.isSubmitting = true
       if (!this.isFormValid) {
         this.showErrorMessage("Fix the errors before submitting")
         return;
       }
+      this.form.birthDate = new Date(this.form.birthDate)
 
       this.$emit("onSubmit",this.form, this.method)
     },
@@ -188,11 +225,13 @@ export default {
     },
     entity(newEntity){
       if (newEntity != null) {
+        this.isSubmitting = false
         if (this.method === 'edit') {
           this.form.id = this.entity.id;
           this.form.email = this.entity.email;
           this.form.name = this.entity.name;
           this.form.gender = this.entity.gender;
+          this.form.birthDate = new Date(this.entity.birthDate);
           this.clone = Object.assign({}, this.form)
         }
         else {
@@ -201,6 +240,7 @@ export default {
           this.form.name = ""
           this.form.gender = "Male"
           this.form.password = ""
+          this.form.birthDate = null
           this.clone = Object.assign({}, this.form)
         }
 

@@ -9,7 +9,6 @@
                 id="input-2"
                 v-model="form.name"
                 placeholder="Enter Name"
-                required
                 :state="nameState"
                 aria-describedby="input-name-feedback"
               ></b-form-input>
@@ -23,7 +22,6 @@
                   id="input-min"
                   v-model="form.min"
                   :placeholder="form.biometricDataTypeMin == null ? 'X' : '≥ ' + form.biometricDataTypeMin"
-                  required
                   type="number"
                   step="0.01"
                   @change="parseFloat(form.min).toFixed(2)"
@@ -41,7 +39,6 @@
                   id="input-max"
                   v-model="form.max"
                   :placeholder="form.biometricDataTypeMax == null ? 'X' : '≤ ' + form.biometricDataTypeMax"
-                  required
                   type="number"
                   step="0.01"
                   @change="parseFloat(form.max).toFixed(2)"
@@ -64,10 +61,9 @@
                       id="input-biometricdatatype"
                       v-model="form.biometricDataTypeName"
                       type="text"
-                      placeholder="Enter Type"
-                      required
+                      placeholder="Select a biometric data type"
                       disabled
-                      :class="!biometricDataTypeState ? 'border border-danger text-danger' : ''"
+                      :class="isSubmitting && !biometricDataTypeState ? 'border border-danger text-danger' : ''"
                     ></b-form-input>
                     <b-input-group-append>
                       <b-button variant="outline-info" @click="selectBiometricType"><b-icon icon="search"></b-icon></b-button>
@@ -161,6 +157,7 @@ export default {
       show: false,
 
       perPage: 4,
+      isSubmitting: false,
 
       currentBioDataPage: 1,
       selectableTEntity: [],
@@ -193,25 +190,25 @@ export default {
     },
     biometricDataTypeState(){
       if ((this.form.biometricDataTypeId == null || this.form.biometricDataTypeId === '')) {
-        return false
+        return this.isSubmitting ? false : null
       }
       return true
     },
     nameState() {
       if (this.form.name == null || this.form.name.trim() === '') {
         this.nameErr = "Name is required"
-        return false
+        return this.isSubmitting ? false : null
       }
       return true
     },
     minState() {
-      if (!this.biometricDataTypeState) {
-        this.minErr = "Select a Biometric Data Type"
-        return false
-      }
-
       if (this.form.min === '') {
         this.minErr = "Min is required"
+        return this.isSubmitting ? false : null
+      }
+
+      if (!this.biometricDataTypeState) {
+        this.minErr = "Select a Biometric Data Type"
         return false
       }
 
@@ -227,13 +224,13 @@ export default {
       return true
     },
     maxState() {
-      if (!this.biometricDataTypeState) {
-        this.maxErr = "Select a Biometric Data Type"
-        return false
-      }
-
       if (this.form.max === '') {
         this.maxErr = "Max is required"
+        return this.isSubmitting ? false : null
+      }
+
+      if (!this.biometricDataTypeState) {
+        this.maxErr = "Select a Biometric Data Type"
         return false
       }
 
@@ -300,11 +297,13 @@ export default {
       }
     },
     onReset(){
+      this.isSubmitting = false
       this.toggleTSelect = false
       this.issues = []
       this.$emit("onReset")
     },
     onSubmit(){
+      this.isSubmitting = true
       this.toggleTSelect = false
 
       if (!this.isFormValid) {
@@ -342,6 +341,7 @@ export default {
       this.toggleTSelect = false;
 
       if (newEntity != null) {
+        this.isSubmitting = false
         this.show = false
         if (this.method === 'edit') {
           this.$axios
