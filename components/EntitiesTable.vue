@@ -229,13 +229,16 @@ export default {
 
       currentPage: 1,
       perPage: 15,
-      pageOptions: [15, 30, 50, { value: 100, text: "Show a lot" }]
+      pageOptions: [15, 30, 50]
     };
   },
   computed: {
     totalRows(){
       return this.items.length
     }
+  },
+  mounted() {
+    this.pageOptions.push({ value: this.items.length, text: "Show all" })
   },
   methods: {
     showEntity(item, method = "create") {
