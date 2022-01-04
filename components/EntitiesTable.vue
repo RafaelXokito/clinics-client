@@ -100,7 +100,7 @@
           <b-icon-pencil-fill></b-icon-pencil-fill>
         </b-button>
       </template>
-      <template #cell(updateAndWatch)="data">
+      <template #cell(actions)="data">
         <b-button
           variant="primary"
           @click="showEntity(data.item, 'edit')"

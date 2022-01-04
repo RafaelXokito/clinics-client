@@ -22,7 +22,6 @@ export default {
   },
   watch: {
     entity(newEntity, oldVar){
-      console.log(newEntity);
       if (newEntity != null) {
 
         if (newEntity["name"] != undefined) {

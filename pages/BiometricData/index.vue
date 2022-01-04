@@ -146,7 +146,8 @@ export default {
             this.fields.push("update")
           }
           else
-            this.fields.push("updateAndWatch")
+            this.fields.push("actions")
+
           this.fields.push("delete")
 
           this.modalShow = false
@@ -168,7 +169,6 @@ export default {
           })
     },
     restoreBioData(item){
-      console.log(item)
       this.$axios
         .$post('/api/biometricdatas/'+item.id+'/restore')
           .then(() => {
