@@ -522,7 +522,7 @@ export default {
           this.form.id = 0
           this.form.email = ""
           this.form.name = ""
-          this.form.gender = ""
+          this.form.gender = "Male"
           this.form.password = ""
           this.form.biometricDatas = ""
           this.form.observations = ""
