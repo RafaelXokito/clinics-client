@@ -530,7 +530,7 @@ export default {
           if (fieldName === 'healthcareProfessionalName') return { visible: false, editable: false }
           if (fieldName === 'patientId') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: true }
           if (fieldName === 'patientName') return { visible: this.$auth.user.scope === 'HealthcareProfessional', editable: false }
-          if (fieldName === 'files') return { visible: true, editable: false }
+          if (fieldName === 'files') return { visible: true, editable: true }
           if (fieldName === 'filesTable') return { visible: false, editable: false }
           if (fieldName === 'createdAt') return { visible: false, editable: false }
           if (fieldName === 'prescriptionId') return { visible: false, editable: false }
