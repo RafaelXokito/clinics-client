@@ -402,11 +402,11 @@ export default {
             .$get('/api/prescriptions/' + this.entity.id)
             .then(prescription => {
               this.form.id = prescription.id;
-              this.form.issues = prescription.issues;
+              this.form.issues = prescription.issues || [];
               this.form.isGlobal = prescription.issues != null && prescription.issues.length > 0
               this.form.healthcareProfessionalId = prescription.healthcareProfessionalId;
               this.form.healthcareProfessionalName = prescription.healthcareProfessionalName;
-              this.form.patients = prescription.patients;
+              this.form.patients = prescription.patients || [];
               this.form.start_date = prescription.start_date;
               this.start_date_time = this.formatTime(prescription.start_date);
               this.form.end_date = prescription.end_date;

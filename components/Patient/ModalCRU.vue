@@ -150,7 +150,7 @@
                 </b-input-group-append>
               </b-input-group>
             </b-form-group>
-            <b-table striped hover responsive :items="form.biometricDatas" :fields="fieldsBiometricData" :filter="filterBioData" show-empty>
+            <b-table striped hover responsive :items="form.biometricDatas" :fields="fieldsBiometricData" :filter="filterBioData" show-empty :current-page="currentPageBiometricDatas" :per-page="perPage">
               <template #empty="scope">
                 <h6 class="text-center">{{ scope.emptyText }}</h6>
               </template>
@@ -164,9 +164,8 @@
             <b-pagination
               v-if="form.biometricDatas.length > perPage"
               v-model="currentPageBiometricDatas"
-              :total-rows="dataRowsBiometricDatas.length"
+              :total-rows="dataRowsBiometricDatas"
               :per-page="perPage"
-              aria-controls="biometric-datas-table"
               align="center"
             ></b-pagination>
           </b-tab>
