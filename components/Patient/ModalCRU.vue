@@ -150,7 +150,7 @@
                 </b-input-group-append>
               </b-input-group>
             </b-form-group>
-            <b-table striped hover responsive :items="form.biometricDatas" :fields="fieldsBiometricData" :filter="filterBioData" show-empty>
+            <b-table striped hover responsive :items="form.biometricDatas" :fields="fieldsBiometricData" :filter="filterBioData" :current-page="currentPageBiometricDatas" :per-page="perPage" show-empty>
               <template #empty="scope">
                 <h6 class="text-center">{{ scope.emptyText }}</h6>
               </template>
