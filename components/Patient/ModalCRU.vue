@@ -347,7 +347,7 @@ export default {
   },
   computed: {
     dataRowsBiometricDatas() {
-      return this.form.biometricDatas
+      return this.form.biometricDatas.length
     },
     dataRowsObservations() {
       return this.form.observations
