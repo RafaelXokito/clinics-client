@@ -1,4 +1,4 @@
 Biometric Data Type;Value;Notes;Patient Health Number;Source;Created At
-1;38;1;123456789;Exam;2021-06-30T01:34:38.541Z;
-2;80;2;123456789;Sensor;2021-07-30T01:34:38.541Z;
-1;38.5;3;123456789;Wearable;2021-08-30T01:34:38.541Z;
+1;38;Sinto-me com febre;123456789;Exam;2021-06-30T01:34:38.541Z;
+2;80;Sinto-me acelerado;123456789;Sensor;2021-07-30T01:34:38.541Z;
+1;38.5;Sinto-me com mais febre;123456789;Wearable;2021-08-30T01:34:38.541Z;
