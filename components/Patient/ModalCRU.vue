@@ -166,7 +166,6 @@
               v-model="currentPageBiometricDatas"
               :total-rows="dataRowsBiometricDatas"
               :per-page="perPage"
-              aria-controls="biometric-datas-table"
               align="center"
             ></b-pagination>
           </b-tab>
