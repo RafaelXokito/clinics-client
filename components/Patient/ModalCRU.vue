@@ -164,7 +164,7 @@
             <b-pagination
               v-if="form.biometricDatas.length > perPage"
               v-model="currentPageBiometricDatas"
-              :total-rows="dataRowsBiometricDatas.length"
+              :total-rows="dataRowsBiometricDatas"
               :per-page="perPage"
               aria-controls="biometric-datas-table"
               align="center"
