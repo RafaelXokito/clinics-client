@@ -5,7 +5,7 @@
       <b-form @submit.prevent="onSubmit">
       <b-form-group
         id="input-group-1"
-        label="Current Password:"
+        label="Current Password"
         label-for="input-1"
       >
         <b-form-input
@@ -52,7 +52,7 @@
           <a href="https://www.linkedin.com/in/danielcarreira/">Daniel Carreira</a>,
         </p>
       </div>
-    </footer> 
+    </footer>
   </div>
 </template>
 
